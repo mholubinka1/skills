@@ -1,6 +1,6 @@
 ---
 name: pre-commit-check
-description: Run pre-commit hooks after writing or modifying code. Use when code has been written, edited, or generated, or when the user asks to lint, format, or validate code quality.
+description: Run pre-commit hooks after writing or modifying any code. Use whenever code has been written, edited, or generated, or when the user asks to lint, format, or validate code quality.
 allowed-tools: Bash, Read, Write
 ---
 
@@ -48,7 +48,7 @@ and fix any issues found.
 - If `.pre-commit-config.yaml` does not exist, inform the user and ask how
   they'd like to proceed.
 - Always re-run hooks after making fixes to confirm clean output.
-- Stage auto-fixed files with `git add` before reporting success.
+- Always recommend additional or missing hooks that would usefully verify code if applicable
 
 ## Output Format
 
