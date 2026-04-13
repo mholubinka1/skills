@@ -1,6 +1,6 @@
 ---
 name: bdd
-description: Behaviour-driven development with red-green-refactor loop and Given-When-Then scenarios. Use whenever a user wants to build features or fix bugs, mentions "red-green-refactor", wants integration or acceptance tests, or asks for test-first or behaviour-first development.
+description: Behaviour-driven development with red-green-refactor loop and Given-When-Then scenarios. Use whenever a user wants to build features, make changes or fix bugs, mentions "red-green-refactor", wants integration or acceptance tests, or asks for test-first or behaviour-first development. This skill should be used whenever code is modified.
 ---
 
 # Behaviour-Driven Development
