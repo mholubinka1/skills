@@ -69,6 +69,38 @@ RIGHT (vertical):
 
 ## Workflow
 
+### 0. Fast Branch Check (before planning)
+
+A quick fail-fast check to catch the most obvious branch problems before any work begins.
+
+#### a. Check autoSetupRemote
+
+Run:
+
+```bash
+git config push.autoSetupRemote
+```
+
+If the output is not `true`, warn the user:
+
+> `push.autoSetupRemote` is not enabled. New branches won't be tracked upstream automatically when pushed. Run `git config --global push.autoSetupRemote true` to enable it, or branches will need `--set-upstream` on first push.
+
+Ask if they want it set before continuing.
+
+#### b. Trunk branch check
+
+Run:
+
+```bash
+git branch --show-current
+```
+
+If the current branch is `main`, `master`, or `develop`, warn immediately:
+
+> You're on `<branch>` — this is a trunk branch. You should work on a feature, bugfix, hotfix, release, or chore branch. A better branch name will be confirmed after planning. Want to continue on a temporary branch now, or wait until after planning to name it properly?
+
+If the user wants to move now, create a placeholder (e.g. `wip/description`) and note that Step 2 will rename it. **Do not push or commit.**
+
 ### 1. Planning
 
 Before writing any code, run a **Three Amigos** conversation between:
@@ -90,7 +122,54 @@ Ask: "What should success look like for the user? Which scenarios are most impor
 
 **You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
 
-### 2. Tracer Bullet
+### 2. Full Branch Check (after planning)
+
+Now that the change type is clear from the agreed user stories and scenarios, validate the branch properly.
+
+#### a. Infer change type from planning output
+
+Classify the work as one of: **feature**, **bugfix**, **hotfix**, **release**, **chore**.
+
+Use the agreed user stories, acceptance criteria, and Three Amigos output as the primary signal:
+
+- **feature**: new capability or behaviour ("As a user I want to add X")
+- **bugfix**: restoring broken behaviour ("X should work but doesn't")
+- **hotfix**: urgent production fix ("prod is down", "blocking users", "critical")
+- **release**: version bump, changelog, release preparation
+- **chore**: refactor, tooling, dependency update, test-only change with no behaviour change
+
+#### b. Validate current branch prefix
+
+| Change type | Valid branch prefixes |
+|---|---|
+| feature | `feature/` |
+| bugfix | `bugfix/`, `hotfix/` |
+| hotfix | `hotfix/` |
+| release | `release/` |
+| chore | `chore/`, `feature/` |
+
+Check the current branch against this table. A mismatch means either:
+
+- The branch prefix doesn't match the change type (e.g. implementing a feature on `bugfix/`)
+- The branch is still a trunk branch or a `wip/` placeholder from Step 0
+
+#### c. Resolve mismatch
+
+On any mismatch, suggest a well-formed branch name derived from the agreed work description:
+
+> You're on `bugfix/fix-login` but planning confirmed this is a new feature. Suggested branch: `feature/add-oauth-login`. Create it and move your work there? (yes/no)
+
+If the user confirms:
+
+```bash
+git checkout -b <suggested-branch>
+```
+
+Any uncommitted changes carry over automatically. **Do not push or commit to the new branch.**
+
+If Step 0 already moved the user off trunk and the new branch name is valid, confirm it and move on.
+
+### 3. Tracer Bullet
 
 Write ONE test that confirms ONE thing about the system:
 
@@ -101,7 +180,7 @@ GREEN: Write minimal code to pass → test passes
 
 This is your tracer bullet - proves the path works end-to-end.
 
-### 3. Incremental Loop
+### 4. Incremental Loop
 
 For each remaining behavior:
 
@@ -117,7 +196,7 @@ Rules:
 - Don't anticipate future tests
 - Keep tests focused on observable behavior
 
-### 4. Refactor
+### 5. Refactor
 
 After all tests pass, look for [refactor candidates](refactoring.md):
 
