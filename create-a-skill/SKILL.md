@@ -25,7 +25,7 @@ description: Create new Claude Code agent skills with proper structure, progress
 
 ## Skill Structure
 
-```
+```text
 skill-name/
 ├── SKILL.md           # Main instructions (required)
 ├── REFERENCE.md       # Detailed docs (if needed)
@@ -75,13 +75,13 @@ The description is **the only thing your agent sees** when deciding which skill 
 
 **Good example**:
 
-```
+```text
 Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when user mentions PDFs, forms, or document extraction.
 ```
 
 **Bad example**:
 
-```
+```text
 Helps with documents.
 ```
 
