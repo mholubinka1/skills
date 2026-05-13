@@ -1,0 +1,2 @@
+# sync_claude_skills.py uses only Python standard library modules.
+# No third-party dependencies required.
