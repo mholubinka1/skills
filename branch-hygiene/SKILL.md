@@ -1,6 +1,6 @@
 ---
 name: branch-hygiene
-description: Validate the current git branch before starting work. Checks autoSetupRemote config, detects trunk branches, and validates branch prefix against change type. Accepts an optional change_type (feature, bugfix, hotfix, release, chore) — if not provided, infers it from the user's request. Use at the start of any work session, or invoke from other skills with a known change_type.
+description: Validate the current git branch before starting work. Checks autoSetupRemote config, detects trunk branches, validates branch prefix against change type, and checks that the branch name is relevant to the current work. Accepts an optional change_type (feature, bugfix, hotfix, release, chore) — if not provided, infers it from the user's request. Use at the start of any work session, or invoke from other skills with a known change_type.
 ---
 
 # Branch Hygiene
@@ -67,18 +67,35 @@ Otherwise, infer from the user's request using these heuristics:
 | release | `release/` |
 | chore | `chore/`, `feature/` |
 
-A mismatch occurs when:
+A prefix mismatch occurs when:
 
 - The current branch is a trunk branch (`main`, `master`, `develop`)
 - The current branch is a `wip/` placeholder
 - The branch prefix doesn't match the change type (e.g. a feature on `bugfix/`)
 - The branch name is unrecognised (no valid prefix)
 
-## Step 5: Resolve mismatch
+## Step 5: Validate branch name relevance
 
-On any mismatch, suggest a well-formed branch name derived from the work description:
+Extract the descriptive slug — everything after the `/` — and assess whether it relates to the current work description.
 
-> You're on `bugfix/fix-login` but this looks like a new feature. Suggested branch: `feature/add-oauth-login`. Create it and move your work there? (yes/no)
+A name mismatch occurs when the slug clearly describes **different work** from what is being done now. Common signals:
+
+- The slug references a feature or fix unrelated to the current task (e.g. `config-reload` when adding a CI pipeline)
+- The slug is a placeholder (`tmp`, `test`, `wip`, `misc`, `changes`)
+- The slug is so generic it provides no signal (`update`, `fix`, `patch`)
+
+Do **not** flag a name mismatch when:
+
+- The slug is a reasonable parent scope for the current work (e.g. `auth` when fixing a login bug)
+- The work is a small follow-on to what the branch was originally named for
+
+When in doubt, flag it — a stale branch name causes confusion in PRs and git history.
+
+## Step 6: Resolve mismatch
+
+On any mismatch (prefix or name), suggest a well-formed branch name derived from the work description:
+
+> You're on `feature/config-reload` but this work is adding a CI pipeline. Suggested branch: `chore/add-ci-checks`. Create it and move your work there? (yes/no)
 
 If the user confirms:
 

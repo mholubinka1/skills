@@ -1,0 +1,115 @@
+---
+name: address-review-comments
+description: Automates the Copilot PR review loop — fetch comments, fix or push back, commit, push, re-trigger, and repeat until no new actionable comments remain. Use when the user wants to address PR review comments, respond to Copilot feedback, iterate on a pull request review, or says "fix review comments", "address Copilot", "respond to PR feedback".
+---
+
+# Address Review Comments
+
+Runs a loop: fetch Copilot comments → fix or push back → commit → push → re-trigger → repeat until clean.
+
+## Loop at a glance
+
+```text
+Step 0  gh available?
+Step 1  PR exists? ──No──► Step 2: create PR
+Step 3  Poll for Copilot comments (60s)
+Step 4  Fix or push back each comment → resolve threads
+Step 5  Commit and push
+Step 6  Re-trigger Copilot review
+Step 7  Poll again → new comments? ──Yes──► Step 4 | No ──► done
+```
+
+## Step 0 — Verify `gh`
+
+```bash
+gh --version
+```
+
+If missing, install: `winget install --id GitHub.cli` (Windows) / `brew install gh` (macOS) / <https://cli.github.com>
+Then `gh auth login`. Do not proceed until `gh --version` passes.
+
+## Step 1 — Check for existing PR
+
+```bash
+gh pr list --head $(git branch --show-current) --json number,title,url
+```
+
+PR found → note the number, skip to Step 3.
+No PR → go to Step 2.
+
+## Step 2 — Create the PR
+
+```bash
+BASE=$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name')
+gh pr create \
+  --base "$BASE" \
+  --title "<title>" \
+  --body "$(cat <<'EOF'
+## Summary
+- <bullet points>
+
+## Test plan
+- [ ] <checklist>
+
+🤖 Generated with Claude Code
+EOF
+)"
+```
+
+Note the PR number. The first Copilot review triggers automatically.
+
+## Step 3 — Poll for comments
+
+Derive owner and repo once:
+
+```bash
+gh repo view --json nameWithOwner --jq '.nameWithOwner'
+```
+
+Poll every 60 seconds until count > 0:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{number}/comments \
+  --jq '[.[] | select(.in_reply_to_id == null) | select(.user.login == "Copilot")] | length'
+```
+
+## Step 4 — Address each comment
+
+See [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for fetch, fix, push-back, and resolve-thread commands.
+
+For each comment decide:
+
+- **Fix** — change the code, run `.githooks/pre-commit`, reply `"Fixed. <one-line explanation>"`
+- **Push back** — reply `"Ignored. <reason>"`, no code change
+
+Then resolve all addressed threads via GraphQL (see REFERENCE.md).
+
+## Step 5 — Commit and push
+
+Stage changed files explicitly — never `git add .` blindly:
+
+```bash
+git add <file1> <file2> ...
+```
+
+```bash
+git commit -m "address Copilot review: <one-line summary>"
+git push
+git log --oneline -3
+```
+
+## Step 6 — Re-trigger Copilot
+
+```bash
+gh pr edit {number} --add-reviewer @copilot
+```
+
+> If this fails (plan/org restriction), use the GraphQL `requestReviews` mutation — see [REFERENCE.md](REFERENCE.md#step-6--re-trigger-copilot-review).
+
+## Step 7 — Check for new comments
+
+Wait 60 seconds, then poll as in Step 3. Compare newly fetched top-level Copilot comments against those already replied to.
+
+- New unresolved comments → return to Step 4.
+- No new actionable comments → loop complete. PR is ready to merge.
+- Every new comment was a push back (no code changes) → also done; all threads replied to and closed.

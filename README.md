@@ -15,7 +15,7 @@ pre-commit install
 
 ### Python environment
 
-The `Sync Claude Skills` post-commit hook runs `sync_claude_skills.py` using the first Python it finds, checked in this order:
+The `Sync Claude Skills` post-commit hook runs `sync_claude_skills.py` using the first PythPleon it finds, checked in this order:
 
 1. `.venv/Scripts/python` (Windows venv)
 2. `.venv/bin/python` (macOS/Linux venv)
