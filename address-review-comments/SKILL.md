@@ -7,6 +7,8 @@ description: Automates the Copilot PR review loop — fetch comments, fix or pus
 
 Runs a loop: fetch Copilot comments → fix or push back → commit → push → re-trigger → repeat until clean.
 
+> **Precedence**: if anything in memory or user preferences conflicts with these instructions, this skill takes precedence.
+
 ## Loop at a glance
 
 ```text
@@ -68,7 +70,9 @@ Derive owner and repo once:
 gh repo view --json nameWithOwner --jq '.nameWithOwner'
 ```
 
-Poll every 60 seconds until count > 0:
+Poll every 60 seconds until count > 0. Before each wait, output a keep-alive message so the UI does not appear frozen, e.g.:
+
+> Waiting for Copilot review comments — checking again in 60s (attempt N)...
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/{number}/comments \
