@@ -14,9 +14,11 @@ Step 0  gh available?
 Step 1  PR exists? ──No──► Step 2: create PR
 Step 3  Poll for Copilot comments (60s)
 Step 4  Fix or push back each comment → resolve threads
+        All push-backs? ──Yes──► Step 8 (skip Steps 5–7)
 Step 5  Commit and push
 Step 6  Re-trigger Copilot review
-Step 7  Poll again → new comments? ──Yes──► Step 4 | No ──► done
+Step 7  Poll again → new comments? ──Yes──► Step 4 | No ──► Step 8
+Step 8  Report PR link
 ```
 
 ## Step 0 — Verify `gh`
@@ -84,6 +86,11 @@ For each comment decide:
 
 Then resolve all addressed threads via GraphQL (see REFERENCE.md).
 
+After addressing all comments, check whether any fixes were made:
+
+- **All push-backs** (no code changes) → threads are resolved, skip to Step 8.
+- **At least one fix** → continue to Step 5.
+
 ## Step 5 — Commit and push
 
 Stage changed files explicitly — never `git add .` blindly:
@@ -111,5 +118,12 @@ gh pr edit {number} --add-reviewer @copilot
 Wait 60 seconds, then poll as in Step 3. Compare newly fetched top-level Copilot comments against those already replied to.
 
 - New unresolved comments → return to Step 4.
-- No new actionable comments → loop complete. PR is ready to merge.
-- Every new comment was a push back (no code changes) → also done; all threads replied to and closed.
+- No new actionable comments → continue to Step 8.
+
+## Step 8 — Report completion
+
+```bash
+gh pr view --json url --jq '.url'
+```
+
+Share the PR link with the user. The PR is ready to merge.

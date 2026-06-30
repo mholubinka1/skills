@@ -127,9 +127,9 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 
 ## Loop termination conditions
 
-The loop is complete when **any** of these is true after a poll:
+The loop is complete when **any** of these conditions is met:
 
-1. No new unresolved top-level Copilot comments appear.
-2. All new comments in a round were push-backs (replied to, threads closed, no code changed).
+1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4. Skip Steps 5 and 6; do not re-trigger Copilot. PR is ready to merge.
+2. **No new actionable comments** after re-triggering — poll in Step 7 returns zero new top-level Copilot comments.
 
 In both cases the PR is considered clean and ready to merge.
