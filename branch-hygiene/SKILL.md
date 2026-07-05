@@ -97,7 +97,31 @@ On any mismatch (prefix or name), suggest a well-formed branch name derived from
 
 > You're on `feature/config-reload` but this work is adding a CI pipeline. Suggested branch: `chore/add-ci-checks`. Create it and move your work there? (yes/no)
 
-If the user confirms:
+If the user confirms, first detect the default branch and fetch it:
+
+```bash
+git symbolic-ref refs/remotes/origin/HEAD --short
+```
+
+This returns something like `origin/main`. Strip the `origin/` prefix to get the default branch name.
+
+If the command succeeds, fetch it:
+
+```bash
+git fetch origin <default-branch>
+```
+
+Then create the new branch from the fetched remote ref:
+
+```bash
+git checkout -b <suggested-branch> origin/<default-branch>
+```
+
+If `git symbolic-ref` fails (no remote, or `origin/HEAD` not set), warn the user:
+
+> Could not detect default branch — no remote or `origin/HEAD` not set. Creating branch from local HEAD instead. Run `git remote set-head origin --auto` to fix this.
+
+Then fall back to:
 
 ```bash
 git checkout -b <suggested-branch>
