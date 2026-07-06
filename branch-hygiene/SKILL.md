@@ -47,7 +47,9 @@ Classify the branch:
 
 ## Step 3: Determine change type
 
-If `change_type` was passed by the calling skill or context, use it directly.
+If called from within `/implement`, derive the change type and branch slug directly from the grill session output already in the conversation context — do not infer from the user's request or prompt for input.
+
+If `change_type` was passed explicitly by the calling skill, use it directly.
 
 Otherwise, infer from the user's request using these heuristics:
 

@@ -1,9 +1,9 @@
 ---
-name: address-review-comments
-description: Automates the Copilot PR review loop — fetch comments, fix or push back, commit, push, re-trigger, and repeat until no new actionable comments remain. Use when the user wants to address PR review comments, respond to Copilot feedback, iterate on a pull request review, or says "fix review comments", "address Copilot", "respond to PR feedback".
+name: address-copilot-comments
+description: Automates the Copilot PR review loop — fetch comments, fix or push back, commit, push, re-trigger, and repeat until no new actionable comments remain. Use when the user wants to address Copilot PR review comments, respond to Copilot feedback, iterate on a pull request review, or says "fix review comments", "address Copilot", "respond to PR feedback".
 ---
 
-# Address Review Comments
+# Address Copilot Comments
 
 Runs a loop: fetch Copilot comments → fix or push back → commit → push → re-trigger → repeat until clean.
 

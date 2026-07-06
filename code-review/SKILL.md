@@ -19,7 +19,7 @@ Step 4  Spawn parallel Standards + Spec review agents → aggregate findings
 Step 5  Address blocking findings (use /bdd and /grill-with-docs as needed)
         No blocking findings? ──► Step 6
         Findings fixed? ──► Step 4 (new agents, new context windows)
-Step 6  Run /address-review-comments for Copilot PR review
+Step 6  Run /address-copilot-comments for Copilot PR review
 ```
 
 ## Step 1 — Branch hygiene
@@ -92,4 +92,4 @@ Repeat until a review pass reports zero blocking findings.
 
 ## Step 6 — Copilot PR review
 
-Invoke the `address-review-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean.
+Invoke the `address-copilot-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean.
