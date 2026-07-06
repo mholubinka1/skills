@@ -16,7 +16,7 @@ Step 1  Branch hygiene check
 Step 2  Verify changes exist; run pre-commit hooks
 Step 3  Pin fixed point + identify spec source
 Step 4  Spawn parallel Standards + Spec review agents → aggregate findings
-Step 5  Address blocking findings (use /bdd and /grill-with-docs as needed)
+Step 5  Address blocking findings (use /bdd and /grill as needed)
         No blocking findings? ──► Step 6
         Findings fixed? ──► Step 4 (new agents, new context windows)
 Step 6  Run /address-copilot-comments for Copilot PR review
@@ -82,7 +82,7 @@ Send a **single message** with two `Agent` tool calls (type: `general-purpose`):
 
 For each blocking finding:
 
-- Use the `behaviour-driven-development` skill when changing or adding logic (write tests first).
+- Use the `bdd` skill when changing or adding logic (write tests first).
 - Use the `design` skill if the fix involves design decisions against the existing domain model.
 - Apply fixes, then re-run pre-commit hooks.
 
