@@ -1,6 +1,6 @@
 ---
 name: init-agent-docs
-description: Bootstraps AI agent documentation in the current repository — creates agent-docs/agent.md with default behavioural standards, bootstraps agent-docs/context.md as a domain glossary, and ensures CLAUDE.md references agent.md. Idempotent — reports what was created or skipped on each run. Use at the start of any implementation workflow to ensure agent standards are in place before work begins.
+description: Bootstraps AI agent documentation in the current repository — creates agent-docs/agent.md with default behavioural standards, bootstraps agent-docs/context.md as a domain glossary, and ensures CLAUDE.md references agent-docs/agent.md. Idempotent — reports what was created or skipped on each run. Use at the start of any implementation workflow to ensure agent standards are in place before work begins.
 ---
 
 # init-agent-docs

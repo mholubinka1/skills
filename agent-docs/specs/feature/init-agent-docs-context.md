@@ -21,7 +21,7 @@ Extend `init-agent-docs` to also bootstrap `agent-docs/context.md` as part of it
 - `init-agent-docs/SKILL.md` gains three new steps (Steps 3, 4, 5 in the renumbered sequence) between the existing `agent.md` steps and the `CLAUDE.md` steps.
 - A new `init-agent-docs/CONTEXT-TEMPLATE.md` is added alongside `SKILL.md` and `AGENT-TEMPLATE.md`. It contains a `# Project Context` heading, a one-sentence placeholder description, a `## Language` subheading, and one placeholder term entry following the format in `design/CONTEXT-FORMAT.md`.
 - **Step 3 — Check for existing context.md**: if `agent-docs/context.md` exists, report and skip to the CLAUDE.md steps.
-- **Step 4 — Search and move**: search root, `docs/`, and `agent-docs/` (non-recursively) for any `context.md` file other than `agent-docs/context.md`. If exactly one found, move it: Read source → Write to `agent-docs/context.md` → delete source. If multiple found, report ambiguity with file list, skip this step, and continue. If move fails, report error, skip, and continue.
+- **Step 4 — Search and move**: search root and `docs/` (non-recursively) for any `context.md` file. If exactly one found, move it: Read source → Write to `agent-docs/context.md` → delete source. If multiple found, report ambiguity with file list, skip this step, and continue. If move fails, report error, skip, and continue.
 - **Step 5 — Create from template**: if no `context.md` was found or moved, read `CONTEXT-TEMPLATE.md` from the skill directory and write its contents verbatim to `agent-docs/context.md`.
 - Step numbering in `SKILL.md` shifts: old Steps 3–5 become Steps 6–8. The summary step (last) is updated to include `context.md` outcomes.
 - No changes to `CLAUDE.md` wiring logic — `context.md` does not get a `CLAUDE.md` reference.
@@ -30,13 +30,13 @@ Extend `init-agent-docs` to also bootstrap `agent-docs/context.md` as part of it
 
 - The skill is a Markdown instruction file, not executable code. There is no automated test harness.
 - BDD scenarios act as the acceptance spec. Each scenario maps to one user story and is verified manually by running the skill in a scratch repository configured to match the scenario's preconditions.
-- Four scenarios to cover: (1) `agent-docs/context.md` exists — skip; (2) `context.md` found at root/docs/agent-docs — moved; (3) multiple `context.md` files found — ambiguity reported; (4) no `context.md` anywhere — created from template.
+- Four scenarios to cover: (1) `agent-docs/context.md` exists — skip; (2) `context.md` found at root or `docs/` — moved; (3) multiple `context.md` files found — ambiguity reported; (4) no `context.md` anywhere — created from template.
 - The move failure path (story 5) is exercised by making the destination directory read-only in the scratch repo.
 - Prior art: the existing `agent.md` creation steps in `SKILL.md` establish the pattern (Read template → Write to target → report).
 
 ## Out of Scope
 
-- Recursive search of the full repo for `context.md` — only root, `docs/`, and `agent-docs/` are searched.
+- Recursive search of the full repo for `context.md` — only root and `docs/` are searched.
 - Validation of the contents of an existing `agent-docs/context.md`.
 - Adding a `context.md` reference to `CLAUDE.md`.
 - Supporting `CONTEXT-MAP.md` multi-context repos in the bootstrap — the template creates a single root glossary only.

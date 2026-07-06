@@ -2,7 +2,7 @@
 
 ## Add CONTEXT-TEMPLATE.md to init-agent-docs
 
-**Blocked by**: None (#4)
+**Blocked by**: None
 
 **User stories**: 3
 
@@ -32,7 +32,7 @@ Create `init-agent-docs/CONTEXT-TEMPLATE.md` — a well-formed empty domain glos
 Extend `init-agent-docs/SKILL.md` with three new steps that bootstrap `agent-docs/context.md`, inserted between the existing `agent.md` steps and the `CLAUDE.md` steps. The new steps implement a three-strategy ordered approach:
 
 1. If `agent-docs/context.md` already exists — report and skip.
-2. If a `context.md` is found in root, `docs/`, or `agent-docs/` (but not at `agent-docs/context.md`) — move it (Read → Write → delete source). If multiple found, report ambiguity and skip. If move fails, report error and skip.
+2. If a `context.md` is found in root or `docs/` — move it (Read → Write → delete source). If multiple found, report ambiguity and skip. If move fails, report error and skip.
 3. If none found — read `CONTEXT-TEMPLATE.md` from the skill directory and write it verbatim to `agent-docs/context.md`.
 
 The existing step numbers shift: old Steps 3–5 become Steps 6–8. The summary step is updated to include `context.md` outcomes.
