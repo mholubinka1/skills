@@ -115,5 +115,6 @@ place.
 - The skill description frontmatter reflects that it is called from within `/implement`
   rather than invoked manually: "Bootstraps AI agent documentation in the current
   repository — creates agent-docs/agent.md with default behavioural standards and ensures
-  CLAUDE.md references it. Idempotent and silent on success. Use at the start of any
-  implementation workflow to ensure agent standards are in place before work begins."
+  CLAUDE.md references it. Idempotent — reports what was created or skipped on each run.
+  Use at the start of any implementation workflow to ensure agent standards are in place
+  before work begins."

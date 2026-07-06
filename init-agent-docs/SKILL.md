@@ -59,7 +59,8 @@ continue to Step 4.
 
 ### Step 4 — Create or append CLAUDE.md
 
-Append the following block to `CLAUDE.md` (create the file first if it does not exist):
+Append the following content to `CLAUDE.md` (create the file first if it does not exist).
+Write only the Markdown content below — do not include the code fence markers:
 
 ```markdown
 
