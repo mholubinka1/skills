@@ -52,7 +52,7 @@ bash .githooks/pre-commit
 
 If it fails because a formatter modified files, stage the auto-formatted files and re-run.
 
-### Resolve addressed threads via GraphQL
+### Resolve the thread — do this immediately after replying, one thread at a time
 
 **Get unresolved thread node IDs:**
 

@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Full implementation workflow — from change request to merged PR. Spawns a fresh sub-agent briefed with the trigger context to run the complete cycle: grill → branch → spec → issues → BDD per issue → code review → PR merge confirmation → cleanup. Use when the user wants to implement a feature, fix a bug, or make any change to the repository.
+description: Full implementation workflow — from change request to merged PR. Spawns a fresh sub-agent briefed with the trigger context to run the complete cycle: init-agent-docs → grill → branch → spec → issues → BDD per issue → code review → PR merge confirmation → cleanup. Use when the user wants to implement a feature, fix a bug, or make any change to the repository.
 ---
 
 # Implement
@@ -30,9 +30,21 @@ Spawn a `claude` sub-agent with a self-contained prompt that includes:
 
 You have been spawned by `/implement` to carry out a full implementation cycle. The trigger context above tells you what to build. Work through the steps below in order.
 
+> **Prerequisite skills**: all skills referenced in this workflow live in this same skills
+> repo and are installed automatically via the post-commit sync hook:
+> `init-agent-docs`, `grill`, `write-spec`, `create-issues`, `branch-hygiene`,
+> `bdd`, `pre-commit-check`, `code-review`,
+> `address-copilot-comments`, `pr-cleanup`.
+
+#### Step 0 — Bootstrap agent docs
+
+Run the `init-agent-docs` skill. This bootstraps `agent-docs/agent.md` and ensures
+`CLAUDE.md` references it. The skill is idempotent — it reports what was created or
+skipped on each run. If it surfaces an error, stop and resolve it before continuing.
+
 #### State detection — resume from where work left off
 
-Before starting, check what already exists for the current branch:
+After Step 0, check what already exists for the current branch:
 
 ```bash
 git branch --show-current
@@ -40,9 +52,9 @@ git branch --show-current
 
 | State | Action |
 |---|---|
-| `agent-docs/issues/<branch>.md` exists | Resume at the BDD loop (Step 5) for any unchecked issues |
-| `agent-docs/specs/<branch>.md` exists only | Resume at `/create-issues` (Step 4) |
-| Neither exists | Start from `/grill` (Step 1) |
+| `agent-docs/issues/<branch-name>.md` exists | Resume at the BDD loop (Step 5) for any unchecked issues |
+| `agent-docs/specs/<branch-name>.md` exists only | Resume at `/create-issues` (Step 4) |
+| Neither exists | Continue to Step 1 below |
 
 #### Step 1 — Grill
 
@@ -64,7 +76,7 @@ Run the `create-issues` skill. It will break the spec into vertical slices, quiz
 
 For each unchecked issue in `agent-docs/issues/<branch-name>.md`, in dependency order (no blockers first):
 
-1. Run the `behaviour-driven-development` skill for this issue.
+1. Run the `bdd` skill for this issue.
 2. Run the `pre-commit-check` skill on all changed files.
 3. Commit with a single pithy line:
 
