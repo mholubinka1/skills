@@ -30,9 +30,15 @@ Spawn a `claude` sub-agent with a self-contained prompt that includes:
 
 You have been spawned by `/implement` to carry out a full implementation cycle. The trigger context above tells you what to build. Work through the steps below in order.
 
+#### Step 0 — Bootstrap agent docs
+
+Run the `init-agent-docs` skill. This bootstraps `agent-docs/agent.md` and ensures
+`CLAUDE.md` references it. The skill is idempotent — it completes silently if both files
+are already in place. If it surfaces an error, stop and resolve it before continuing.
+
 #### State detection — resume from where work left off
 
-Before starting, check what already exists for the current branch:
+After Step 0, check what already exists for the current branch:
 
 ```bash
 git branch --show-current
@@ -42,13 +48,7 @@ git branch --show-current
 |---|---|
 | `agent-docs/issues/<branch>.md` exists | Resume at the BDD loop (Step 5) for any unchecked issues |
 | `agent-docs/specs/<branch>.md` exists only | Resume at `/create-issues` (Step 4) |
-| Neither exists | Start from Step 0 below |
-
-#### Step 0 — Bootstrap agent docs
-
-Run the `init-agent-docs` skill. This bootstraps `agent-docs/agent.md` and ensures
-`CLAUDE.md` references it. The skill is idempotent — it completes silently if both files
-are already in place. If it surfaces an error, stop and resolve it before continuing.
+| Neither exists | Continue to Step 1 below |
 
 #### Step 1 — Grill
 

@@ -52,7 +52,7 @@ anywhere in its content.
 If `CLAUDE.md` already contains `agent-docs/agent.md`:
 
 - Report: "`CLAUDE.md` already references `agent-docs/agent.md` — skipping."
-- Stop. All steps complete.
+- Continue to Step 5.
 
 If `CLAUDE.md` does not exist, or exists but does not contain `agent-docs/agent.md`,
 continue to Step 4.
