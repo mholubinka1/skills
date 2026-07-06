@@ -60,7 +60,9 @@ continue to Step 4.
 ### Step 4 — Create or append CLAUDE.md
 
 Append the following content to `CLAUDE.md` (create the file first if it does not exist).
-Write only the Markdown content below — do not include the code fence markers:
+Write only the Markdown content below — do not include the code fence markers. When
+appending to an existing file, ensure there is a blank line between the existing content
+and the block (add one if the file does not already end with a newline):
 
 ```markdown
 

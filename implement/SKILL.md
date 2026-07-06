@@ -30,6 +30,12 @@ Spawn a `claude` sub-agent with a self-contained prompt that includes:
 
 You have been spawned by `/implement` to carry out a full implementation cycle. The trigger context above tells you what to build. Work through the steps below in order.
 
+> **Prerequisite skills**: all skill names referenced below (`init-agent-docs`, `grill`,
+> `write-spec`, `create-issues`, `bdd`, `pre-commit-check`, `code-review`,
+> `address-review-comments`, `pr-cleanup`) are sibling skills in this same skills repo,
+> installed under `~/.claude/skills/`. Ensure they are present before running this
+> workflow.
+
 #### Step 0 — Bootstrap agent docs
 
 Run the `init-agent-docs` skill. This bootstraps `agent-docs/agent.md` and ensures
@@ -46,8 +52,8 @@ git branch --show-current
 
 | State | Action |
 |---|---|
-| `agent-docs/issues/<branch>.md` exists | Resume at the BDD loop (Step 5) for any unchecked issues |
-| `agent-docs/specs/<branch>.md` exists only | Resume at `/create-issues` (Step 4) |
+| `agent-docs/issues/<branch-name>.md` exists | Resume at the BDD loop (Step 5) for any unchecked issues |
+| `agent-docs/specs/<branch-name>.md` exists only | Resume at `/create-issues` (Step 4) |
 | Neither exists | Continue to Step 1 below |
 
 #### Step 1 — Grill
