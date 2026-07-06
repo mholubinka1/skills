@@ -83,12 +83,14 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments \
 
 See [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for fetch, fix, push-back, and resolve-thread commands.
 
-For each comment decide:
+For each comment, work through this sequence in order:
 
-- **Fix** — change the code, run `.githooks/pre-commit`, reply `"Fixed. <one-line explanation>"`
-- **Push back** — reply `"Ignored. <reason>"`, no code change
+1. Decide: **Fix** or **Push back**
+   - **Fix** — make the code change, run pre-commit hooks, then reply: `"Fixed. <one-line explanation>"`
+   - **Push back** — reply: `"Ignored. <reason>"`, no code change
+2. **Immediately resolve the thread** via GraphQL — do not wait until all comments are done. Resolve each thread right after replying to it (see REFERENCE.md for the `resolveReviewThread` mutation).
 
-Then resolve all addressed threads via GraphQL (see REFERENCE.md).
+Every addressed thread — whether fixed or pushed back — must be marked resolved before moving to the next comment. A reply without a resolve leaves the thread open and clutters the PR.
 
 After addressing all comments, check whether any fixes were made:
 
