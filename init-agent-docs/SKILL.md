@@ -36,7 +36,7 @@ Write those contents verbatim to `agent-docs/agent.md` in the current repository
 If writing fails for any reason (permissions, disk space, etc.):
 
 - Report the error clearly.
-- Stop. Do not proceed to Step 3 or Step 4.
+- Stop. Do not proceed to Step 3, Step 4, or Step 5.
 
 If writing succeeds:
 
