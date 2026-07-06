@@ -16,7 +16,7 @@ Step 1  Branch hygiene check
 Step 2  Verify changes exist; run pre-commit hooks
 Step 3  Pin fixed point + identify spec source
 Step 4  Spawn parallel Standards + Spec review agents → aggregate findings
-Step 5  Address blocking findings (use /bdd and /grill as needed)
+Step 5  Address blocking findings (use /bdd and /design as needed)
         No blocking findings? ──► Step 6
         Findings fixed? ──► Step 4 (new agents, new context windows)
 Step 6  Run /address-copilot-comments for Copilot PR review

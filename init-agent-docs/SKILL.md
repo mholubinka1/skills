@@ -65,7 +65,6 @@ appending to an existing file, ensure there is a blank line between the existing
 and the block (add one if the file does not already end with a newline):
 
 ```markdown
-
 ## Agent Standards
 
 See [agent-docs/agent.md](agent-docs/agent.md) for behavioural standards that apply to all AI agent work in this repository.
