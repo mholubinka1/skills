@@ -16,8 +16,8 @@ meaning the agent running in that repository may never load the standards.
 A new skill, `init-agent-docs`, bootstraps AI agent documentation in any target
 repository. It creates `agent-docs/agent.md` with second-person imperative behavioural
 standards (translated from the "Expectations of a Software Developer" source document)
-and ensures `CLAUDE.md` references it. The skill is idempotent and silent when nothing
-needs doing, making it safe to run as the first step of any implementation workflow.
+and ensures `CLAUDE.md` references it. The skill is idempotent — it reports what was created or skipped on each run — making it
+safe to run as the first step of any implementation workflow.
 
 The `/implement` skill is updated to invoke `init-agent-docs` as its first step, before
 `/grill`, so every implementation cycle in every repository begins with standards in

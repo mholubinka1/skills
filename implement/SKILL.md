@@ -33,8 +33,8 @@ You have been spawned by `/implement` to carry out a full implementation cycle. 
 #### Step 0 — Bootstrap agent docs
 
 Run the `init-agent-docs` skill. This bootstraps `agent-docs/agent.md` and ensures
-`CLAUDE.md` references it. The skill is idempotent — it completes silently if both files
-are already in place. If it surfaces an error, stop and resolve it before continuing.
+`CLAUDE.md` references it. The skill is idempotent — it reports what was created or
+skipped on each run. If it surfaces an error, stop and resolve it before continuing.
 
 #### State detection — resume from where work left off
 
@@ -70,7 +70,7 @@ Run the `create-issues` skill. It will break the spec into vertical slices, quiz
 
 For each unchecked issue in `agent-docs/issues/<branch-name>.md`, in dependency order (no blockers first):
 
-1. Run the `behaviour-driven-development` skill for this issue.
+1. Run the `bdd` skill for this issue.
 2. Run the `pre-commit-check` skill on all changed files.
 3. Commit with a single pithy line:
 
@@ -85,7 +85,7 @@ Run the `code-review` skill.
 
 #### Step 7 — Merge confirmation loop
 
-After `/address-copilot-comments` shares the PR link, enter this loop:
+After `/address-review-comments` shares the PR link, enter this loop:
 
 Prompt the user:
 

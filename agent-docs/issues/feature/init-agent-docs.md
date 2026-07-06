@@ -40,9 +40,9 @@ The skill description frontmatter:
 
 ```text
 Bootstraps AI agent documentation in the current repository — creates agent-docs/agent.md
-with default behavioural standards and ensures CLAUDE.md references it. Idempotent and
-silent on success. Use at the start of any implementation workflow to ensure agent
-standards are in place before work begins.
+with default behavioural standards and ensures CLAUDE.md references it. Idempotent —
+reports what was created or skipped on each run. Use at the start of any implementation
+workflow to ensure agent standards are in place before work begins.
 ```
 
 The skill assumes it is always invoked from the repo root (document this in SKILL.md).
@@ -80,7 +80,7 @@ The skill assumes it is always invoked from the repo root (document this in SKIL
 
 Update `implement/SKILL.md` to invoke the `init-agent-docs` skill as Step 0, before the
 existing Step 1 (`/grill`). The step should be labelled clearly and noted as a bootstrap
-step that runs silently when nothing needs doing.
+step that reports what was created or skipped on each run.
 
 ### Acceptance criteria (issue 2)
 
