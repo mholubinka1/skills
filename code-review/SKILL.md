@@ -19,7 +19,7 @@ Step 4  Spawn parallel Standards + Spec review agents → aggregate findings
 Step 5  Address blocking findings (use /bdd and /grill-with-docs as needed)
         No blocking findings? ──► Step 6
         Findings fixed? ──► Step 4 (new agents, new context windows)
-Step 6  Run /address-review-comments for Copilot PR review
+Step 6  Run /address-copilot-comments for Copilot PR review
 ```
 
 ## Step 1 — Branch hygiene
@@ -83,7 +83,7 @@ Send a **single message** with two `Agent` tool calls (type: `general-purpose`):
 For each blocking finding:
 
 - Use the `behaviour-driven-development` skill when changing or adding logic (write tests first).
-- Use the `grill-with-docs` skill if the fix involves design decisions against the existing domain model.
+- Use the `design` skill if the fix involves design decisions against the existing domain model.
 - Apply fixes, then re-run pre-commit hooks.
 
 Once all blocking findings are addressed, return to **Step 4** with brand new agents (fresh context windows). Advisory findings may be noted but do not block progression.
@@ -92,4 +92,4 @@ Repeat until a review pass reports zero blocking findings.
 
 ## Step 6 — Copilot PR review
 
-Invoke the `address-review-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean.
+Invoke the `address-copilot-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean.

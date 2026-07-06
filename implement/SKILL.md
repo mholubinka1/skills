@@ -30,11 +30,11 @@ Spawn a `claude` sub-agent with a self-contained prompt that includes:
 
 You have been spawned by `/implement` to carry out a full implementation cycle. The trigger context above tells you what to build. Work through the steps below in order.
 
-> **Prerequisite skills**: all skill names referenced below (`init-agent-docs`, `grill`,
-> `write-spec`, `create-issues`, `bdd`, `pre-commit-check`, `code-review`,
-> `address-review-comments`, `pr-cleanup`) are sibling skills in this same skills repo,
-> installed under `~/.claude/skills/`. Ensure they are present before running this
-> workflow.
+> **Prerequisite skills**: all skills referenced in this workflow live in this same skills
+> repo and are installed automatically via the post-commit sync hook:
+> `init-agent-docs`, `grill`, `write-spec`, `create-issues`, `branch-hygiene`,
+> `behaviour-driven-development`, `pre-commit-check`, `code-review`,
+> `address-copilot-comments`, `pr-cleanup`.
 
 #### Step 0 — Bootstrap agent docs
 
@@ -76,7 +76,7 @@ Run the `create-issues` skill. It will break the spec into vertical slices, quiz
 
 For each unchecked issue in `agent-docs/issues/<branch-name>.md`, in dependency order (no blockers first):
 
-1. Run the `bdd` skill for this issue.
+1. Run the `behaviour-driven-development` skill for this issue.
 2. Run the `pre-commit-check` skill on all changed files.
 3. Commit with a single pithy line:
 
@@ -91,7 +91,7 @@ Run the `code-review` skill.
 
 #### Step 7 — Merge confirmation loop
 
-After `/address-review-comments` shares the PR link, enter this loop:
+After `/address-copilot-comments` shares the PR link, enter this loop:
 
 Prompt the user:
 
