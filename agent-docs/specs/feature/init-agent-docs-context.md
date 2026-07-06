@@ -11,7 +11,7 @@ Extend `init-agent-docs` to also bootstrap `agent-docs/context.md` as part of it
 ## User Stories
 
 1. As an agent running `init-agent-docs` in a repo that already has `agent-docs/context.md`, I want the skill to detect it and skip without touching it, so that an existing domain glossary is never overwritten.
-2. As an agent running `init-agent-docs` in a repo that has a `context.md` at the root, in `docs/`, or in `agent-docs/`, I want it moved to `agent-docs/context.md`, so that the glossary lands in the canonical location without me having to do it manually.
+2. As an agent running `init-agent-docs` in a repo that has a `context.md` at the root or in `docs/`, I want it moved to `agent-docs/context.md`, so that the glossary lands in the canonical location without me having to do it manually.
 3. As an agent running `init-agent-docs` in a repo with no `context.md` anywhere, I want a well-formed empty glossary created at `agent-docs/context.md` from the bundled template, so that the `design` skill has a file to update from the first session onward.
 4. As an agent running `init-agent-docs` in a repo that has multiple `context.md` files in the search scope, I want the skill to report the ambiguity and ask me to resolve it, rather than silently picking the wrong one.
 5. As an agent running `init-agent-docs` when a move operation fails, I want the error reported clearly so I can diagnose it, while the rest of the skill (CLAUDE.md wiring) completes normally.

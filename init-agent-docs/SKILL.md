@@ -60,7 +60,6 @@ Search the following locations (non-recursively) for a file named `context.md`:
 
 - Repository root (`./context.md`)
 - `docs/context.md`
-- `agent-docs/context.md` (already checked above — will not be present at this point)
 
 Collect all matches found.
 
@@ -82,14 +81,11 @@ Collect all matches found.
 
 1. Read the contents of the source file.
 2. Write those contents verbatim to `agent-docs/context.md`.
-3. Delete the source file.
+   - If the write fails, report the error clearly and skip to Step 6. Do **not** delete the source file.
+3. Delete the source file only after the write succeeds.
+   - If the delete fails, report the error clearly and skip to Step 6. The destination file has already been written.
 
-If the write or delete fails for any reason:
-
-- Report the error clearly.
-- Skip to Step 6.
-
-If the move succeeds:
+If both steps succeed:
 
 - Report: "Moved `<source path>` to `agent-docs/context.md`."
 - Skip to Step 6.
