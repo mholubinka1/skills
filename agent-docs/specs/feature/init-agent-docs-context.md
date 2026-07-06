@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-When an AI agent runs `/implement` in a fresh repository, the `design` skill expects a `agent-docs/context.md` domain glossary to be present so it can maintain consistent terminology throughout a design session. Currently, `init-agent-docs` only creates `agent-docs/agent.md` and wires `CLAUDE.md` — it does not bootstrap `context.md`. This means the first design session in any new repo either finds no glossary (so the `design` skill has nothing to update inline) or the user must manually create one, knowing the correct format. This friction defeats the purpose of having a bootstrapping skill.
+When an AI agent runs `/implement` in a fresh repository, the `design` skill expects an `agent-docs/context.md` domain glossary to be present so it can maintain consistent terminology throughout a design session. Currently, `init-agent-docs` only creates `agent-docs/agent.md` and wires `CLAUDE.md` — it does not bootstrap `context.md`. This means the first design session in any new repo either finds no glossary (so the `design` skill has nothing to update inline) or the user must manually create one, knowing the correct format. This friction defeats the purpose of having a bootstrapping skill.
 
 ## Solution
 
