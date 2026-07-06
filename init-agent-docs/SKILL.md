@@ -66,11 +66,12 @@ Collect all matches found.
 
 **If multiple files are found:**
 
-- Report the ambiguity:
+- Report the ambiguity, listing each file actually found:
 
   > Multiple `context.md` files found — unable to determine which to use:
-  > - `./context.md`
-  > - `docs/context.md`
+  > - `<path to first match>`
+  > - `<path to second match>`
+  > - (etc.)
   >
   > Please resolve manually by moving the correct file to `agent-docs/context.md`, then
   > re-run this skill.
