@@ -7,4 +7,4 @@ description: Entrypoint for the two-axis design session. Use whenever a user wan
 
 Run the `design` skill.
 
-> See [design/SKILL.md](../design/SKILL.md) for the full two-axis interview structure and example question exchanges.
+> See `design/SKILL.md` for the full two-axis interview structure and example question exchanges.

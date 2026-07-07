@@ -18,22 +18,22 @@ Run `git config push.autoSetupRemote`. If the output is not `true`, warn the use
 
 ## Step 2: Detect current branch
 
-Run `git branch --show-current`. Classify the branch using the table in [REFERENCE.md](REFERENCE.md#branch-classification-table-step-2). Flag trunk branches (`main`, `master`, `develop`) and unrecognised prefixes.
+Run `git branch --show-current`. Classify the branch using the Branch Classification Table in [REFERENCE.md](REFERENCE.md). Flag trunk branches (`main`, `master`, `develop`) and unrecognised prefixes.
 
 ## Step 3: Determine change type
 
-If called from within `/implement`, derive the change type and branch slug from the grill session output already in context. If `change_type` was passed explicitly, use it. Otherwise infer from the user's request — see [REFERENCE.md](REFERENCE.md#change-type-inference-heuristics-step-3).
+If called from within `/implement`, derive the change type and branch slug from the grill session output already in context. If `change_type` was passed explicitly, use it. Otherwise infer from the user's request — see the Change Type Inference Heuristics section in [REFERENCE.md](REFERENCE.md).
 
 ## Step 4: Validate branch prefix against change type
 
-Check the branch prefix against the valid prefixes for the change type — see [REFERENCE.md](REFERENCE.md#branch-prefix-validation-table-step-4). Flag trunk branches, `wip/` placeholders, prefix mismatches, and unrecognised prefixes.
+Check the branch prefix against the valid prefixes for the change type — see the Branch Prefix Validation Table in [REFERENCE.md](REFERENCE.md). Flag trunk branches, `wip/` placeholders, prefix mismatches, and unrecognised prefixes.
 
 ## Step 5: Validate branch name relevance
 
-Extract the descriptive slug and assess whether it relates to the current work. Flag when the slug clearly describes different work — see [REFERENCE.md](REFERENCE.md#branch-name-relevance-rules-step-5) for signal criteria.
+Extract the descriptive slug and assess whether it relates to the current work. Flag when the slug clearly describes different work — see the Branch Name Relevance Rules section in [REFERENCE.md](REFERENCE.md) for signal criteria.
 
 ## Step 6: Resolve mismatch
 
-On any mismatch, suggest a well-formed branch name and offer to create it from the remote default branch. See [REFERENCE.md](REFERENCE.md#mismatch-resolution-step-6) for the full procedure. **Do not push or commit to the new branch.**
+On any mismatch, suggest a well-formed branch name and offer to create it from the remote default branch. See the Mismatch Resolution section in [REFERENCE.md](REFERENCE.md) for the full procedure. **Do not push or commit to the new branch.**
 
 If there is no mismatch, confirm the branch is appropriate and continue.

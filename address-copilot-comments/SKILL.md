@@ -57,11 +57,11 @@ Note the PR number. Set `review_round = 1`. The first Copilot review triggers au
 
 ## Step 3 — Poll for Copilot review threads
 
-Poll every 60 seconds (max 10 attempts) until unresolved Copilot thread count > 0; one final check if still 0; if still empty after that, go to Step 8. See [REFERENCE.md](REFERENCE.md#step-3--poll-for-copilot-review-threads) for the GraphQL query.
+Poll every 60 seconds (max 10 attempts) until unresolved Copilot thread count > 0; one final check if still 0; if still empty after that, go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the GraphQL query.
 
 ## Step 4 — Decide and apply changes
 
-For each unresolved thread decide **Fix** or **Push back** (push back on `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for fetch query and reply commands.
+For each unresolved thread decide **Fix** or **Push back** (push back on `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for fetch query and reply commands.
 
 ## Step 4b — Validate changes with code-review
 
@@ -69,15 +69,15 @@ If at least one fix was applied, run `code-review` Steps 1–5 only — pass the
 
 ## Step 4c — Reply and resolve threads
 
-Reply to each thread ("Fixed. ..." or "Ignored. ...") and immediately resolve via GraphQL — see [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for the `resolveReviewThread` mutation. All push-backs → skip to Step 8; at least one fix → continue to Step 5.
+Reply to each thread ("Fixed. ..." or "Ignored. ...") and immediately resolve via GraphQL — see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for the `resolveReviewThread` mutation. All push-backs → skip to Step 8; at least one fix → continue to Step 5.
 
 ## Step 5 — Commit and push
 
-Stage files explicitly (`git add <file1> <file2> ...`), commit with `"address Copilot review: <summary>"`, push, confirm with `git log --oneline -3`. See [REFERENCE.md](REFERENCE.md#staging-rules) for staging rules.
+Stage files explicitly (`git add <file1> <file2> ...`), commit with `"address Copilot review: <summary>"`, push, confirm with `git log --oneline -3`. See the Staging Rules section in [REFERENCE.md](REFERENCE.md) for staging rules.
 
 ## Step 6 — Re-trigger Copilot (if within limit)
 
-If `review_round >= 2`, skip to Step 8. Otherwise increment to 2 and re-trigger via `gh pr edit {number} --add-reviewer @copilot`. See [REFERENCE.md](REFERENCE.md#step-6--re-trigger-copilot-review) if that command fails.
+If `review_round >= 2`, skip to Step 8. Otherwise increment to 2 and re-trigger via `gh pr edit {number} --add-reviewer @copilot`. See the Re-trigger Copilot Review section in [REFERENCE.md](REFERENCE.md) if that command fails.
 
 ## Step 7 — Check for new threads
 

@@ -25,7 +25,7 @@ See [REFERENCE.md](REFERENCE.md) for description requirements and the review che
    - Anything missing or unclear?
    - Should any section be more/less detailed?
 
-4. **Verify against checklist** — see [REFERENCE.md](REFERENCE.md#review-checklist).
+4. **Verify against checklist** — see the Review Checklist section in [REFERENCE.md](REFERENCE.md).
 
 ## Skill Structure
 

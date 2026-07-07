@@ -30,8 +30,8 @@ Present the breakdown as a numbered list showing title, blocked-by, and user sto
 
 ### 5. Write the local issues file
 
-Create `.agent-docs/issues/<branch-name>.md` using the template in [REFERENCE.md](REFERENCE.md#local-issues-file-template-step-5).
+Create `.agent-docs/issues/<branch-name>.md` using the Local Issues File Template in [REFERENCE.md](REFERENCE.md).
 
 ### 6. Push to GitHub
 
-Verify `gh` is available (`gh --version`). Publish issues in dependency order using the command in [REFERENCE.md](REFERENCE.md#github-issue-creation-command-step-6). Update the local file with real issue numbers.
+Verify `gh` is available (`gh --version`). Publish issues in dependency order using the GitHub Issue Creation Command in [REFERENCE.md](REFERENCE.md). Update the local file with real issue numbers.
