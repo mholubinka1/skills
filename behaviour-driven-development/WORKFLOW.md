@@ -23,8 +23,8 @@ This produces agreed-upon scenarios that become your test plan. Then:
 - [ ] Capture behaviors as user stories: "As a [role], I want [feature], so that [benefit]"
 - [ ] Write acceptance criteria as Given-When-Then scenarios for each story
 - [ ] Confirm with user what interface changes are needed
-- [ ] Identify opportunities for [deep modules](deep-modules.md) (small interface, deep implementation)
-- [ ] Design interfaces for [testability](interface-design.md)
+- [ ] Identify opportunities for deep modules (small interface, deep implementation) — see `deep-modules.md`
+- [ ] Design interfaces for testability — see `interface-design.md`
 - [ ] Get user approval on the scenario list
 
 Ask: "What should success look like for the user? Which scenarios are most important to get right?"
@@ -74,7 +74,7 @@ Rules:
 
 ## Step 5 — Refactor
 
-After all tests pass, look for [refactor candidates](refactoring.md):
+After all tests pass, look for refactor candidates (see `refactoring.md`):
 
 - [ ] Extract duplication
 - [ ] Deepen modules (move complexity behind simple interfaces)
