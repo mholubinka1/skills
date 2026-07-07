@@ -17,7 +17,7 @@ description: Behaviour-driven development with red-green-refactor loop and Given
 
 **Outside-in development**: BDD is an outside-in discipline. Start from the user's perspective — acceptance criteria, user stories — and work inward toward implementation. Define what success looks like for the user before designing internal structure.
 
-See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking guidelines.
+See `tests.md` for examples and `mocking.md` for mocking guidelines.
 
 ## Scenarios: Given-When-Then
 
@@ -40,7 +40,7 @@ When the shopper checks out with a valid payment method
 Then the order is confirmed and the shopper receives a confirmation number
 ```
 
-Test names should read as scenario titles — plain English, domain vocabulary, no implementation detail. See [tests.md](tests.md) for how to translate scenarios into code.
+Test names should read as scenario titles — plain English, domain vocabulary, no implementation detail. See `tests.md` for how to translate scenarios into code.
 
 ## Anti-Pattern: Horizontal Slices
 
