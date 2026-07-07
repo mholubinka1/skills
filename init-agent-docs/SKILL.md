@@ -20,8 +20,11 @@ Check whether the old `agent-docs/` directory (without the dot prefix) exists in
 current repository. If it does not exist at all, skip this step entirely and continue to
 Step 2.
 
-If `agent-docs/` exists, migrate its contents to `.agent-docs/` as follows. Handle each
-of the three items below in order:
+If `agent-docs/` exists, migrate its contents to `.agent-docs/` as follows.
+
+First, create the `.agent-docs/` directory if it does not already exist.
+
+Then handle each of the three items below in order:
 
 **`agent-docs/agent.md`:**
 
