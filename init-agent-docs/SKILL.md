@@ -29,7 +29,10 @@ Then handle each of the three items below in order:
 **`agent-docs/agent.md`:**
 
 - If `agent-docs/agent.md` exists and `.agent-docs/agent.md` does **not** exist:
-  Move it: Read source → Write to `.agent-docs/agent.md` → delete `agent-docs/agent.md`.
+  Move it: Read source → Write to `.agent-docs/agent.md`.
+  - If the write fails, report the error clearly and skip to the next item. Do **not** delete the source file.
+  Delete `agent-docs/agent.md` only after the write succeeds.
+  - If the delete fails, report the error clearly and continue. The destination file has been written.
   Report: "Migrated `agent-docs/agent.md` to `.agent-docs/agent.md`."
 - If both `agent-docs/agent.md` and `.agent-docs/agent.md` exist:
   Delete `agent-docs/agent.md` (the `.agent-docs/` version is preferred).
@@ -39,7 +42,10 @@ Then handle each of the three items below in order:
 **`agent-docs/context.md`:**
 
 - If `agent-docs/context.md` exists and `.agent-docs/context.md` does **not** exist:
-  Move it: Read source → Write to `.agent-docs/context.md` → delete `agent-docs/context.md`.
+  Move it: Read source → Write to `.agent-docs/context.md`.
+  - If the write fails, report the error clearly and skip to the next item. Do **not** delete the source file.
+  Delete `agent-docs/context.md` only after the write succeeds.
+  - If the delete fails, report the error clearly and continue. The destination file has been written.
   Report: "Migrated `agent-docs/context.md` to `.agent-docs/context.md`."
 - If both `agent-docs/context.md` and `.agent-docs/context.md` exist:
   Delete `agent-docs/context.md`.
