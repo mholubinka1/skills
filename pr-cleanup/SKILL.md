@@ -17,7 +17,7 @@ Get the current branch:
 git branch --show-current
 ```
 
-Confirm the PR is actually merged before proceeding. Direct user or agent confirmation is not required, use the GitHub CLI to check the PR state:
+Confirm the PR is actually merged before proceeding. Direct user or agent confirmation is not required; use the GitHub CLI to check the PR state:
 
 ```bash
 gh pr view --head $(git branch --show-current) --json state --jq '.state'

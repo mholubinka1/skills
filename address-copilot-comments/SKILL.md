@@ -18,7 +18,7 @@ Step 1  PR exists? ──No──► Step 2: create PR (review_round = 1)
 Step 3  Poll for unresolved Copilot review threads (60s)
         Poll exhausted (0 threads after 10 attempts + fallback)? ──► Step 8
 Step 4  For each unresolved thread: decide fix or push-back; apply code changes
-Step 4b Run code-review (Steps 1–5 only, skip Step 6) to validate changes
+Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
         All push-backs? ──Yes──► Step 8 (skip Steps 5–7)
 Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push
