@@ -1,6 +1,6 @@
 ---
 name: write-spec
-description: Synthesise the current conversation into a spec (PRD) and write it to agent-docs/specs/<branch-name>.md. No interview — synthesis only. Use after a /grill session when the design is agreed and ready to record.
+description: Synthesise the current conversation into a spec (PRD) and write it to .agent-docs/specs/<branch-name>.md. No interview — synthesis only. Use after a /grill session when the design is agreed and ready to record.
 attribution: Based on to-prd (Matt Pocock, mattpocock/skills)
 ---
 
@@ -20,11 +20,11 @@ Get the current branch name:
 git branch --show-current
 ```
 
-The spec file is `agent-docs/specs/<branch-name>.md`. Create `agent-docs/specs/` if it does not exist.
+The spec file is `.agent-docs/specs/<branch-name>.md`. Create `.agent-docs/specs/` if it does not exist.
 
 ### 2. Explore the repo
 
-Read the codebase to understand the current state. Use the domain glossary vocabulary from `agent-docs/context.md` (if present) throughout the spec. Respect any ADRs in `agent-docs/docs/adr/`.
+Read the codebase to understand the current state. Use the domain glossary vocabulary from `.agent-docs/context.md` (if present) throughout the spec. Respect any ADRs in `.agent-docs/adr/`.
 
 ### 3. Identify test seams
 
@@ -34,7 +34,7 @@ Check with the user that the proposed seams match their expectations before writ
 
 ### 4. Write the spec
 
-Write `agent-docs/specs/<branch-name>.md` using the template below.
+Write `.agent-docs/specs/<branch-name>.md` using the template below.
 
 ```md
 # <Feature title>

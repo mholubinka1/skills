@@ -38,7 +38,7 @@ You have been spawned by `/implement` to carry out a full implementation cycle. 
 
 #### Step 0 — Bootstrap agent docs
 
-Run the `init-agent-docs` skill. This bootstraps `agent-docs/agent.md` and ensures
+Run the `init-agent-docs` skill. This bootstraps `.agent-docs/agent.md` and ensures
 `CLAUDE.md` references it. The skill is idempotent — it reports what was created or
 skipped on each run. If it surfaces an error, stop and resolve it before continuing.
 
@@ -52,8 +52,8 @@ git branch --show-current
 
 | State | Action |
 |---|---|
-| `agent-docs/issues/<branch-name>.md` exists | Resume at the BDD loop (Step 5) for any unchecked issues |
-| `agent-docs/specs/<branch-name>.md` exists only | Resume at `/create-issues` (Step 4) |
+| `.agent-docs/issues/<branch-name>.md` exists | Resume at the BDD loop (Step 5) for any unchecked issues |
+| `.agent-docs/specs/<branch-name>.md` exists only | Resume at `/create-issues` (Step 4) |
 | Neither exists | Continue to Step 1 below |
 
 #### Step 1 — Grill
@@ -66,15 +66,15 @@ Run the `branch-hygiene` skill. Derive the change type and branch slug from the 
 
 #### Step 3 — Write spec
 
-Run the `write-spec` skill. It will synthesise the grill output into `agent-docs/specs/<branch-name>.md`.
+Run the `write-spec` skill. It will synthesise the grill output into `.agent-docs/specs/<branch-name>.md`.
 
 #### Step 4 — Create issues
 
-Run the `create-issues` skill. It will break the spec into vertical slices, quiz you on the breakdown, write `agent-docs/issues/<branch-name>.md`, and push to GitHub.
+Run the `create-issues` skill. It will break the spec into vertical slices, quiz you on the breakdown, write `.agent-docs/issues/<branch-name>.md`, and push to GitHub.
 
 #### Step 5 — BDD loop (per issue, in dependency order)
 
-For each unchecked issue in `agent-docs/issues/<branch-name>.md`, in dependency order (no blockers first):
+For each unchecked issue in `.agent-docs/issues/<branch-name>.md`, in dependency order (no blockers first):
 
 1. Run the `bdd` skill for this issue.
 2. Run the `pre-commit-check` skill on all changed files.

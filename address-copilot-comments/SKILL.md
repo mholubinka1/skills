@@ -13,14 +13,19 @@ Runs a loop: fetch Copilot comments → fix or push back → commit → push →
 
 ```text
 Step 0  gh available?
-Step 1  PR exists? ──No──► Step 2: create PR
-Step 3  Poll for Copilot comments (60s)
-Step 4  Fix or push back each comment → resolve threads
+Step 1  PR exists? ──No──► Step 2: create PR (review_round = 1)
+        PR exists? ──Yes──► review_round = 1
+Step 3  Poll for unresolved Copilot review threads (60s)
+        Poll exhausted (0 threads after 10 attempts + fallback)? ──► Step 8
+Step 4  For each unresolved thread: decide fix or push-back; apply code changes
+Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
+Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
         All push-backs? ──Yes──► Step 8 (skip Steps 5–7)
-Step 5  Commit and push
-Step 6  Re-trigger Copilot review
-Step 7  Poll again → new comments? ──Yes──► Step 4 | No ──► Step 8
-Step 8  Report PR link
+Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push
+Step 6  review_round < 2? ──Yes──► review_round++; re-trigger Copilot → Step 7
+                          ──No ──► Step 8 (max 2 reviews; do not re-trigger)
+Step 7  New unresolved Copilot threads? ──Yes──► Step 4 | No ──► Step 8
+Step 8  Report PR link — PR is ready to merge
 ```
 
 ## Step 0 — Verify `gh`
@@ -38,7 +43,7 @@ Then `gh auth login`. Do not proceed until `gh --version` passes.
 gh pr list --head $(git branch --show-current) --json number,title,url
 ```
 
-PR found → note the number, skip to Step 3.
+PR found → note the number. Set `review_round = 1`. Skip to Step 3.
 No PR → go to Step 2.
 
 ## Step 2 — Create the PR
@@ -60,9 +65,9 @@ EOF
 )"
 ```
 
-Note the PR number. The first Copilot review triggers automatically.
+Note the PR number. Set `review_round = 1`. The first Copilot review triggers automatically.
 
-## Step 3 — Poll for comments
+## Step 3 — Poll for Copilot review threads
 
 Derive owner and repo once:
 
@@ -70,31 +75,45 @@ Derive owner and repo once:
 gh repo view --json nameWithOwner --jq '.nameWithOwner'
 ```
 
-Poll every 60 seconds until count > 0. Before each wait, output a keep-alive message so the UI does not appear frozen, e.g.:
+Poll every 60 seconds until unresolved thread count > 0. Before each wait, output a keep-alive message:
 
-> Waiting for Copilot review comments — checking again in 60s (attempt N)...
+> Waiting for Copilot review threads — checking again in 60s (attempt N)...
 
-```bash
-gh api repos/{owner}/{repo}/pulls/{number}/comments \
-  --jq '[.[] | select(.in_reply_to_id == null) | select(.user.login == "Copilot")] | length'
-```
+Use the GraphQL query from [REFERENCE.md](REFERENCE.md#step-3--poll-for-copilot-review-threads) to count unresolved Copilot threads. Do **not** use the REST `pulls/{number}/comments` endpoint — it misses threads posted as part of a Copilot review submission rather than as standalone inline comments.
 
-## Step 4 — Address each comment
+After 10 failed attempts, perform one final direct GraphQL check (see REFERENCE.md). If the final check also returns 0, Copilot has not reviewed or has no comments — continue to Step 8.
 
-See [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for fetch, fix, push-back, and resolve-thread commands.
+## Step 4 — Decide and apply changes
 
-For each comment, work through this sequence in order:
+Fetch all unresolved Copilot review threads — see [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for the query.
 
-1. Decide: **Fix** or **Push back**
-   - **Fix** — make the code change, run pre-commit hooks, then reply: `"Fixed. <one-line explanation>"`
-   - **Push back** — reply: `"Ignored. <reason>"`, no code change
-2. **Immediately resolve the thread** via GraphQL — do not wait until all comments are done. Resolve each thread right after replying to it (see REFERENCE.md for the `resolveReviewThread` mutation).
+For each thread, decide: **Fix** or **Push back**.
 
-Every addressed thread — whether fixed or pushed back — must be marked resolved before moving to the next comment. A reply without a resolve leaves the thread open and clutters the PR.
+- **Fix** — apply the code change now. Do **not** reply to the thread yet.
+- **Push back** — no code change. Note the reason. Do **not** reply yet.
 
-After addressing all comments, check whether any fixes were made:
+**Push back** on anything in `.agent-docs/`. That is agent documentation, not code — Copilot is not a domain expert on this content.
 
-- **All push-backs** (no code changes) → threads are resolved, skip to Step 8.
+Once all decisions are made and code changes applied, continue to Step 4b.
+
+## Step 4b — Validate changes with code-review
+
+If at least one fix was applied, run the `code-review` workflow for Steps 1–5 only. When invoking code-review from this step, you **must** pass an explicit instruction: "Stop after Step 5. Do not execute Step 6 — you are running inside `address-copilot-comments` Step 4b and must return control here when the review is clean." Address all blocking and advisory findings before continuing to Step 4c. A sub-agent that proceeds to code-review Step 6 would re-invoke `address-copilot-comments` and create an infinite loop.
+
+If all decisions were push-backs (no code changes), skip directly to Step 4c.
+
+## Step 4c — Reply and resolve threads
+
+For each thread, in order:
+
+1. **Fixed** → reply: `"Fixed. <one-line explanation>"`, then immediately resolve the thread via GraphQL.
+2. **Push back** → reply: `"Ignored. <reason>"`, then immediately resolve the thread via GraphQL.
+
+See [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for the `resolveReviewThread` mutation. Resolve each thread right after replying — do not batch replies.
+
+After all threads are replied to and resolved:
+
+- **All push-backs** (no code changes) → skip to Step 8.
 - **At least one fix** → continue to Step 5.
 
 ## Step 5 — Commit and push
@@ -111,7 +130,11 @@ git push
 git log --oneline -3
 ```
 
-## Step 6 — Re-trigger Copilot
+## Step 6 — Re-trigger Copilot (if within limit)
+
+Check `review_round`. If `review_round >= 2`, **do not re-trigger** — go directly to Step 8. The PR has had its maximum number of Copilot reviews.
+
+If `review_round < 2`, increment `review_round` to 2 and re-trigger:
 
 ```bash
 gh pr edit {number} --add-reviewer @copilot
@@ -119,12 +142,12 @@ gh pr edit {number} --add-reviewer @copilot
 
 > If this fails (plan/org restriction), use the GraphQL `requestReviews` mutation — see [REFERENCE.md](REFERENCE.md#step-6--re-trigger-copilot-review).
 
-## Step 7 — Check for new comments
+## Step 7 — Check for new threads
 
-Wait 60 seconds, then poll as in Step 3. Compare newly fetched top-level Copilot comments against those already replied to.
+Wait 60 seconds, then poll as in Step 3. Compare the unresolved thread count against those already replied to.
 
-- New unresolved comments → return to Step 4.
-- No new actionable comments → continue to Step 8.
+- New unresolved Copilot threads → return to Step 4.
+- No new unresolved Copilot threads → continue to Step 8.
 
 ## Step 8 — Report completion
 
