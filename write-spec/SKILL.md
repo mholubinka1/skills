@@ -8,8 +8,6 @@ attribution: Based on to-prd (Matt Pocock, mattpocock/skills)
 
 Synthesise what is already known from the conversation into a spec. Do **not** interview the user — the `/grill` session already did that.
 
-> **Note**: The spec template (Problem Statement, Solution, User Stories, etc.) is a candidate for restructuring in the future as usage patterns become clearer.
-
 ## Process
 
 ### 1. Determine the spec filename

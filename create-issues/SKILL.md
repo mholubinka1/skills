@@ -8,108 +8,30 @@ attribution: Based on to-issues (Matt Pocock, mattpocock/skills)
 
 Break the spec into independently-grabbable vertical slice issues. Write locally first, then push to GitHub.
 
+See [REFERENCE.md](REFERENCE.md) for the local issues file template and the GitHub CLI command.
+
 ## Process
 
 ### 1. Read the spec
 
-```bash
-git branch --show-current
-```
-
-Read `.agent-docs/specs/<branch-name>.md`. If it does not exist, tell the user to run `/write-spec` first.
+Get the current branch with `git branch --show-current`. Read `.agent-docs/specs/<branch-name>.md` — if it does not exist, tell the user to run `/write-spec` first.
 
 ### 2. Explore the codebase
 
-If not already done, explore the codebase to understand the current state. Issue titles and descriptions should use the domain glossary vocabulary from `.agent-docs/context.md`. Respect ADRs in `.agent-docs/adr/`.
-
-Look for prefactoring opportunities — "make the change easy, then make the easy change."
+Read the codebase if not already done. Use domain glossary vocabulary from `.agent-docs/context.md`. Look for prefactoring opportunities — "make the change easy, then make the easy change."
 
 ### 3. Draft vertical slices
 
-Break the spec into **tracer bullet** issues. Each issue is a thin vertical slice cutting through ALL integration layers end-to-end, not a horizontal layer slice.
-
-Each slice must:
-
-- Deliver a narrow but complete path through every layer (schema, API, UI, tests)
-- Be demoable or verifiable on its own when complete
-- Have any required prefactoring as its own preceding slice
+Break the spec into tracer bullet issues — each a thin vertical slice cutting through all integration layers end-to-end. Each slice must be demoable on its own and have any required prefactoring as its own preceding slice.
 
 ### 4. Three amigos review
 
-Present the proposed breakdown as a numbered list. For each slice show:
-
-- **Title**: short descriptive name
-- **Blocked by**: which other slices must complete first (if any)
-- **User stories covered**: which user stories from the spec this addresses
-
-Ask the user:
-
-- Does the granularity feel right?
-- Are the dependency relationships correct?
-- Should any slices be merged or split further?
-
-Iterate until the user approves the breakdown.
+Present the breakdown as a numbered list showing title, blocked-by, and user stories covered. Ask the user if the granularity, dependencies, and split/merge feel right. Iterate until approved.
 
 ### 5. Write the local issues file
 
-Create `.agent-docs/issues/` if it does not exist. Write `.agent-docs/issues/<branch-name>.md`:
-
-```md
-# Issues: <branch-name>
-
-## <Slice title>
-
-**Blocked by**: None / #<issue-number>
-
-**User stories**: <numbers from spec>
-
-### What to build
-
-A concise description of this vertical slice end-to-end. No file paths or code snippets
-unless a snippet encodes a decision more precisely than prose.
-
-### Acceptance criteria
-
-- [ ] Criterion 1
-- [ ] Criterion 2
-
----
-```
-
-Repeat for each approved slice.
+Create `.agent-docs/issues/<branch-name>.md` using the Local Issues File Template in [REFERENCE.md](REFERENCE.md).
 
 ### 6. Push to GitHub
 
-Verify `gh` is available:
-
-```bash
-gh --version
-```
-
-Publish issues in dependency order (blockers first) so real issue numbers can be referenced. For each slice:
-
-```bash
-gh issue create \
-  --title "<slice title>" \
-  --body "$(cat <<'EOF'
-## Parent
-
-<link to parent spec issue if one exists, otherwise omit>
-
-## What to build
-
-<description>
-
-## Acceptance criteria
-
-- [ ] Criterion 1
-- [ ] Criterion 2
-
-## Blocked by
-
-None / #<issue-number>
-EOF
-)"
-```
-
-After publishing, update the `.agent-docs/issues/<branch-name>.md` file with the real GitHub issue numbers in the "Blocked by" fields.
+Verify `gh` is available (`gh --version`). Publish issues in dependency order using the GitHub Issue Creation Command in [REFERENCE.md](REFERENCE.md). Update the local file with real issue numbers.

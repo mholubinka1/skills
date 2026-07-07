@@ -29,6 +29,8 @@ Grill on the *what* and *why* before thinking about the *how*. Explore:
 - **Failure modes**: What does broken look like from a user's perspective?
 - **Edge cases**: Probe boundaries — empty states, concurrent users, partial failure.
 
+**Example exchange** — Q: "What does success look like for the user?" → Recommended answer: "A developer can run `/implement` and get a merged PR without writing any git commands manually."
+
 Do not move to Phase 2 until the business picture is complete and agreed.
 
 ## Phase 2 — Engineering axis

@@ -1,6 +1,6 @@
 ---
 name: pr-cleanup
-description: Post-merge cleanup — close GitHub issues for the current branch and check them off in .agent-docs/issues/<branch-name>.md. Run after a PR has been merged. Invoked by /implement after the merge confirmation loop.
+description: Post-merge cleanup — close GitHub issues for the current branch and check them off in .agent-docs/issues/<branch-name>.md. Use when a PR has been merged and issues need closing, or when invoked by /implement after the merge confirmation loop.
 ---
 
 # PR Cleanup
@@ -20,7 +20,8 @@ git branch --show-current
 Confirm the PR is actually merged before proceeding. Direct user or agent confirmation is not required; use the GitHub CLI to check the PR state:
 
 ```bash
-gh pr view --head $(git branch --show-current) --json state --jq '.state'
+gh pr list --head $(git branch --show-current) --json number --jq '.[0].number'
+gh pr view <number> --json state --jq '.state'
 ```
 
 If the state is not `MERGED`, stop and tell the user the PR has not been merged yet.
