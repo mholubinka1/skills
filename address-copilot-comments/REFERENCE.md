@@ -4,14 +4,7 @@ Full command detail for each step. Replace `{owner}`, `{repo}`, `{number}`, `{id
 
 ---
 
-## Step 3 — Poll for Copilot comments
-
-Run every 60 seconds until the count is greater than zero:
-
-```bash
-gh api repos/{owner}/{repo}/pulls/{number}/comments \
-  --jq '[.[] | select(.in_reply_to_id == null) | select(.user.login == "Copilot")] | length'
-```
+## Step 3 — Poll for Copilot review threads
 
 Get `{owner}/{repo}` from:
 
@@ -19,15 +12,56 @@ Get `{owner}/{repo}` from:
 gh repo view --json nameWithOwner --jq '.nameWithOwner'
 ```
 
+Run every 60 seconds until the count is greater than zero. Use GraphQL — the REST `pulls/{number}/comments` endpoint misses threads posted as part of a review submission:
+
+```bash
+gh api graphql -f query='
+query {
+  repository(owner: "{owner}", name: "{repo}") {
+    pullRequest(number: {number}) {
+      reviewThreads(first: 100) {
+        nodes {
+          isResolved
+          comments(first: 1) {
+            nodes { author { login } }
+          }
+        }
+      }
+    }
+  }
+}' --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login == "Copilot")] | length'
+```
+
+After 10 failed attempts (count still 0), perform one final direct check with the same query. If the final check also returns 0, Copilot has not reviewed or has nothing actionable — continue to Step 8.
+
 ---
 
 ## Step 4 — Address each comment
 
-### Fetch all top-level Copilot comments
+### Fetch all unresolved Copilot review threads
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{number}/comments \
-  --jq '.[] | select(.in_reply_to_id == null) | select(.user.login == "Copilot") | {id, path, line, body}'
+gh api graphql -f query='
+query {
+  repository(owner: "{owner}", name: "{repo}") {
+    pullRequest(number: {number}) {
+      reviewThreads(first: 100) {
+        nodes {
+          id
+          isResolved
+          comments(first: 10) {
+            nodes {
+              author { login }
+              body
+              path
+              line
+            }
+          }
+        }
+      }
+    }
+  }
+}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login == "Copilot") | {id, path: .comments.nodes[0].path, line: .comments.nodes[0].line, body: .comments.nodes[0].body}'
 ```
 
 ### Reply: fixed
@@ -61,7 +95,7 @@ gh api graphql -f query='
 query {
   repository(owner: "{owner}", name: "{repo}") {
     pullRequest(number: {number}) {
-      reviewThreads(first: 20) {
+      reviewThreads(first: 100) {
         nodes { id isResolved }
       }
     }
@@ -129,7 +163,8 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 
 The loop is complete when **any** of these conditions is met:
 
-1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4. Skip Steps 5 and 6; do not re-trigger Copilot. PR is ready to merge.
-2. **No new actionable comments** after re-triggering — poll in Step 7 returns zero new top-level Copilot comments.
+1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
+2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger. PR is ready to merge.
+3. **No new unresolved threads** after re-triggering — poll in Step 7 returns zero unresolved Copilot threads.
 
-In both cases the PR is considered clean and ready to merge.
+In all cases the PR is considered clean and ready to merge.

@@ -16,9 +16,9 @@ Step 1  Branch hygiene check
 Step 2  Verify changes exist; run pre-commit hooks
 Step 3  Pin fixed point + identify spec source
 Step 4  Spawn parallel Standards + Spec review agents → aggregate findings
-Step 5  Address blocking findings (use /bdd and /design as needed)
-        No blocking findings? ──► Step 6
-        Findings fixed? ──► Step 4 (new agents, new context windows)
+Step 5  Address all findings — blocking first, then advisory
+        Zero findings on both axes? ──► Step 6
+        Findings addressed? ──► Step 4 (new agents, new context windows)
 Step 6  Run /address-copilot-comments for Copilot PR review
 ```
 
@@ -78,21 +78,21 @@ Send a **single message** with two `Agent` tool calls (type: `general-purpose`):
 
 **Aggregate**: present both reports under `## Standards` and `## Spec` headings verbatim. End with a one-line summary — total findings per axis and the worst blocking issue within each (if any). Do not rerank across axes.
 
-## Step 5 — Address blocking findings
+## Step 5 — Address all findings
 
-For each blocking finding:
+Address findings in order of severity — blocking first, then advisory:
 
 - Use the `bdd` skill when changing or adding logic (write tests first).
 - Use the `design` skill if the fix involves design decisions against the existing domain model.
 - Apply fixes, then re-run pre-commit hooks.
 
-Once all blocking findings are addressed, return to **Step 4** with brand new agents (fresh context windows). Advisory findings may be noted but do not block progression.
+Once all findings are addressed, return to **Step 4** with brand new agents (fresh context windows).
 
-Repeat until a review pass reports zero blocking findings.
+Repeat until a review pass reports zero findings on both axes — blocking **and** advisory.
 
-Do not move on to Step 6 until completing a full clean review pass. If sub-agents are still executing, wait for them to finish and aggregate their findings before proceeding.
+Do not move on to Step 6 until completing a full clean review pass with zero findings. If sub-agents are still executing, wait for them to finish and aggregate their findings before proceeding.
 
-Always report aggregated findings to the user, even if there are no blocking issues. If there are no blocking issues, report "no blocking issues found" and continue to Step 6.
+Always report aggregated findings to the user. If there are zero findings on both axes, report "no findings" and continue to Step 6.
 
 ## Step 6 — Copilot PR review
 
