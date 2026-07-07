@@ -90,6 +90,10 @@ Once all blocking findings are addressed, return to **Step 4** with brand new ag
 
 Repeat until a review pass reports zero blocking findings.
 
+Do not move on to Step 6 until completing a full clean review pass. If sub-agents are still executing, wait for them to finish and aggregate their findings before proceeding.
+
+Always report aggregated findings to the user, even if there are no blocking issues. If there are no blocking issues, report "no blocking issues found" and continue to Step 6.
+
 ## Step 6 — Copilot PR review
 
 Invoke the `address-copilot-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean.
