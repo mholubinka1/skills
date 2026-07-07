@@ -50,104 +50,38 @@ No PR → go to Step 2.
 
 ```bash
 BASE=$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name')
-gh pr create \
-  --base "$BASE" \
-  --title "<title>" \
-  --body "$(cat <<'EOF'
-## Summary
-- <bullet points>
-
-## Test plan
-- [ ] <checklist>
-
-🤖 Generated with Claude Code
-EOF
-)"
+gh pr create --base "$BASE" --title "<title>" --body "<summary and test plan>"
 ```
 
 Note the PR number. Set `review_round = 1`. The first Copilot review triggers automatically.
 
 ## Step 3 — Poll for Copilot review threads
 
-Derive owner and repo once:
-
-```bash
-gh repo view --json nameWithOwner --jq '.nameWithOwner'
-```
-
-Poll every 60 seconds until unresolved thread count > 0. Before each wait, output a keep-alive message:
-
-> Waiting for Copilot review threads — checking again in 60s (attempt N)...
-
-Use the GraphQL query from [REFERENCE.md](REFERENCE.md#step-3--poll-for-copilot-review-threads) to count unresolved Copilot threads. Do **not** use the REST `pulls/{number}/comments` endpoint — it misses threads posted as part of a Copilot review submission rather than as standalone inline comments.
-
-After 10 failed attempts, perform one final direct GraphQL check (see REFERENCE.md). If the final check also returns 0, Copilot has not reviewed or has no comments — continue to Step 8.
+Poll every 60 seconds (max 10 attempts) until unresolved Copilot thread count > 0; one final check if still 0; if still empty after that, go to Step 8. See [REFERENCE.md](REFERENCE.md#step-3--poll-for-copilot-review-threads) for the GraphQL query.
 
 ## Step 4 — Decide and apply changes
 
-Fetch all unresolved Copilot review threads — see [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for the query.
-
-For each thread, decide: **Fix** or **Push back**.
-
-- **Fix** — apply the code change now. Do **not** reply to the thread yet.
-- **Push back** — no code change. Note the reason. Do **not** reply yet.
-
-**Push back** on anything in `.agent-docs/`. That is agent documentation, not code — Copilot is not a domain expert on this content.
-
-Once all decisions are made and code changes applied, continue to Step 4b.
+For each unresolved thread decide **Fix** or **Push back** (push back on `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for fetch query and reply commands.
 
 ## Step 4b — Validate changes with code-review
 
-If at least one fix was applied, run the `code-review` workflow for Steps 1–5 only. When invoking code-review from this step, you **must** pass an explicit instruction: "Stop after Step 5. Do not execute Step 6 — you are running inside `address-copilot-comments` Step 4b and must return control here when the review is clean." Address all blocking and advisory findings before continuing to Step 4c. A sub-agent that proceeds to code-review Step 6 would re-invoke `address-copilot-comments` and create an infinite loop.
-
-If all decisions were push-backs (no code changes), skip directly to Step 4c.
+If at least one fix was applied, run `code-review` Steps 1–5 only — pass the explicit instruction to stop after Step 5 to avoid re-invoking this skill. Skip if all decisions were push-backs.
 
 ## Step 4c — Reply and resolve threads
 
-For each thread, in order:
-
-1. **Fixed** → reply: `"Fixed. <one-line explanation>"`, then immediately resolve the thread via GraphQL.
-2. **Push back** → reply: `"Ignored. <reason>"`, then immediately resolve the thread via GraphQL.
-
-See [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for the `resolveReviewThread` mutation. Resolve each thread right after replying — do not batch replies.
-
-After all threads are replied to and resolved:
-
-- **All push-backs** (no code changes) → skip to Step 8.
-- **At least one fix** → continue to Step 5.
+Reply to each thread ("Fixed. ..." or "Ignored. ...") and immediately resolve via GraphQL — see [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for the `resolveReviewThread` mutation. All push-backs → skip to Step 8; at least one fix → continue to Step 5.
 
 ## Step 5 — Commit and push
 
-Stage changed files explicitly — never `git add .` blindly:
-
-```bash
-git add <file1> <file2> ...
-```
-
-```bash
-git commit -m "address Copilot review: <one-line summary>"
-git push
-git log --oneline -3
-```
+Stage files explicitly (`git add <file1> <file2> ...`), commit with `"address Copilot review: <summary>"`, push, confirm with `git log --oneline -3`. See [REFERENCE.md](REFERENCE.md#staging-rules) for staging rules.
 
 ## Step 6 — Re-trigger Copilot (if within limit)
 
-Check `review_round`. If `review_round >= 2`, **do not re-trigger** — go directly to Step 8. The PR has had its maximum number of Copilot reviews.
-
-If `review_round < 2`, increment `review_round` to 2 and re-trigger:
-
-```bash
-gh pr edit {number} --add-reviewer @copilot
-```
-
-> If this fails (plan/org restriction), use the GraphQL `requestReviews` mutation — see [REFERENCE.md](REFERENCE.md#step-6--re-trigger-copilot-review).
+If `review_round >= 2`, skip to Step 8. Otherwise increment to 2 and re-trigger via `gh pr edit {number} --add-reviewer @copilot`. See [REFERENCE.md](REFERENCE.md#step-6--re-trigger-copilot-review) if that command fails.
 
 ## Step 7 — Check for new threads
 
-Wait 60 seconds, then poll as in Step 3. Compare the unresolved thread count against those already replied to.
-
-- New unresolved Copilot threads → return to Step 4.
-- No new unresolved Copilot threads → continue to Step 8.
+Wait 60 seconds, poll as in Step 3. New unresolved threads → return to Step 4. None → continue to Step 8.
 
 ## Step 8 — Report completion
 
