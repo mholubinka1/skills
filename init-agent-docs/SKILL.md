@@ -187,8 +187,9 @@ Search the following locations for files matching the ADR naming convention (`[0
 - `docs/` (non-recursively — files directly inside `docs/` only, not subdirectories)
 - `docs/adr/` (all `.md` files matching the pattern)
 - `agent-docs/docs/adr/` (all `.md` files matching the pattern — legacy path from older convention)
+- `.agent-docs/docs/adr/` (all `.md` files matching the pattern — dotted legacy path that may exist after Step 1 migration)
 
-Collect all matches found across both locations.
+Collect all matches found across all four locations.
 
 **If no matching files are found:**
 
@@ -212,7 +213,10 @@ Collect all matches found across both locations.
      3. Compare the two dates:
         - **Source is newer**: overwrite the destination. Read source → Write to `.agent-docs/adr/<filename>` → delete source. Report: "Overwrote `.agent-docs/adr/<filename>` with newer `<source path>`."
         - **Destination is newer or same age**: skip the source file. Report: "Skipped `<source path>` — `.agent-docs/adr/<filename>` is already newer."
-3. After processing all files, check whether the `docs/adr/` directory exists and is now empty. If it is empty, delete the `docs/adr/` directory. Do **not** delete or modify `docs/` itself.
+3. After processing all files, clean up each legacy source directory if it is now empty:
+   - If `docs/adr/` exists and is empty, delete it. Do **not** delete or modify `docs/` itself.
+   - If `agent-docs/docs/adr/` exists and is empty, delete it. If `agent-docs/docs/` is then empty, delete it too.
+   - If `.agent-docs/docs/adr/` exists and is empty, delete it. If `.agent-docs/docs/` is then empty, delete it too.
 
 Continue to Step 8.
 
