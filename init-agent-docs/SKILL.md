@@ -50,7 +50,7 @@ Check whether `agent-docs/context.md` already exists in the current repository.
 If it exists:
 
 - Report: "`agent-docs/context.md` already exists — skipping."
-- Skip to Step 6.
+- Skip to Step 6 (ADR migration still runs).
 
 If it does not exist, continue to Step 4.
 
@@ -108,7 +108,42 @@ If writing succeeds:
 
 - Report: "Created `agent-docs/context.md` from template."
 
-### Step 6 — Check CLAUDE.md
+### Step 6 — Migrate ADR files
+
+Search the following locations for files matching the ADR naming convention (`[0-9]*-*.md`):
+
+- `docs/` (non-recursively — files directly inside `docs/` only, not subdirectories)
+- `docs/adr/` (all `.md` files matching the pattern)
+
+Collect all matches found across both locations.
+
+**If no matching files are found:**
+
+- Record "no ADRs found — skipped" for the summary.
+- Continue to Step 7.
+
+**If matching files are found:**
+
+1. Create the `agent-docs/adr/` directory if it does not already exist.
+2. For each matched file, in the order found:
+   - **If no file with the same name exists at `agent-docs/adr/<filename>`:**
+     1. Read the source file contents.
+     2. Write those contents verbatim to `agent-docs/adr/<filename>`.
+        - If the write fails, report the error clearly and skip this file. Continue with the next file.
+     3. Delete the source file only after the write succeeds.
+        - If the delete fails, report the error clearly and continue. The destination file has been written.
+     4. Report: "Moved `<source path>` to `agent-docs/adr/<filename>`."
+   - **If a file with the same name already exists at `agent-docs/adr/<filename>`** (conflict):
+     1. Determine the effective date of the source file: run `git log -1 --format="%ai" -- <source path>`. If the output is empty (file is untracked), use the filesystem modification time instead.
+     2. Determine the effective date of the destination file: run `git log -1 --format="%ai" -- agent-docs/adr/<filename>`. If the output is empty, use the filesystem modification time.
+     3. Compare the two dates:
+        - **Source is newer**: overwrite the destination. Read source → Write to `agent-docs/adr/<filename>` → delete source. Report: "Overwrote `agent-docs/adr/<filename>` with newer `<source path>`."
+        - **Destination is newer or same age**: skip the source file. Report: "Skipped `<source path>` — `agent-docs/adr/<filename>` is already newer."
+3. After processing all files, check whether the `docs/adr/` directory exists and is now empty. If it is empty, delete the `docs/adr/` directory. Do **not** delete or modify `docs/` itself.
+
+Continue to Step 7.
+
+### Step 7 — Check CLAUDE.md
 
 Check whether `CLAUDE.md` exists in the current repository root.
 
@@ -118,12 +153,12 @@ anywhere in its content.
 If `CLAUDE.md` already contains `agent-docs/agent.md`:
 
 - Report: "`CLAUDE.md` already references `agent-docs/agent.md` — skipping."
-- Continue to Step 8.
+- Continue to Step 9.
 
 If `CLAUDE.md` does not exist, or exists but does not contain `agent-docs/agent.md`,
-continue to Step 7.
+continue to Step 8.
 
-### Step 7 — Create or append CLAUDE.md
+### Step 8 — Create or append CLAUDE.md
 
 Append the following content to `CLAUDE.md` (create the file first if it does not exist).
 Write only the Markdown content below — do not include the code fence markers. When
@@ -144,7 +179,7 @@ If `CLAUDE.md` existed and was appended to:
 
 - Report: "Appended Agent Standards reference to existing `CLAUDE.md`."
 
-### Step 8 — Summary
+### Step 9 — Summary
 
 Report a brief summary of every action taken and every step skipped with a reason.
 Example:
@@ -153,6 +188,7 @@ Example:
 init-agent-docs complete:
   - Created agent-docs/agent.md
   - Created agent-docs/context.md from template
+  - Moved docs/adr/0001-use-postgresql.md to agent-docs/adr/0001-use-postgresql.md
   - Created CLAUDE.md with Agent Standards reference
 ```
 
@@ -162,5 +198,6 @@ Or if nothing needed doing:
 init-agent-docs complete (nothing to do):
   - agent-docs/agent.md already exists — skipped
   - agent-docs/context.md already exists — skipped
+  - no ADRs found — skipped
   - CLAUDE.md already references agent-docs/agent.md — skipped
 ```
