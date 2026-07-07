@@ -186,6 +186,7 @@ Search the following locations for files matching the ADR naming convention (`[0
 
 - `docs/` (non-recursively — files directly inside `docs/` only, not subdirectories)
 - `docs/adr/` (all `.md` files matching the pattern)
+- `agent-docs/docs/adr/` (all `.md` files matching the pattern — legacy path from older convention)
 
 Collect all matches found across both locations.
 
@@ -206,8 +207,8 @@ Collect all matches found across both locations.
         - If the delete fails, report the error clearly and continue. The destination file has been written.
      4. Report: "Moved `<source path>` to `.agent-docs/adr/<filename>`."
    - **If a file with the same name already exists at `.agent-docs/adr/<filename>`** (conflict):
-     1. Determine the effective date of the source file: run `git log -1 --format="%ai" -- <source path>`. If the output is empty (file is untracked), use the filesystem modification time instead.
-     2. Determine the effective date of the destination file: run `git log -1 --format="%ai" -- .agent-docs/adr/<filename>`. If the output is empty, use the filesystem modification time.
+     1. Determine the effective date of the source file: run `git log -1 --format="%ai" -- <source path>`. If the command exits non-zero or the output is empty (file is untracked or unknown to git), use the filesystem modification time instead.
+     2. Determine the effective date of the destination file: run `git log -1 --format="%ai" -- .agent-docs/adr/<filename>`. If the command exits non-zero or the output is empty, use the filesystem modification time instead.
      3. Compare the two dates:
         - **Source is newer**: overwrite the destination. Read source → Write to `.agent-docs/adr/<filename>` → delete source. Report: "Overwrote `.agent-docs/adr/<filename>` with newer `<source path>`."
         - **Destination is newer or same age**: skip the source file. Report: "Skipped `<source path>` — `.agent-docs/adr/<filename>` is already newer."
