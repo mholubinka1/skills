@@ -10,11 +10,11 @@
 
 ### What to build
 
-Create `init-.agent-docs/CONTEXT-TEMPLATE.md` — a well-formed empty domain glossary that the skill writes verbatim to `.agent-docs/context.md` when no existing `context.md` is found. The template must follow the format defined in `design/CONTEXT-FORMAT.md`: a `# Project Context` heading, a one-sentence placeholder description, a `## Language` subheading, and one placeholder term entry with a name, definition, and `_Avoid_` line.
+Create `init-agent-docs/CONTEXT-TEMPLATE.md` — a well-formed empty domain glossary that the skill writes verbatim to `.agent-docs/context.md` when no existing `context.md` is found. The template must follow the format defined in `design/CONTEXT-FORMAT.md`: a `# Project Context` heading, a one-sentence placeholder description, a `## Language` subheading, and one placeholder term entry with a name, definition, and `_Avoid_` line.
 
 ### Acceptance criteria
 
-- [ ] `init-.agent-docs/CONTEXT-TEMPLATE.md` exists alongside `SKILL.md` and `AGENT-TEMPLATE.md`
+- [ ] `init-agent-docs/CONTEXT-TEMPLATE.md` exists alongside `SKILL.md` and `AGENT-TEMPLATE.md`
 - [ ] The template contains a `# Project Context` heading
 - [ ] The template contains a one-sentence placeholder description beneath the heading
 - [ ] The template contains a `## Language` subheading
@@ -31,7 +31,7 @@ Create `init-.agent-docs/CONTEXT-TEMPLATE.md` — a well-formed empty domain glo
 
 ### Description
 
-Extend `init-.agent-docs/SKILL.md` with three new steps that bootstrap `.agent-docs/context.md`, inserted between the existing `agent.md` steps and the `CLAUDE.md` steps. The new steps implement a three-strategy ordered approach:
+Extend `init-agent-docs/SKILL.md` with three new steps that bootstrap `.agent-docs/context.md`, inserted between the existing `agent.md` steps and the `CLAUDE.md` steps. The new steps implement a three-strategy ordered approach:
 
 1. If `.agent-docs/context.md` already exists — report and skip.
 2. If a `context.md` is found in root or `docs/` — move it (Read → Write → delete source). If multiple found, report ambiguity and skip. If move fails, report error and skip.
@@ -72,7 +72,7 @@ Update `design/ADR-FORMAT.md` to reference `.agent-docs/adr/` as the canonical A
 
 ---
 
-## Add ADR migration step to init-.agent-docs/SKILL.md
+## Add ADR migration step to init-agent-docs/SKILL.md
 
 **Blocked by**: #7
 
@@ -80,7 +80,7 @@ Update `design/ADR-FORMAT.md` to reference `.agent-docs/adr/` as the canonical A
 
 ### What to build
 
-Insert a new Step 6 in `init-.agent-docs/SKILL.md` after the context.md steps (Steps 3–5) and before the CLAUDE.md steps. The step searches `docs/` (non-recursively) and `docs/adr/` for files matching `[0-9]*-*.md` and migrates them to `.agent-docs/adr/`. Conflict resolution uses git commit date (filesystem mtime fallback). After migration, removes empty `docs/adr/`. Renumbers old Steps 6–8 to Steps 7–9; summary becomes Step 10.
+Insert a new Step 6 in `init-agent-docs/SKILL.md` after the context.md steps (Steps 3–5) and before the CLAUDE.md steps. The step searches `docs/` (non-recursively) and `docs/adr/` for files matching `[0-9]*-*.md` and migrates them to `.agent-docs/adr/`. Conflict resolution uses git commit date (filesystem mtime fallback). After migration, removes empty `docs/adr/`. Renumbers old Steps 6–8 to Steps 7–9; summary becomes Step 10.
 
 ### Acceptance criteria
 
@@ -135,7 +135,7 @@ Rename the `.agent-docs/` directory to `..agent-docs/` in the skills repo using 
 
 ---
 
-## Add migration Step 1 to init-.agent-docs/SKILL.md for .agent-docs/ → ..agent-docs/
+## Add migration Step 1 to init-agent-docs/SKILL.md for .agent-docs/ → ..agent-docs/
 
 **Blocked by**: #10
 
@@ -143,7 +143,7 @@ Rename the `.agent-docs/` directory to `..agent-docs/` in the skills repo using 
 
 ### What to build
 
-Add a new Step 1 to `init-.agent-docs/SKILL.md` that detects and migrates existing `.agent-docs/` content in target repos to `..agent-docs/`. Runs before all other steps. Shifts all existing step numbers up by 1. Also updates the CLAUDE.md idempotency check to handle old `.agent-docs/agent.md` references (replace in-place, not append duplicate).
+Add a new Step 1 to `init-agent-docs/SKILL.md` that detects and migrates existing `.agent-docs/` content in target repos to `..agent-docs/`. Runs before all other steps. Shifts all existing step numbers up by 1. Also updates the CLAUDE.md idempotency check to handle old `.agent-docs/agent.md` references (replace in-place, not append duplicate).
 
 ### Acceptance criteria
 

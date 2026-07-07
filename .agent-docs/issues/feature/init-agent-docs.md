@@ -8,16 +8,16 @@
 
 ### What to build
 
-Create the `init-agent-docs` skill in the skills repo under `init-.agent-docs/`. The skill
+Create the `init-agent-docs` skill in the skills repo under `init-agent-docs/`. The skill
 bootstraps AI agent documentation in any target repository when invoked from its root.
 
 Two files to create:
 
-- `init-.agent-docs/AGENT-TEMPLATE.md` — the full content of `agent.md`, containing all
+- `init-agent-docs/AGENT-TEMPLATE.md` — the full content of `agent.md`, containing all
   six sections of the "Expectations of a Software Developer" document translated into
   second-person imperative instructions for an AI agent. Kept separate from SKILL.md so
   the template can be edited independently.
-- `init-.agent-docs/SKILL.md` — step-by-step instructions for the agent:
+- `init-agent-docs/SKILL.md` — step-by-step instructions for the agent:
   1. Check if `.agent-docs/agent.md` already exists; if so skip writing it.
   2. Create `.agent-docs/` if it does not exist.
   3. Copy the content of `AGENT-TEMPLATE.md` into `.agent-docs/agent.md`.
@@ -49,11 +49,11 @@ The skill assumes it is always invoked from the repo root (document this in SKIL
 
 ### Acceptance criteria
 
-- [ ] `init-.agent-docs/AGENT-TEMPLATE.md` exists and covers all six sections (Ownership &
+- [ ] `init-agent-docs/AGENT-TEMPLATE.md` exists and covers all six sections (Ownership &
       Independence, Production Code Quality, Testing Discipline, Source Control & Git
       Practice, Engineering Lifecycle (SDLC), Communication & Feedback) in second-person
       imperative language.
-- [ ] `init-.agent-docs/SKILL.md` exists with a valid frontmatter description and
+- [ ] `init-agent-docs/SKILL.md` exists with a valid frontmatter description and
       step-by-step instructions.
 - [ ] Running the skill in a repo with no `.agent-docs/` creates `.agent-docs/agent.md`
       with the template content.

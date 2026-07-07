@@ -53,7 +53,7 @@ place.
 
 ## Implementation Decisions
 
-- Two files are created in the skills repo under `init-.agent-docs/`:
+- Two files are created in the skills repo under `init-agent-docs/`:
   - `SKILL.md` — step-by-step instructions for the agent
   - `AGENT-TEMPLATE.md` — the full content of `agent.md`, kept separate so the template
     can be edited independently of the skill instructions

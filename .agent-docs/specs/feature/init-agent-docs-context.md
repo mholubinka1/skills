@@ -20,8 +20,8 @@ Extend `init-agent-docs` to also bootstrap `.agent-docs/context.md` as part of i
 
 ## Implementation Decisions
 
-- `init-.agent-docs/SKILL.md` gains three new steps (Steps 3, 4, 5 in the renumbered sequence) between the existing `agent.md` steps and the `CLAUDE.md` steps.
-- A new `init-.agent-docs/CONTEXT-TEMPLATE.md` is added alongside `SKILL.md` and `AGENT-TEMPLATE.md`. It contains a `# Project Context` heading, a one-sentence placeholder description, a `## Language` subheading, and one placeholder term entry following the format in `design/CONTEXT-FORMAT.md`.
+- `init-agent-docs/SKILL.md` gains three new steps (Steps 3, 4, 5 in the renumbered sequence) between the existing `agent.md` steps and the `CLAUDE.md` steps.
+- A new `init-agent-docs/CONTEXT-TEMPLATE.md` is added alongside `SKILL.md` and `AGENT-TEMPLATE.md`. It contains a `# Project Context` heading, a one-sentence placeholder description, a `## Language` subheading, and one placeholder term entry following the format in `design/CONTEXT-FORMAT.md`.
 - **Step 3 — Check for existing context.md**: if `.agent-docs/context.md` exists, report and skip to the CLAUDE.md steps.
 - **Step 4 — Search and move**: search root and `docs/` (non-recursively) for any `context.md` file. If exactly one found, move it: Read source → Write to `.agent-docs/context.md` → delete source. If multiple found, report ambiguity with file list, skip this step, and continue. If move fails, report error, skip, and continue.
 - **Step 5 — Create from template**: if no `context.md` was found or moved, read `CONTEXT-TEMPLATE.md` from the skill directory and write its contents verbatim to `.agent-docs/context.md`.
@@ -60,7 +60,7 @@ The `design` skill records architectural decisions as ADR files under `.agent-do
 
 ## Solution
 
-Add a new step to `init-.agent-docs/SKILL.md` that searches `docs/` (root, non-recursively) and `docs/adr/` for files matching the ADR naming convention (`[0-9]*-*.md`) and migrates them to `.agent-docs/adr/`. The step uses git commit date (filesystem mtime fallback) for conflict resolution. After migration, `docs/adr/` is removed if empty. The step is idempotent — on a second run, no source files remain and the step reports "no ADRs found — skipped". Alongside this, `design/ADR-FORMAT.md` is corrected to reference `.agent-docs/adr/` as the canonical path, and an ADR is recorded in the skills repo documenting this path decision.
+Add a new step to `init-agent-docs/SKILL.md` that searches `docs/` (root, non-recursively) and `docs/adr/` for files matching the ADR naming convention (`[0-9]*-*.md`) and migrates them to `.agent-docs/adr/`. The step uses git commit date (filesystem mtime fallback) for conflict resolution. After migration, `docs/adr/` is removed if empty. The step is idempotent — on a second run, no source files remain and the step reports "no ADRs found — skipped". Alongside this, `design/ADR-FORMAT.md` is corrected to reference `.agent-docs/adr/` as the canonical path, and an ADR is recorded in the skills repo documenting this path decision.
 
 ## User Stories
 
@@ -72,7 +72,7 @@ Add a new step to `init-.agent-docs/SKILL.md` that searches `docs/` (root, non-r
 
 ## Implementation Decisions
 
-- A new **Step 6** is inserted in `init-.agent-docs/SKILL.md` after the context.md steps (Steps 3–5) and before the CLAUDE.md steps (old Steps 6–7).
+- A new **Step 6** is inserted in `init-agent-docs/SKILL.md` after the context.md steps (Steps 3–5) and before the CLAUDE.md steps (old Steps 6–7).
 - Step 6 logic:
   1. Search `docs/` (non-recursively) and `docs/adr/` for files matching `[0-9]*-*.md`.
   2. If none found, report "no ADRs found — skipped" and continue to Step 7.
@@ -124,19 +124,19 @@ Rename `.agent-docs/` to `..agent-docs/` everywhere: physically in the skills re
 ## Implementation Decisions
 
 - **Skills repo**: `git mv agent-docs .agent-docs` to rename the directory with git history preserved. Followed by a bulk find-and-replace of `.agent-docs/` → `..agent-docs/` across all `.md` files in the repo.
-- **`init-.agent-docs/SKILL.md` — new Step 1 (Migration)**:
+- **`init-agent-docs/SKILL.md` — new Step 1 (Migration)**:
   - Run before all other steps.
   - For each of `.agent-docs/agent.md`, `.agent-docs/context.md`, `.agent-docs/adr/`:
     - If old path exists and new path (`..agent-docs/...`) does not: move to new path, report.
     - If both exist: prefer `..agent-docs/`, delete old `.agent-docs/` copy, report.
     - If only new path exists (already migrated): do nothing.
   - After migrating files, if `.agent-docs/` directory is empty, remove it.
-- **`init-.agent-docs/SKILL.md` — CLAUDE.md idempotency check** (Step 8 after renumbering):
+- **`init-agent-docs/SKILL.md` — CLAUDE.md idempotency check** (Step 8 after renumbering):
   - Check for both `.agent-docs/agent.md` and `..agent-docs/agent.md` in `CLAUDE.md`.
   - If `..agent-docs/agent.md` already present: skip (already up to date).
   - If `.agent-docs/agent.md` present but not `..agent-docs/agent.md`: replace the old string in-place, report "Migrated `CLAUDE.md` reference from `.agent-docs/agent.md` to `..agent-docs/agent.md`."
   - If neither present: append the new block (`..agent-docs/agent.md`), report as before.
-- All existing step numbers in `init-.agent-docs/SKILL.md` shift up by 1 (old Step 1 → new Step 2, etc.).
+- All existing step numbers in `init-agent-docs/SKILL.md` shift up by 1 (old Step 1 → new Step 2, etc.).
 - An ADR is recorded in the skills repo documenting the `.agent-docs/` → `..agent-docs/` rename decision (hidden directory convention, hard to reverse, genuine alternative of keeping it visible was rejected).
 
 ## Testing Decisions
