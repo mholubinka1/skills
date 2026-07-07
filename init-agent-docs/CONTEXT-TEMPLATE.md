@@ -1,6 +1,6 @@
 # Project Context
 
-One sentence describing what this project does and why this context exists.
+One or two sentences describing what this project does and why this context exists.
 
 ## Language
 
