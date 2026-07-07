@@ -20,7 +20,8 @@ git branch --show-current
 Confirm the PR is actually merged before proceeding. Direct user or agent confirmation is not required; use the GitHub CLI to check the PR state:
 
 ```bash
-gh pr view --head $(git branch --show-current) --json state --jq '.state'
+gh pr list --head $(git branch --show-current) --json number --jq '.[0].number'
+gh pr view <number> --json state --jq '.state'
 ```
 
 If the state is not `MERGED`, stop and tell the user the PR has not been merged yet.

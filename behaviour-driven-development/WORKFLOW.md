@@ -8,7 +8,7 @@ Run the **branch-hygiene** skill in fast mode (no `change_type` — infers from 
 
 This catches the most obvious problem before planning begins: being on a trunk branch (`main`, `master`, `develop`). It also checks `autoSetupRemote`.
 
-If the user is on trunk and wants to move now, branch-hygiene will create a `wip/` placeholder. Note that Step 2 will replace it with a properly-named branch once the change type is confirmed by planning. **Do not push or commit.**
+If the user is on trunk and wants to move now, branch-hygiene may suggest a `wip/` placeholder when the change type or slug is still unclear. Note that Step 2 will replace it with a properly-named branch once the change type is confirmed by planning. **Do not push or commit.**
 
 ## Step 1 — Planning
 
