@@ -57,7 +57,21 @@ of the three items below in order:
 
 **After handling all three items:**
 
-If the `agent-docs/` directory now exists and is empty, delete it.
+Scan the `agent-docs/` directory for any remaining files or subdirectories that were not
+covered by the three items above (i.e. anything other than `agent.md`, `context.md`, and
+`adr/`). Common examples include `specs/`, `issues/`, or other subdirectories from an
+older skill layout.
+
+If any such files or directories remain:
+
+- Report each one:
+  > Warning: `agent-docs/<name>` was not migrated — please move it to `.agent-docs/<name>`
+  > manually and re-run this skill.
+- Do **not** delete the `agent-docs/` directory (it is not empty and contains unmigrated
+  content). Do **not** attempt automatic migration of unknown items.
+- Continue to Step 2.
+
+If no unexpected files or directories remain and `agent-docs/` is now empty, delete it.
 
 Continue to Step 2.
 
@@ -84,7 +98,7 @@ Write those contents verbatim to `.agent-docs/agent.md` in the current repositor
 If writing fails for any reason (permissions, disk space, etc.):
 
 - Report the error clearly.
-- Stop. Do not proceed to Step 4, Step 5, or Step 6.
+- Stop. Do not proceed to any further steps.
 
 If writing succeeds:
 
