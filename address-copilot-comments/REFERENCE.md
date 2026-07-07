@@ -55,14 +55,20 @@ query {
               body
               path
               line
+              databaseId
             }
           }
         }
       }
     }
   }
-}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login == "Copilot") | {id, path: .comments.nodes[0].path, line: .comments.nodes[0].line, body: .comments.nodes[0].body}'
+}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login == "Copilot") | {threadId: .id, commentId: .comments.nodes[0].databaseId, path: .comments.nodes[0].path, line: .comments.nodes[0].line, body: .comments.nodes[0].body}'
 ```
+
+The query returns two IDs per thread — use the right one for each operation:
+
+- `threadId` (`PRRT_...` node ID) — used with `resolveReviewThread` GraphQL mutation
+- `commentId` (numeric `databaseId`) — used with the REST reply endpoint below
 
 ### Reply: fixed
 

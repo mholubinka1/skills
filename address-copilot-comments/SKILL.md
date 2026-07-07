@@ -16,6 +16,7 @@ Step 0  gh available?
 Step 1  PR exists? ──No──► Step 2: create PR (review_round = 1)
         PR exists? ──Yes──► review_round = 1
 Step 3  Poll for unresolved Copilot review threads (60s)
+        Poll exhausted (0 threads after 10 attempts + fallback)? ──► Step 8
 Step 4  For each unresolved thread: decide fix or push-back; apply code changes
 Step 4b Run code-review (Steps 1–5 only, skip Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
@@ -97,7 +98,7 @@ Once all decisions are made and code changes applied, continue to Step 4b.
 
 ## Step 4b — Validate changes with code-review
 
-If at least one fix was applied, invoke the `code-review` skill — **Steps 1–5 only; do not proceed to Step 6** (that would create an infinite loop). Address all blocking and advisory findings before continuing to Step 4c.
+If at least one fix was applied, run the `code-review` workflow for Steps 1–5 only. When invoking code-review from this step, you **must** pass an explicit instruction: "Stop after Step 5. Do not execute Step 6 — you are running inside `address-copilot-comments` Step 4b and must return control here when the review is clean." Address all blocking and advisory findings before continuing to Step 4c. A sub-agent that proceeds to code-review Step 6 would re-invoke `address-copilot-comments` and create an infinite loop.
 
 If all decisions were push-backs (no code changes), skip directly to Step 4c.
 
