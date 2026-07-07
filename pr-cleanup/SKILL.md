@@ -1,6 +1,6 @@
 ---
 name: pr-cleanup
-description: Post-merge cleanup — close GitHub issues for the current branch and check them off in .agent-docs/issues/<branch-name>.md. Run after a PR has been merged. Invoked by /implement after the merge confirmation loop.
+description: Post-merge cleanup — close GitHub issues for the current branch and check them off in .agent-docs/issues/<branch-name>.md. Use when a PR has been merged and issues need closing, or when invoked by /implement after the merge confirmation loop.
 ---
 
 # PR Cleanup
