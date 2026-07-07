@@ -80,7 +80,7 @@ Send a **single message** with two `Agent` tool calls (type: `general-purpose`):
 
 ## Step 5 — Address all findings
 
-Address findings in order of severity — blocking first, then advisory. Advisory findings are not lower priority — they are equally loop-blocking. The loop does not exit until a pass returns zero findings on both axes:
+Address findings in order — blocking first, then advisory. Both are equally gate-blocking: the loop does not exit until a pass returns zero findings on both axes:
 
 - Use the `bdd` skill when changing or adding logic (write tests first).
 - Use the `design` skill if the fix involves design decisions against the existing domain model.
