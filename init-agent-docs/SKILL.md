@@ -69,9 +69,10 @@ Then handle each of the three items below in order:
 **After handling all three items:**
 
 Scan the `agent-docs/` directory for any remaining files or subdirectories that were not
-covered by the three items above (i.e. anything other than `agent.md`, `context.md`, and
-`adr/`). Common examples include `specs/`, `issues/`, or other subdirectories from an
-older skill layout.
+covered by the three items above (i.e. anything other than `agent.md`, `context.md`, `adr/`,
+and `docs/`). Do **not** warn about `docs/` — any ADR files inside `agent-docs/docs/adr/`
+will be migrated by Step 7. Common examples of items that do warrant a warning include
+`specs/`, `issues/`, or other subdirectories from an older skill layout.
 
 If any such files or directories remain:
 
@@ -215,7 +216,7 @@ Collect all matches found across all four locations.
         - **Destination is newer or same age**: skip the source file. Report: "Skipped `<source path>` — `.agent-docs/adr/<filename>` is already newer."
 3. After processing all files, clean up each legacy source directory if it is now empty:
    - If `docs/adr/` exists and is empty, delete it. Do **not** delete or modify `docs/` itself.
-   - If `agent-docs/docs/adr/` exists and is empty, delete it. If `agent-docs/docs/` is then empty, delete it too.
+   - If `agent-docs/docs/adr/` exists and is empty, delete it. If `agent-docs/docs/` is then empty, delete it too. If `agent-docs/` is then empty, delete it too.
    - If `.agent-docs/docs/adr/` exists and is empty, delete it. If `.agent-docs/docs/` is then empty, delete it too.
 
 Continue to Step 8.
