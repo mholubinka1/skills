@@ -115,7 +115,7 @@ Create `.agent-docs/adr/0001-adr-canonical-location.md` in the skills repo, docu
 
 ---
 
-## Rename .agent-docs/ to ..agent-docs/ in skills repo and update all references
+## Rename agent-docs/ to .agent-docs/ in skills repo and update all references
 
 **Blocked by**: #7, #8, #9
 
@@ -123,19 +123,19 @@ Create `.agent-docs/adr/0001-adr-canonical-location.md` in the skills repo, docu
 
 ### What to build
 
-Rename the `.agent-docs/` directory to `..agent-docs/` in the skills repo using `git mv`, then do a bulk find-and-replace of `.agent-docs/` → `..agent-docs/` across all `.md` files in the repo. After the rename, no file in the skills repo should reference `.agent-docs/`.
+Rename the `agent-docs/` directory to `.agent-docs/` in the skills repo using `git mv`, then do a bulk find-and-replace of `agent-docs/` → `.agent-docs/` across all `.md` files in the repo. After the rename, no file in the skills repo should reference `agent-docs/`.
 
 ### Acceptance criteria
 
-- [ ] `.agent-docs/` directory no longer exists; `..agent-docs/` exists in its place
+- [ ] `agent-docs/` directory no longer exists; `.agent-docs/` exists in its place
 - [ ] Git history is preserved via `git mv`
-- [ ] Zero occurrences of `.agent-docs/` remain in any `.md` file in the skills repo (verified by grep)
-- [ ] All skill instruction files (`*/SKILL.md`, `design/ADR-FORMAT.md`, etc.) use `..agent-docs/`
-- [ ] The `..agent-docs/specs/`, `..agent-docs/issues/`, `..agent-docs/adr/` subdirectories are intact
+- [ ] Zero occurrences of `agent-docs/` remain in any `.md` file in the skills repo (verified by grep)
+- [ ] All skill instruction files (`*/SKILL.md`, `design/ADR-FORMAT.md`, etc.) use `.agent-docs/`
+- [ ] The `.agent-docs/specs/`, `.agent-docs/issues/`, `.agent-docs/adr/` subdirectories are intact
 
 ---
 
-## Add migration Step 1 to init-agent-docs/SKILL.md for .agent-docs/ → ..agent-docs/
+## Add migration Step 1 to init-agent-docs/SKILL.md for agent-docs/ → .agent-docs/
 
 **Blocked by**: #10
 
@@ -143,23 +143,23 @@ Rename the `.agent-docs/` directory to `..agent-docs/` in the skills repo using 
 
 ### What to build
 
-Add a new Step 1 to `init-agent-docs/SKILL.md` that detects and migrates existing `.agent-docs/` content in target repos to `..agent-docs/`. Runs before all other steps. Shifts all existing step numbers up by 1. Also updates the CLAUDE.md idempotency check to handle old `.agent-docs/agent.md` references (replace in-place, not append duplicate).
+Add a new Step 1 to `init-agent-docs/SKILL.md` that detects and migrates existing `agent-docs/` content in target repos to `.agent-docs/`. Runs before all other steps. Shifts all existing step numbers up by 1. Also updates the CLAUDE.md idempotency check to handle old `agent-docs/agent.md` references (replace in-place, not append duplicate).
 
 ### Acceptance criteria
 
 - [ ] New Step 1 runs before all other steps
-- [ ] `.agent-docs/agent.md` migrated to `..agent-docs/agent.md` when old exists and new does not
-- [ ] `.agent-docs/context.md` migrated to `..agent-docs/context.md` when old exists and new does not
-- [ ] `.agent-docs/adr/` migrated to `..agent-docs/adr/` when old exists and new does not
-- [ ] When both old and new exist: `..agent-docs/` version kept, old `.agent-docs/` copy removed
-- [ ] Empty `.agent-docs/` directory removed after migration
+- [ ] `agent-docs/agent.md` migrated to `.agent-docs/agent.md` when old exists and new does not
+- [ ] `agent-docs/context.md` migrated to `.agent-docs/context.md` when old exists and new does not
+- [ ] `agent-docs/adr/` migrated to `.agent-docs/adr/` when old exists and new does not
+- [ ] When both old and new exist: `.agent-docs/` version kept, old `agent-docs/` copy removed
+- [ ] Empty `agent-docs/` directory removed after migration
 - [ ] All existing steps correctly renumbered (old Step 1 → Step 2, etc.)
-- [ ] CLAUDE.md idempotency check handles old `.agent-docs/agent.md` reference: replaces in-place, does not append duplicate
+- [ ] CLAUDE.md idempotency check handles old `agent-docs/agent.md` reference: replaces in-place, does not append duplicate
 - [ ] Skill is idempotent — second run on a migrated repo: Step 1 finds nothing to migrate and reports nothing
 
 ---
 
-## Record ADR for .agent-docs/ to ..agent-docs/ hidden directory rename
+## Record ADR for agent-docs/ to .agent-docs/ hidden directory rename
 
 **Blocked by**: #10
 
@@ -167,14 +167,14 @@ Add a new Step 1 to `init-agent-docs/SKILL.md` that detects and migrates existin
 
 ### What to build
 
-Create `..agent-docs/adr/0002-hidden-agent-docs-directory.md` in the skills repo, documenting the decision to rename `.agent-docs/` to `..agent-docs/`.
+Create `.agent-docs/adr/0002-hidden-agent-docs-directory.md` in the skills repo, documenting the decision to rename `agent-docs/` to `.agent-docs/`.
 
 ### Acceptance criteria
 
-- [ ] `..agent-docs/adr/0002-hidden-agent-docs-directory.md` exists in the skills repo
-- [ ] ADR records the context: `.agent-docs/` appeared as a first-class source directory in file browsers
-- [ ] ADR records the decision: rename to `..agent-docs/` (hidden directory convention)
+- [ ] `.agent-docs/adr/0002-hidden-agent-docs-directory.md` exists in the skills repo
+- [ ] ADR records the context: `agent-docs/` appeared as a first-class source directory in file browsers
+- [ ] ADR records the decision: rename to `.agent-docs/` (hidden directory convention)
 - [ ] ADR records the rationale: consistent with `.github/`, `.husky/`, `.vscode/` tooling directory convention; keeps AI agent documentation accessible to tools but out of casual sight
-- [ ] ADR records the rejected alternative: keeping the visible `.agent-docs/` name
+- [ ] ADR records the rejected alternative: keeping the visible `agent-docs/` name
 
 ---

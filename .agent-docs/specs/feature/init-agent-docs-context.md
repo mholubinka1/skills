@@ -103,56 +103,56 @@ Add a new step to `init-agent-docs/SKILL.md` that searches `docs/` (root, non-re
 
 ---
 
-# Rename .agent-docs/ to ..agent-docs/ across all skills
+# Rename agent-docs/ to .agent-docs/ across all skills
 
 ## Problem Statement
 
-The `.agent-docs/` directory created by `init-agent-docs` appears prominently in file browsers and `ls` output, adding visual noise alongside source code directories. Teams using the skills workflow find that `.agent-docs/` looks like a first-class source directory rather than tooling scaffolding. A hidden directory (prefixed with `.`) keeps AI agent documentation accessible to tools but out of casual sight — consistent with the convention used by `.github/`, `.husky/`, and similar tooling directories.
+The `agent-docs/` directory created by `init-agent-docs` appears prominently in file browsers and `ls` output, adding visual noise alongside source code directories. Teams using the skills workflow find that `agent-docs/` looks like a first-class source directory rather than tooling scaffolding. A hidden directory (prefixed with `.`) keeps AI agent documentation accessible to tools but out of casual sight — consistent with the convention used by `.github/`, `.husky/`, and similar tooling directories.
 
 ## Solution
 
-Rename `.agent-docs/` to `..agent-docs/` everywhere: physically in the skills repo (via `git mv`), in every skill file that references the path, and in the `init-agent-docs` skill's runtime behaviour. The `init-agent-docs` skill gains a new Step 1 that detects and migrates existing `.agent-docs/` content in target repos to `..agent-docs/`, making the transition safe for repos already using the old layout. The `CLAUDE.md` migration step is updated to replace `.agent-docs/agent.md` references in-place rather than appending a duplicate block.
+Rename `agent-docs/` to `.agent-docs/` everywhere: physically in the skills repo (via `git mv`), in every skill file that references the path, and in the `init-agent-docs` skill's runtime behaviour. The `init-agent-docs` skill gains a new Step 1 that detects and migrates existing `agent-docs/` content in target repos to `.agent-docs/`, making the transition safe for repos already using the old layout. The `CLAUDE.md` migration step is updated to replace `agent-docs/agent.md` references in-place rather than appending a duplicate block.
 
 ## User Stories
 
-1. As a developer browsing a repo that uses the skills workflow, I want the AI agent documentation directory to be hidden (`..agent-docs/`), so that it does not clutter my file browser alongside source code.
-2. As an agent running `init-agent-docs` in a repo that already has `.agent-docs/` content from a previous run, I want the skill to migrate it to `..agent-docs/` automatically, so that I do not need to intervene manually.
-3. As an agent running `init-agent-docs` in a repo where both `.agent-docs/` and `..agent-docs/` exist, I want the skill to prefer `..agent-docs/` and remove the old `.agent-docs/` copies, so that there is only one canonical location.
-4. As an agent running `init-agent-docs` in a repo whose `CLAUDE.md` references the old `.agent-docs/agent.md` path, I want the reference updated in-place to `..agent-docs/agent.md`, so that no duplicate block is appended.
-5. As a skill author reading any skill file in the skills repo, I want all paths to use `..agent-docs/` consistently, so that there is no confusion about which path convention is current.
+1. As a developer browsing a repo that uses the skills workflow, I want the AI agent documentation directory to be hidden (`.agent-docs/`), so that it does not clutter my file browser alongside source code.
+2. As an agent running `init-agent-docs` in a repo that already has `agent-docs/` content from a previous run, I want the skill to migrate it to `.agent-docs/` automatically, so that I do not need to intervene manually.
+3. As an agent running `init-agent-docs` in a repo where both `agent-docs/` and `.agent-docs/` exist, I want the skill to prefer `.agent-docs/` and remove the old `agent-docs/` copies, so that there is only one canonical location.
+4. As an agent running `init-agent-docs` in a repo whose `CLAUDE.md` references the old `agent-docs/agent.md` path, I want the reference updated in-place to `.agent-docs/agent.md`, so that no duplicate block is appended.
+5. As a skill author reading any skill file in the skills repo, I want all paths to use `.agent-docs/` consistently, so that there is no confusion about which path convention is current.
 
 ## Implementation Decisions
 
-- **Skills repo**: `git mv agent-docs .agent-docs` to rename the directory with git history preserved. Followed by a bulk find-and-replace of `.agent-docs/` → `..agent-docs/` across all `.md` files in the repo.
+- **Skills repo**: `git mv agent-docs .agent-docs` to rename the directory with git history preserved. Followed by a bulk find-and-replace of `agent-docs/` → `.agent-docs/` across all `.md` files in the repo.
 - **`init-agent-docs/SKILL.md` — new Step 1 (Migration)**:
   - Run before all other steps.
-  - For each of `.agent-docs/agent.md`, `.agent-docs/context.md`, `.agent-docs/adr/`:
-    - If old path exists and new path (`..agent-docs/...`) does not: move to new path, report.
-    - If both exist: prefer `..agent-docs/`, delete old `.agent-docs/` copy, report.
+  - For each of `agent-docs/agent.md`, `agent-docs/context.md`, `agent-docs/adr/`:
+    - If old path exists and new path (`.agent-docs/...`) does not: move to new path, report.
+    - If both exist: prefer `.agent-docs/`, delete old `agent-docs/` copy, report.
     - If only new path exists (already migrated): do nothing.
-  - After migrating files, if `.agent-docs/` directory is empty, remove it.
+  - After migrating files, if `agent-docs/` directory is empty, remove it.
 - **`init-agent-docs/SKILL.md` — CLAUDE.md idempotency check** (Step 8 after renumbering):
-  - Check for both `.agent-docs/agent.md` and `..agent-docs/agent.md` in `CLAUDE.md`.
-  - If `..agent-docs/agent.md` already present: skip (already up to date).
-  - If `.agent-docs/agent.md` present but not `..agent-docs/agent.md`: replace the old string in-place, report "Migrated `CLAUDE.md` reference from `.agent-docs/agent.md` to `..agent-docs/agent.md`."
-  - If neither present: append the new block (`..agent-docs/agent.md`), report as before.
+  - Check for both `agent-docs/agent.md` and `.agent-docs/agent.md` in `CLAUDE.md`.
+  - If `.agent-docs/agent.md` already present: skip (already up to date).
+  - If `agent-docs/agent.md` present but not `.agent-docs/agent.md`: replace the old string in-place, report "Migrated `CLAUDE.md` reference from `agent-docs/agent.md` to `.agent-docs/agent.md`."
+  - If neither present: append the new block (`.agent-docs/agent.md`), report as before.
 - All existing step numbers in `init-agent-docs/SKILL.md` shift up by 1 (old Step 1 → new Step 2, etc.).
-- An ADR is recorded in the skills repo documenting the `.agent-docs/` → `..agent-docs/` rename decision (hidden directory convention, hard to reverse, genuine alternative of keeping it visible was rejected).
+- An ADR is recorded in the skills repo documenting the `agent-docs/` → `.agent-docs/` rename decision (hidden directory convention, hard to reverse, genuine alternative of keeping it visible was rejected).
 
 ## Testing Decisions
 
 - BDD scenarios verified by running the skill in scratch repos.
-- Scenarios: (1) fresh repo — `..agent-docs/` created correctly; (2) repo with existing `.agent-docs/` — migrated to `..agent-docs/`, old directory removed; (3) repo with both `.agent-docs/` and `..agent-docs/` — old copies removed, new kept; (4) repo whose `CLAUDE.md` has old `.agent-docs/agent.md` reference — replaced in-place, no duplicate block.
-- Bulk find-and-replace verified by grepping the skills repo for any remaining `.agent-docs/` references after the change (expect zero).
+- Scenarios: (1) fresh repo — `.agent-docs/` created correctly; (2) repo with existing `agent-docs/` — migrated to `.agent-docs/`, old directory removed; (3) repo with both `agent-docs/` and `.agent-docs/` — old copies removed, new kept; (4) repo whose `CLAUDE.md` has old `agent-docs/agent.md` reference — replaced in-place, no duplicate block.
+- Bulk find-and-replace verified by grepping the skills repo for any remaining `agent-docs/` references after the change (expect zero).
 
 ## Out of Scope
 
-- Migration of any files other than `.agent-docs/agent.md`, `.agent-docs/context.md`, and `.agent-docs/adr/`.
+- Migration of any files other than `agent-docs/agent.md`, `agent-docs/context.md`, and `agent-docs/adr/`.
 - Updating `CLAUDE.md` files in repos other than the one the skill is currently running in.
 - Automated propagation to repos that have already used the old skill and are not re-running `init-agent-docs`.
 
 ## Further Notes
 
-- The `..agent-docs/` naming follows the established convention of `.github/`, `.husky/`, `.vscode/` — tooling config hidden from casual browsing but accessible to tools that know to look for it.
+- The `.agent-docs/` naming follows the established convention of `.github/`, `.husky/`, `.vscode/` — tooling config hidden from casual browsing but accessible to tools that know to look for it.
 - The post-commit sync hook in the skills repo propagates all skill file changes to `~/.claude/skills/` automatically — no manual copy step needed after committing the rename.
-- `address-copilot-comments/SKILL.md` already contained one reference to `.agent-docs` (anticipating this rename) — the bulk replace will make all other references in that file consistent.
+- `address-copilot-comments/SKILL.md` already contained one reference to `agent-docs` (anticipating this rename) — the bulk replace will make all other references in that file consistent.
