@@ -55,9 +55,11 @@ Then handle each of the three items below in order:
 **`agent-docs/adr/` (directory):**
 
 - If `agent-docs/adr/` exists and `.agent-docs/adr/` does **not** exist:
-  Move the entire directory: create `.agent-docs/adr/`, move all files from `agent-docs/adr/`
-  into it (Read each → Write to `.agent-docs/adr/<filename>` → delete source), then remove
-  the now-empty `agent-docs/adr/` directory.
+  Move the entire directory: create `.agent-docs/adr/`, then for each file in `agent-docs/adr/`:
+  1. Read the source file.
+  2. Write to `.agent-docs/adr/<filename>`. If the write fails, report the error clearly and skip this file. Do **not** delete the source file.
+  3. Delete the source file only after the write succeeds. If the delete fails, report the error clearly and continue.
+  After processing all files, if `agent-docs/adr/` is now empty, remove it.
   Report: "Migrated `agent-docs/adr/` to `.agent-docs/adr/`."
 - If both `agent-docs/adr/` and `.agent-docs/adr/` exist:
   Delete all files in `agent-docs/adr/` and remove the directory.
