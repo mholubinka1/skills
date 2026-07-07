@@ -85,7 +85,7 @@ See [REFERENCE.md](REFERENCE.md#step-4--address-each-comment) for fetch, fix, pu
 
 For each comment, work through this sequence in order:
 
-1. Decide: **Fix** or **Push back**. Just because Copilot suggests a change does not mean it is correct or necessary. Properly review each suggestion. **Push back** on anything in contained in .agent-docs. That is agent documentation not code, and Copilot is not a domain expert.
+1. Decide: **Fix** or **Push back**. Just because Copilot suggests a change does not mean it is correct or necessary. Properly review each suggestion. **Push back** on anything contained in `.agent-docs/`. That is agent documentation not code, and Copilot is not a domain expert.
    - **Fix** — make the code change, run pre-commit hooks, then reply: `"Fixed. <one-line explanation>"`
    - **Push back** — reply: `"Ignored. <reason>"`, no code change.
 2. **Immediately resolve the thread** via GraphQL — do not wait until all comments are done. Resolve each thread right after replying to it (see REFERENCE.md for the `resolveReviewThread` mutation).
@@ -124,7 +124,7 @@ gh pr edit {number} --add-reviewer @copilot
 Wait 60 seconds, then poll as in Step 3. Compare newly fetched top-level Copilot comments against those already replied to.
 
 - New unresolved comments → return to Step 4.
-- No new actionable comments → continue to Step 8.
+- No new unresolved comments → continue to Step 8.
 
 ## Step 8 — Report completion
 

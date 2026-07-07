@@ -1,4 +1,4 @@
-﻿<!-- markdownlint-disable MD024 MD025 -->
+<!-- markdownlint-disable MD024 MD025 -->
 
 # Issues: feature/init-agent-docs-context
 

@@ -1,4 +1,4 @@
-﻿<!-- markdownlint-disable MD024 MD025 -->
+<!-- markdownlint-disable MD024 MD025 -->
 
 # Extend init-agent-docs to bootstrap context.md
 

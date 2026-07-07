@@ -1,4 +1,4 @@
-﻿# ADR Format
+# ADR Format
 
 ADRs live in `.agent-docs/adr/` and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
 

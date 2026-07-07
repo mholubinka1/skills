@@ -1,4 +1,4 @@
-﻿---
+---
 name: create-issues
 description: Break a spec into vertical-slice issues, write them to .agent-docs/issues/<branch-name>.md, and mirror to GitHub. Use after /write-spec when the spec is ready to be broken into implementation work.
 attribution: Based on to-issues (Matt Pocock, mattpocock/skills)
