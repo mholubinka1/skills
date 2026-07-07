@@ -1,6 +1,6 @@
----
+﻿---
 name: create-issues
-description: Break a spec into vertical-slice issues, write them to agent-docs/issues/<branch-name>.md, and mirror to GitHub. Use after /write-spec when the spec is ready to be broken into implementation work.
+description: Break a spec into vertical-slice issues, write them to .agent-docs/issues/<branch-name>.md, and mirror to GitHub. Use after /write-spec when the spec is ready to be broken into implementation work.
 attribution: Based on to-issues (Matt Pocock, mattpocock/skills)
 ---
 
@@ -16,11 +16,11 @@ Break the spec into independently-grabbable vertical slice issues. Write locally
 git branch --show-current
 ```
 
-Read `agent-docs/specs/<branch-name>.md`. If it does not exist, tell the user to run `/write-spec` first.
+Read `.agent-docs/specs/<branch-name>.md`. If it does not exist, tell the user to run `/write-spec` first.
 
 ### 2. Explore the codebase
 
-If not already done, explore the codebase to understand the current state. Issue titles and descriptions should use the domain glossary vocabulary from `agent-docs/context.md`. Respect ADRs in `agent-docs/docs/adr/`.
+If not already done, explore the codebase to understand the current state. Issue titles and descriptions should use the domain glossary vocabulary from `.agent-docs/context.md`. Respect ADRs in `.agent-docs/adr/`.
 
 Look for prefactoring opportunities — "make the change easy, then make the easy change."
 
@@ -52,7 +52,7 @@ Iterate until the user approves the breakdown.
 
 ### 5. Write the local issues file
 
-Create `agent-docs/issues/` if it does not exist. Write `agent-docs/issues/<branch-name>.md`:
+Create `.agent-docs/issues/` if it does not exist. Write `.agent-docs/issues/<branch-name>.md`:
 
 ```md
 # Issues: <branch-name>
@@ -112,4 +112,4 @@ EOF
 )"
 ```
 
-After publishing, update the `agent-docs/issues/<branch-name>.md` file with the real GitHub issue numbers in the "Blocked by" fields.
+After publishing, update the `.agent-docs/issues/<branch-name>.md` file with the real GitHub issue numbers in the "Blocked by" fields.

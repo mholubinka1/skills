@@ -1,6 +1,6 @@
----
+﻿---
 name: pr-cleanup
-description: Post-merge cleanup — close GitHub issues for the current branch and check them off in agent-docs/issues/<branch-name>.md. Run after a PR has been merged. Invoked by /implement after the merge confirmation loop.
+description: Post-merge cleanup — close GitHub issues for the current branch and check them off in .agent-docs/issues/<branch-name>.md. Run after a PR has been merged. Invoked by /implement after the merge confirmation loop.
 ---
 
 # PR Cleanup
@@ -27,7 +27,7 @@ If the state is not `MERGED`, stop and tell the user the PR has not been merged 
 
 ### 2. Read the local issues file
 
-Read `agent-docs/issues/<branch-name>.md`. Extract all GitHub issue numbers referenced in the file.
+Read `.agent-docs/issues/<branch-name>.md`. Extract all GitHub issue numbers referenced in the file.
 
 ### 3. Close GitHub issues
 
@@ -39,7 +39,7 @@ gh issue close <number> --comment "Closed: merged via PR."
 
 ### 4. Check off items in the local issues file
 
-Update `agent-docs/issues/<branch-name>.md` — mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top of the file:
+Update `.agent-docs/issues/<branch-name>.md` — mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top of the file:
 
 ```md
 > Merged and closed.
