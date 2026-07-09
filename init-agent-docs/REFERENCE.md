@@ -110,8 +110,8 @@ Check whether `.agent-docs/context.md` already exists in the current repository.
 
 If it exists:
 
-- Report: "`.agent-docs/context.md` already exists — skipping."
-- Skip to Step 7 (ADR migration still runs).
+- Report: "`.agent-docs/context.md` found — proceeding to review."
+- Continue to Step 6 (review sub-path).
 
 If it does not exist, continue to Step 5.
 
@@ -149,25 +149,52 @@ Collect all matches found.
 If both steps succeed:
 
 - Report: "Moved `<source path>` to `.agent-docs/context.md`."
-- Skip to Step 7.
+- Continue to Step 6 (review sub-path).
 
 **If no files are found**, continue to Step 6.
 
-## Step 6 — Create context.md from template
+## Step 6 — Bootstrap or review context.md
 
-Read the full contents of this skill's `CONTEXT-TEMPLATE.md` file (located in the same
-directory as this `SKILL.md`).
+This step has two sub-paths depending on whether a `context.md` was found in Steps 4–5.
 
-Write those contents verbatim to `.agent-docs/context.md` in the current repository.
+### Generate sub-path (no context.md found after Steps 4–5)
 
-If writing fails for any reason (permissions, disk space, etc.):
+1. Read `CONTEXT-FORMAT.md` from this skill's directory (alongside this `REFERENCE.md`) to
+   understand the required structure and rules.
+2. Read the codebase to identify domain-specific concepts — the terminology, workflow names,
+   file conventions, and concepts unique to this repository. Focus on terms that a new
+   contributor would need to understand to work in this codebase, not general programming
+   concepts.
+3. Write a full `context.md` to `.agent-docs/context.md` following the format defined in
+   `CONTEXT-FORMAT.md`:
+   - A `# {Context Name}` heading using the repository name or domain name.
+   - A one- or two-sentence description of what the context is and why it exists.
+   - A `## Language` section listing all domain-specific terms found, each with a tight
+     one- or two-sentence definition and an `_Avoid_` line listing synonyms to reject.
+   - Subheadings grouping terms when natural clusters emerge.
 
-- Report the error clearly.
-- Skip to Step 7.
+   If writing fails for any reason, report the error clearly and skip to Step 7.
 
-If writing succeeds:
+4. Report: "Created `.agent-docs/context.md` from codebase analysis."
 
-- Report: "Created `.agent-docs/context.md` from template."
+### Review and improve sub-path (context.md exists or was just moved)
+
+1. Read `CONTEXT-FORMAT.md` from this skill's directory.
+2. Read the existing `.agent-docs/context.md`.
+3. Audit the file against the rules in `CONTEXT-FORMAT.md`:
+   - Are definitions longer than two sentences? (tighten them)
+   - Are any terms missing an `_Avoid_` line when synonyms clearly exist?
+   - Do any definitions describe what a concept *does* rather than what it *is*?
+   - Are there general programming concepts that do not belong (not specific to this domain)?
+   - Are there term clusters that would benefit from a subheading but are currently ungrouped?
+   - Are there obvious domain concepts visible in the codebase that are missing from the glossary?
+4. If shortcomings are found:
+   - Write the improved file to `.agent-docs/context.md`.
+     If writing fails, report the error clearly and skip to Step 7.
+   - Report: "Improved `.agent-docs/context.md` — `<brief summary of changes>`."
+5. If no shortcomings are found:
+   - Report: "`.agent-docs/context.md` reviewed — no improvements needed."
+   - Continue to Step 7 without writing.
 
 ## Step 7 — Migrate ADR files
 
