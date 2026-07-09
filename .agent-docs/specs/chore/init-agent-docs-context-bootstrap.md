@@ -80,8 +80,8 @@ Replace the single "write CONTEXT-TEMPLATE.md verbatim" instruction with two sub
   5. If no shortcomings are found: report "`.agent-docs/context.md` reviewed — no
      improvements needed." and continue to Step 7 without writing.
 
-`CONTEXT-FORMAT.md` already lives in `init-agent-docs/` alongside `SKILL.md` and
-`REFERENCE.md` — no new files are needed.
+`CONTEXT-FORMAT.md` is added to `init-agent-docs/` alongside `SKILL.md` and `REFERENCE.md`
+as part of this change. The obsolete `CONTEXT-TEMPLATE.md` is removed.
 
 ## Testing Decisions
 
@@ -108,10 +108,9 @@ No executable code changes. Verification is by inspection of the updated skill f
 
 ## Further Notes
 
-`CONTEXT-FORMAT.md` already exists in `init-agent-docs/` as of the trigger for this work.
-The `CONTEXT-TEMPLATE.md` reference in the current files is simply wrong — there is no such
-file and there never will be. The fix replaces the broken reference entirely rather than
-creating a template file to satisfy it.
+`CONTEXT-FORMAT.md` is introduced in this PR. The `CONTEXT-TEMPLATE.md` reference in the
+original files was simply wrong — there was no such file. The fix replaces the broken
+reference entirely and adds the format spec that the skill now reads.
 
 The SKILL.md overview only needs to update the Step 4 and Step 6 summary lines — the detail
 lives in REFERENCE.md. Both files must be updated in sync.

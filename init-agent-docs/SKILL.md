@@ -6,8 +6,8 @@ description: Bootstraps AI agent documentation in the current repository — mig
 # init-agent-docs
 
 Bootstraps `.agent-docs/agent.md`, `.agent-docs/context.md`, and a `CLAUDE.md` reference in
-the current repository. On each run, reviews an existing `context.md` against the format
-rules and improves it only where needed.
+the current repository. When `.agent-docs/context.md` is present or moved into place, reviews
+it against the format rules and improves it only where needed.
 
 > **Assumption**: this skill must be invoked from the repository root. It writes paths
 > relative to the current working directory.

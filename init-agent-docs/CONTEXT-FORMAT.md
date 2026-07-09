@@ -51,10 +51,10 @@ _Avoid_: Client, buyer, account
 - **Ordering ↔ Billing**: Shared types for `CustomerId` and `Money`
 ```
 
-The skill infers which structure applies:
+Choose the structure that fits the repository:
 
-- If `CONTEXT-MAP.md` exists, read it to find contexts
-- If only a root `CONTEXT.md` exists, single context
-- If neither exists, create a root `CONTEXT.md` lazily when the first term is resolved
+- Single context: create one `context.md` at the appropriate location (e.g. `.agent-docs/context.md`)
+- Multiple contexts: create a `CONTEXT-MAP.md` at the repo root listing each context and its location
 
-When multiple contexts exist, infer which one the current topic relates to. If unclear, ask.
+When working within a multi-context repo, infer which context the current topic relates to.
+If it is unclear, ask.

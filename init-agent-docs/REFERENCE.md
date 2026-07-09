@@ -159,8 +159,9 @@ This step has two sub-paths depending on whether a `context.md` was found in Ste
 
 ### Generate sub-path (no context.md found after Steps 4–5)
 
-1. Read `CONTEXT-FORMAT.md` from this skill's directory (alongside this `REFERENCE.md`) to
-   understand the required structure and rules.
+1. Read the **Structure** and **Rules** sections of `CONTEXT-FORMAT.md` from this skill's
+   directory (alongside this `REFERENCE.md`). Do not apply the "Single vs multi-context
+   repos" section — this skill always bootstraps a single-context `.agent-docs/context.md`.
 2. Read the codebase to identify domain-specific concepts — the terminology, workflow names,
    file conventions, and concepts unique to this repository. Focus on terms that a new
    contributor would need to understand to work in this codebase, not general programming
@@ -281,10 +282,10 @@ Example (fresh repo with no prior agent docs):
 ```text
 init-agent-docs complete:
   - no agent-docs/ layout to migrate — skipped
-  - created .agent-docs/agent.md
-  - created .agent-docs/context.md from codebase analysis
+  - Created `.agent-docs/agent.md`.
+  - Created `.agent-docs/context.md` from codebase analysis.
   - no ADRs found — skipped
-  - created CLAUDE.md with Agent Standards reference
+  - Created `CLAUDE.md` with Agent Standards reference.
 ```
 
 Example (existing repo where context.md needed improvement):
@@ -292,11 +293,11 @@ Example (existing repo where context.md needed improvement):
 ```text
 init-agent-docs complete:
   - no agent-docs/ layout to migrate — skipped
-  - .agent-docs/agent.md already exists — skipped
-  - .agent-docs/context.md found — proceeding to review
-  - improved .agent-docs/context.md — tightened 2 definitions, added avoid-lists for 3 terms
+  - `.agent-docs/agent.md` already exists — skipping.
+  - `.agent-docs/context.md` found — proceeding to review.
+  - Improved `.agent-docs/context.md` — tightened 2 definitions, added avoid-lists for 3 terms.
   - no ADRs found — skipped
-  - CLAUDE.md already references .agent-docs/agent.md — skipped
+  - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
 ```
 
 Or if nothing needed doing:
@@ -304,8 +305,8 @@ Or if nothing needed doing:
 ```text
 init-agent-docs complete (nothing to do):
   - no agent-docs/ layout to migrate — skipped
-  - .agent-docs/agent.md already exists — skipped
-  - .agent-docs/context.md reviewed — no improvements needed
+  - `.agent-docs/agent.md` already exists — skipping.
+  - `.agent-docs/context.md` reviewed — no improvements needed.
   - no ADRs found — skipped
-  - CLAUDE.md already references .agent-docs/agent.md — skipped
+  - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
 ```
