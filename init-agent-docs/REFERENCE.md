@@ -181,13 +181,8 @@ This step has two sub-paths depending on whether a `context.md` was found in Ste
 
 1. Read `CONTEXT-FORMAT.md` from this skill's directory.
 2. Read the existing `.agent-docs/context.md`.
-3. Audit the file against the rules in `CONTEXT-FORMAT.md`:
-   - Are definitions longer than two sentences? (tighten them)
-   - Are any terms missing an `_Avoid_` line when synonyms clearly exist?
-   - Do any definitions describe what a concept *does* rather than what it *is*?
-   - Are there general programming concepts that do not belong (not specific to this domain)?
-   - Are there term clusters that would benefit from a subheading but are currently ungrouped?
-   - Are there obvious domain concepts visible in the codebase that are missing from the glossary?
+3. Audit the file against every rule defined in `CONTEXT-FORMAT.md`. Apply each rule in turn
+   and identify any shortcomings — do not rely on memory; read the rules from the file.
 4. If shortcomings are found:
    - Write the improved file to `.agent-docs/context.md`.
      If writing fails, report the error clearly and skip to Step 7.
