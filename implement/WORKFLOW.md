@@ -67,7 +67,7 @@ Run the `code-review` skill.
 
 ## Step 7 — Merge
 
-The PR link was shared at the end of `/code-review`. Prompt the user to merge it:
+The PR link was shared by `/pr-cleanup` at the end of `/code-review`. Prompt the user to merge it:
 
 > Please merge the PR when you're ready and let me know.
 

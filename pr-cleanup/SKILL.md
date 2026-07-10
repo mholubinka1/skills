@@ -18,11 +18,11 @@ gh pr list --head <branch> --json number --jq '.[0].number'
 
 ### 2. Update the local issues file
 
-Read `.agent-docs/issues/<branch-name>.md`. Mark all acceptance criteria checkboxes as checked (`- [x]`).
+Read `.agent-docs/issues/<branch-name>.md`. Extract all GitHub issue numbers referenced in the file. Mark all acceptance criteria checkboxes as checked (`- [x]`).
 
 ### 3. Commit and push
 
-Stage the issues file and commit with the message `"Close <branch-name> issues"`, then push the branch.
+Stage the issues file and commit with the message `"Close <actual-branch-name> issues"` (substituting the real branch name from Step 1), then push the branch.
 
 ### 4. Close GitHub issues
 
