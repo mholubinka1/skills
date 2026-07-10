@@ -17,6 +17,6 @@ Edit Step 4b in `address-copilot-comments/SKILL.md` to open with a `MUST NOT SKI
 - [ ] Step 4b opens with a `> **MUST NOT SKIP.**` blockquote naming the only valid skip condition.
 - [ ] The prose explicitly states that Markdown and `.agent-docs/` files are not exempt.
 - [ ] The all-push-backs skip condition is preserved and framed as the only exit.
-- [ ] No other steps or files are modified.
+- [ ] No other steps in `address-copilot-comments/SKILL.md` are modified.
 
 ---

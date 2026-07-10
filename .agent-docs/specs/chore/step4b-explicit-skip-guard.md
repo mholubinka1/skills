@@ -20,7 +20,7 @@ Rewrite Step 4b to open with a `MUST NOT SKIP` blockquote that names the only va
 
 ## Implementation Decisions
 
-- Edit `address-copilot-comments/SKILL.md`, Step 4b only.
+- Edit Step 4b only in `address-copilot-comments/SKILL.md` (no other steps changed).
 - Strip non-compliant memory-file frontmatter from `.agent-docs/context.md` (init-agent-docs Step 6 compliance fix applied in Step 0 of this workflow; no content changes to the glossary body).
 - Open the step with a blockquote: `> **MUST NOT SKIP.** The only valid reason to skip this step is if every single decision in Step 4 was a push-back and zero files were modified.`
 - Follow with the action sentence, then a dedicated paragraph naming Markdown, documentation, and `.agent-docs/` files as explicitly non-exempt.
