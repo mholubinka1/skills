@@ -22,7 +22,7 @@ Read `.agent-docs/issues/<branch-name>.md`. Mark all acceptance criteria checkbo
 
 ### 3. Commit and push
 
-Stage the issues file and commit with the message `"Close <branch-name> issues"`.
+Stage the issues file and commit with the message `"Close <branch-name> issues"`, then push the branch.
 
 ### 4. Close GitHub issues
 

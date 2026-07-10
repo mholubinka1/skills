@@ -65,7 +65,7 @@ For each unchecked issue in `.agent-docs/issues/<branch-name>.md`, in dependency
 
 Run the `code-review` skill.
 
-## Step 7 — Merge and close issues
+## Step 7 — Merge
 
 The PR link was shared at the end of `/code-review`. Prompt the user to merge it:
 
