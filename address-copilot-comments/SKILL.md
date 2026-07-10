@@ -66,7 +66,7 @@ Before polling, capture the latest Copilot review ID as a baseline (empty if no 
 Poll every 60 seconds, max 10 attempts:
 
 1. Run the thread count check. If > 0, exit to Step 4.
-2. If 0, check whether the latest Copilot review ID differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
+2. If 0, check whether the latest Copilot review ID is non-empty and differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
 3. If no new review, wait and repeat.
 
 After 10 attempts with no new clean review, perform one final check following the same branching: threads > 0 → exit to Step 4; otherwise go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the queries.

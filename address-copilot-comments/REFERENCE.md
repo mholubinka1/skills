@@ -17,7 +17,7 @@ gh repo view --json nameWithOwner --jq '.nameWithOwner'
 Run once before polling begins. Records the latest Copilot review ID so the loop can detect when a new review is submitted.
 
 ```bash
-BASELINE_REVIEW_ID=$(gh api repos/{owner}/{repo}/pulls/{number}/reviews \
+BASELINE_REVIEW_ID=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
   --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
 ```
 
@@ -51,7 +51,7 @@ If count > 0 — exit the poll loop and continue to Step 4.
 
 ```bash
 # Same query as baseline capture above — assigns to CURRENT_REVIEW_ID
-CURRENT_REVIEW_ID=$(gh api repos/{owner}/{repo}/pulls/{number}/reviews \
+CURRENT_REVIEW_ID=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
   --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
 ```
 
