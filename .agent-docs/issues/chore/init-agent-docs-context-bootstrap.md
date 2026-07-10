@@ -1,5 +1,7 @@
 # Issues: chore/init-agent-docs-context-bootstrap
 
+> Merged and closed.
+
 ## Fix init-agent-docs context bootstrap (Steps 4, 5, 6)
 
 **Blocked by**: None
@@ -28,12 +30,12 @@ Three step changes, two files:
 
 ### Acceptance criteria
 
-- [ ] `SKILL.md` Step 4 no longer says "skip to Step 7" when `context.md` exists; it routes to Step 6.
-- [ ] `REFERENCE.md` Step 4 no longer says "skip to Step 7" when `context.md` exists; it routes to Step 6.
-- [ ] `REFERENCE.md` Step 5 no longer says "skip to Step 7" after a successful file move; it continues to Step 6.
-- [ ] `REFERENCE.md` Step 6 defines a **generate** sub-path that reads `CONTEXT-FORMAT.md` and the codebase before writing `context.md`.
-- [ ] `REFERENCE.md` Step 6 defines a **review and improve** sub-path with explicit audit criteria, an "improved" report variant, and a "no improvements needed" report variant.
-- [ ] `SKILL.md` Step 6 summary reflects the two sub-paths (generate vs review-and-improve).
-- [ ] Neither `SKILL.md` nor `REFERENCE.md` contains any reference to `CONTEXT-TEMPLATE.md`.
+- [x] `SKILL.md` Step 4 no longer says "skip to Step 7" when `context.md` exists; it routes to Step 6.
+- [x] `REFERENCE.md` Step 4 no longer says "skip to Step 7" when `context.md` exists; it routes to Step 6.
+- [x] `REFERENCE.md` Step 5 no longer says "skip to Step 7" after a successful file move; it continues to Step 6.
+- [x] `REFERENCE.md` Step 6 defines a **generate** sub-path that reads `CONTEXT-FORMAT.md` and the codebase before writing `context.md`.
+- [x] `REFERENCE.md` Step 6 defines a **review and improve** sub-path with explicit audit criteria, an "improved" report variant, and a "no improvements needed" report variant.
+- [x] `SKILL.md` Step 6 summary reflects the two sub-paths (generate vs review-and-improve).
+- [x] Neither `SKILL.md` nor `REFERENCE.md` contains any reference to `CONTEXT-TEMPLATE.md`.
 
 ---

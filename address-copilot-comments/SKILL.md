@@ -61,7 +61,7 @@ Poll every 60 seconds (max 10 attempts) until unresolved Copilot thread count > 
 
 ## Step 4 — Decide and apply changes
 
-For each unresolved thread decide **Fix** or **Push back** (push back on `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for fetch query and reply commands.
+For each unresolved thread decide **Fix** or **Push back** (push back on any file contained within `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for fetch query and reply commands.
 
 ## Step 4b — Validate changes with code-review
 
