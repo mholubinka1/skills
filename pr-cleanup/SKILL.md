@@ -12,16 +12,18 @@ Commit final housekeeping to the PR branch, close GitHub issues, and share the P
 ### 1. Get the PR number
 
 ```bash
-git branch --show-current
-gh pr list --head <branch> --json number --jq '.[0].number'
+BRANCH=$(git branch --show-current)
+gh pr list --head "$BRANCH" --json number --jq '.[0].number'
 ```
+
+Store the returned number — it is referenced as `<PR-number>` in the steps below.
 
 ### 2. Update the local issues file
 
 Read `.agent-docs/issues/<branch-name>.md`. Extract all GitHub issue numbers referenced in the file. Mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top:
 
 ```md
-> Issues closed — PR ready to merge.
+> Work complete — PR ready to merge.
 ```
 
 ### 3. Commit and push
@@ -33,13 +35,13 @@ Stage the issues file and commit with the message `"Close <actual-branch-name> i
 For each issue number found in the issues file:
 
 ```bash
-gh issue close <number> --comment "Closed: merged via PR."
+gh issue close <number> --comment "Closed: implementation complete, see PR for review."
 ```
 
 ### 5. Share PR link
 
 ```bash
-gh pr view <number> --json url --jq '.url'
+gh pr view <PR-number> --json url --jq '.url'
 ```
 
 Share the URL. The PR is ready to merge.

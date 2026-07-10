@@ -75,10 +75,8 @@ The PR link was shared by `/pr-cleanup` at the end of `/code-review`. Prompt the
 - Once confirmation is given, verify:
 
   ```bash
-  gh pr view <number> --json state --jq '.state'
+  gh pr view --json state --jq '.state'
   ```
-
-  Use `gh pr view <number>` with the actual PR number — the `--head` flag is not supported by this version of `gh`.
 
 - If the state is not `MERGED`, tell the user and press them again.
 - Once verified as `MERGED`, the workflow is complete.
