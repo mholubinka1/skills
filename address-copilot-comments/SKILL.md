@@ -59,7 +59,7 @@ Note the PR number. Set `review_round = 1`. The first Copilot review triggers au
 
 ## Step 3 — Poll for Copilot review threads
 
-Before polling, capture the latest Copilot review ID as a baseline (empty if no review exists yet). Poll every 60 seconds (max 10 attempts): run the thread count check first; if > 0, exit to Step 4. If 0, check whether the latest Copilot review ID differs from the baseline — if yes, Copilot reviewed clean, go to Step 8 immediately. One final check after 10 attempts; if still no new clean review, go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for both queries.
+Before polling, capture the latest Copilot review ID as a baseline (empty if no review exists yet). Poll every 60 seconds (max 10 attempts): run the thread count check first; if > 0, exit to Step 4. If 0, check whether the latest Copilot review ID differs from the baseline — if yes, Copilot reviewed clean, go to Step 8 immediately. One final check after 10 attempts; if still no new clean review, go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the queries.
 
 ## Step 4 — Decide and apply changes
 
@@ -83,7 +83,7 @@ If `review_round >= 2`, skip to Step 8. Otherwise increment to 2 and re-trigger 
 
 ## Step 7 — Check for new threads
 
-Wait 60 seconds, poll as in Step 3. New unresolved threads → return to Step 4. None → continue to Step 8.
+Re-capture the baseline Copilot review ID, then poll as in Step 3. New unresolved threads → return to Step 4. None (or clean review detected) → continue to Step 8.
 
 ## Step 8 — Report completion
 
