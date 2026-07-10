@@ -13,14 +13,14 @@ Commit final housekeeping to the PR branch, close GitHub issues, and share the P
 
 ```bash
 BRANCH=$(git branch --show-current)
-gh pr list --head "$BRANCH" --json number --jq '.[0].number'
+gh pr view --json number --jq '.number'
 ```
 
-Store the returned number — it is referenced as `<PR-number>` in the steps below.
+Store the returned number — it is referenced as `<PR-number>` in the steps below. `gh pr view` resolves the PR for the current branch and fails fast if none exists.
 
 ### 2. Update the local issues file
 
-Read `.agent-docs/issues/<branch-name>.md`. Extract all GitHub issue numbers referenced in the file. Mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top:
+Read `.agent-docs/issues/$BRANCH.md`. Extract all GitHub issue numbers referenced in the file. Mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top:
 
 ```md
 > Work complete — PR ready to merge.

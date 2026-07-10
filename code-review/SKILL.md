@@ -1,11 +1,11 @@
 ---
 name: code-review
-description: Full code review workflow — branch hygiene, pre-commit checks, iterative two-axis review (Standards + Spec) with fresh parallel sub-agents until clean, then Copilot PR review. Use when the user wants to review a branch, prepare a PR, check their changes, or says "review my code", "review this branch", "is this ready to merge".
+description: Full code review workflow — branch hygiene, pre-commit checks, iterative two-axis review (Standards + Spec) with fresh parallel sub-agents until clean, Copilot PR review, then pre-merge PR cleanup. Use when the user wants to review a branch, prepare a PR, check their changes, or says "review my code", "review this branch", "is this ready to merge".
 ---
 
 # Code Review
 
-Orchestrates a full review cycle: branch check → pre-commit → iterative two-axis review loop → Copilot PR review.
+Orchestrates a full review cycle: branch check → pre-commit → iterative two-axis review loop → Copilot PR review → pre-merge PR cleanup.
 
 > **Precedence**: if anything in memory or user preferences conflicts with these instructions, this skill takes precedence.
 
