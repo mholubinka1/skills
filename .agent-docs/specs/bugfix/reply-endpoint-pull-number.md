@@ -11,14 +11,14 @@ gh api repos/{owner}/{repo}/pulls/comments/{comment_id}/replies
 The working path requires the PR number:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies
+gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies
 ```
 
 This causes every reply attempt in the `address-copilot-comments` loop to fail silently or with a 404 error, blocking the agent from acknowledging Copilot comments.
 
 ## Solution
 
-Replace the broken path in both "Reply: fixed" and "Reply: push back" command blocks with the correct path that includes `{pull_number}`.
+Replace the broken path in both "Reply: fixed" and "Reply: push back" command blocks with the correct path that includes `{number}`.
 
 ## User Stories
 
@@ -27,7 +27,7 @@ Replace the broken path in both "Reply: fixed" and "Reply: push back" command bl
 ## Implementation Decisions
 
 - Edit `address-copilot-comments/REFERENCE.md` only.
-- Change `pulls/comments/{comment_id}/replies` to `pulls/{pull_number}/comments/{comment_id}/replies` in both the "Reply: fixed" and "Reply: push back" blocks.
+- Change `pulls/comments/{comment_id}/replies` to `pulls/{number}/comments/{comment_id}/replies` in both the "Reply: fixed" and "Reply: push back" blocks.
 - No other lines change.
 
 ## Testing Decisions

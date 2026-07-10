@@ -10,12 +10,12 @@
 
 ### What to build
 
-Replace the broken path in both "Reply: fixed" and "Reply: push back" command blocks in `address-copilot-comments/REFERENCE.md`. The path `pulls/comments/{comment_id}/replies` returns 404; the correct path is `pulls/{pull_number}/comments/{comment_id}/replies`.
+Replace the broken path in both "Reply: fixed" and "Reply: push back" command blocks in `address-copilot-comments/REFERENCE.md`. The path `pulls/comments/{comment_id}/replies` returns 404; the correct path is `pulls/{number}/comments/{comment_id}/replies`.
 
 ### Acceptance criteria
 
-- [ ] "Reply: fixed" block uses `pulls/{pull_number}/comments/{comment_id}/replies`
-- [ ] "Reply: push back" block uses `pulls/{pull_number}/comments/{comment_id}/replies`
+- [ ] "Reply: fixed" block uses `pulls/{number}/comments/{comment_id}/replies`
+- [ ] "Reply: push back" block uses `pulls/{number}/comments/{comment_id}/replies`
 - [ ] No other lines in `REFERENCE.md` are changed
 
 ---
