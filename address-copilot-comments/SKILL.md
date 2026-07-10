@@ -26,7 +26,8 @@ Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediat
 Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push
 Step 6  review_round < 2? ──Yes──► review_round++; re-trigger Copilot → Step 7
                           ──No ──► Step 8 (max 2 reviews; do not re-trigger)
-Step 7  New unresolved Copilot threads? ──Yes──► Step 4 | No ──► Step 8
+Step 7  Re-capture baseline; poll as in Step 3:
+        threads? ──► Step 4 | clean or exhausted? ──► Step 8
 Step 8  Report PR link — PR is ready to merge
 ```
 
@@ -59,7 +60,15 @@ Note the PR number. Set `review_round = 1`. The first Copilot review triggers au
 
 ## Step 3 — Poll for Copilot review threads
 
-Before polling, capture the latest Copilot review ID as a baseline (empty if no review exists yet). Poll every 60 seconds (max 10 attempts): run the thread count check first; if > 0, exit to Step 4. If 0, check whether the latest Copilot review ID differs from the baseline — if yes, Copilot reviewed clean, go to Step 8 immediately. One final check after 10 attempts; if still no new clean review, go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the queries.
+Before polling, capture the latest Copilot review ID as a baseline (empty if no review exists yet).
+
+Poll every 60 seconds, max 10 attempts:
+
+1. Run the thread count check. If > 0, exit to Step 4.
+2. If 0, check whether the latest Copilot review ID differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
+3. If no new review, wait and repeat.
+
+After 10 attempts with no new clean review, perform one final check then go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the queries.
 
 ## Step 4 — Decide and apply changes
 
