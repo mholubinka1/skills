@@ -1,10 +1,3 @@
----
-name: skills-context
-description: Domain glossary for the Claude Code skills repository — terminology used across skill definitions, workflows, and agent-docs conventions.
-metadata:
-  type: reference
----
-
 # Claude Code Skills
 
 A repository of self-contained agent skills installed to `~/.claude/skills/`. Each skill defines a named workflow that the Claude Code harness invokes when the user types `/<skill-name>`.
