@@ -65,26 +65,18 @@ For each unchecked issue in `.agent-docs/issues/<branch-name>.md`, in dependency
 
 Run the `code-review` skill.
 
-## Step 7 — Merge confirmation loop
+## Step 7 — Merge
 
-After `/address-copilot-comments` shares the PR link, enter this loop:
+The PR link was shared at the end of `/code-review`. Prompt the user to merge it:
 
-Prompt the user:
+> Please merge the PR when you're ready and let me know.
 
-> The PR is at {url}. Please confirm when it has been merged.
+Once the user confirms, verify:
 
-- If the response is not a clear confirmation, press the user again.
-- Once confirmation is given, verify:
+```bash
+gh pr view <number> --json state --jq '.state'
+```
 
-  ```bash
-  gh pr view <number> --json state --jq '.state'
-  ```
+Use `gh pr view <number>` with the actual PR number — the `--head` flag is not supported by this version of `gh`.
 
-  Use `gh pr view <number>` with the actual PR number — the `--head` flag is not supported by this version of `gh`.
-
-- If the state is not `MERGED`, tell the user and press them again.
-- Once verified as `MERGED`, continue.
-
-## Step 8 — PR cleanup
-
-Run the `pr-cleanup` skill.
+If the state is not `MERGED`, tell the user and wait for confirmation again.

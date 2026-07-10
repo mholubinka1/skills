@@ -20,6 +20,7 @@ Step 5  Address all findings — blocking first, then advisory
         Zero findings on both axes? ──► Step 6
         Findings addressed? ──► Step 4 (new agents, new context windows)
 Step 6  Run /address-copilot-comments for Copilot PR review
+Step 7  Run /pr-cleanup
 ```
 
 ## Step 1 — Branch hygiene
@@ -97,3 +98,7 @@ Always report aggregated findings to the user. If there are zero findings on bot
 ## Step 6 — Copilot PR review
 
 Invoke the `address-copilot-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean.
+
+## Step 7 — PR cleanup
+
+Invoke the `pr-cleanup` skill. It commits the final issues-file housekeeping to the PR branch, closes GitHub issues, and shares the PR link for merging.
