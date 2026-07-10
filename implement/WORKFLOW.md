@@ -1,10 +1,10 @@
 # Implementation Workflow
 
-This is the full workflow embedded in the sub-agent prompt by [SKILL.md](SKILL.md) Step 2.
+This is the full implementation workflow run inline by [SKILL.md](SKILL.md).
 
 ---
 
-You have been spawned by `/implement` to carry out a full implementation cycle. The trigger context above tells you what to build. Work through the steps below in order.
+Work through the steps below in order.
 
 > **Prerequisite skills**: all skills referenced in this workflow live in this same skills
 > repo and are installed automatically via the post-commit sync hook:
