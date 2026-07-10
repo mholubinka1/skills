@@ -18,7 +18,11 @@ gh pr list --head <branch> --json number --jq '.[0].number'
 
 ### 2. Update the local issues file
 
-Read `.agent-docs/issues/<branch-name>.md`. Extract all GitHub issue numbers referenced in the file. Mark all acceptance criteria checkboxes as checked (`- [x]`).
+Read `.agent-docs/issues/<branch-name>.md`. Extract all GitHub issue numbers referenced in the file. Mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top:
+
+```md
+> Issues closed — PR ready to merge.
+```
 
 ### 3. Commit and push
 
