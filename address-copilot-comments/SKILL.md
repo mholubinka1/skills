@@ -79,9 +79,11 @@ For each unresolved thread decide **Fix** or **Push back** (push back on any fil
 
 > **MUST NOT SKIP.** The only valid reason to skip this step is if every single decision in Step 4 was a push-back and zero files were modified.
 
-If at least one fix was applied — **including fixes to Markdown or documentation files** — run `code-review` Steps 1–5 only. Pass the explicit instruction to stop after Step 5 to avoid re-invoking this skill.
+If at least one fix was applied, run `code-review` Steps 1–5 only. Pass the explicit instruction to stop after Step 5 to avoid re-invoking this skill.
 
-File type is not a skip condition. Markdown and `.agent-docs/` changes require the same validation as code changes.
+Markdown files, documentation files, and `.agent-docs/` files are not exempt — they require the same validation as code changes.
+
+File type is not a skip condition.
 
 ## Step 4c — Reply and resolve threads
 
