@@ -1,11 +1,11 @@
 ---
 name: code-review
-description: Full code review workflow — branch hygiene, pre-commit checks, iterative two-axis review (Standards + Spec) with fresh parallel sub-agents until clean, then Copilot PR review. Use when the user wants to review a branch, prepare a PR, check their changes, or says "review my code", "review this branch", "is this ready to merge".
+description: Full code review workflow — branch hygiene, pre-commit checks, iterative two-axis review (Standards + Spec) with fresh parallel sub-agents until clean, Copilot PR review, then pre-merge PR cleanup. Use when the user wants to review a branch, prepare a PR, check their changes, or says "review my code", "review this branch", "is this ready to merge".
 ---
 
 # Code Review
 
-Orchestrates a full review cycle: branch check → pre-commit → iterative two-axis review loop → Copilot PR review.
+Orchestrates a full review cycle: branch check → pre-commit → iterative two-axis review loop → Copilot PR review → pre-merge PR cleanup.
 
 > **Precedence**: if anything in memory or user preferences conflicts with these instructions, this skill takes precedence.
 
@@ -20,6 +20,7 @@ Step 5  Address all findings — blocking first, then advisory
         Zero findings on both axes? ──► Step 6
         Findings addressed? ──► Step 4 (new agents, new context windows)
 Step 6  Run /address-copilot-comments for Copilot PR review
+Step 7  Run /pr-cleanup
 ```
 
 ## Step 1 — Branch hygiene
@@ -96,4 +97,8 @@ Always report aggregated findings to the user. If there are zero findings on bot
 
 ## Step 6 — Copilot PR review
 
-Invoke the `address-copilot-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean.
+Invoke the `address-copilot-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean. Once the loop is clean, continue to Step 7.
+
+## Step 7 — PR cleanup
+
+Invoke the `pr-cleanup` skill. It commits the final issues-file housekeeping to the PR branch, closes GitHub issues, and shares the PR link for merging.

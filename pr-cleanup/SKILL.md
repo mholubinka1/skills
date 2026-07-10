@@ -1,51 +1,47 @@
 ---
 name: pr-cleanup
-description: Post-merge cleanup — close GitHub issues for the current branch and check them off in .agent-docs/issues/<branch-name>.md. Use when a PR has been merged and issues need closing, or when invoked by /implement after the merge confirmation loop.
+description: Pre-merge cleanup — check off acceptance criteria in .agent-docs/issues/<branch-name>.md, commit to the PR branch, close GitHub issues, and share the PR link for merging. Invoked automatically by /code-review after the Copilot review loop.
 ---
 
 # PR Cleanup
 
-Close GitHub issues and update the local issues file after a PR is merged.
+Commit final housekeeping to the PR branch, close GitHub issues, and share the PR link for merging.
 
 ## Process
 
-### 1. Verify the PR is merged
-
-Get the current branch:
+### 1. Get the PR number
 
 ```bash
-git branch --show-current
+BRANCH=$(git branch --show-current)
+gh pr view --json number --jq '.number'
 ```
 
-Confirm the PR is actually merged before proceeding. Direct user or agent confirmation is not required; use the GitHub CLI to check the PR state:
+Store the returned number — it is referenced as `<PR-number>` in the steps below. `gh pr view` resolves the PR for the current branch and fails fast if none exists.
 
-```bash
-gh pr list --head $(git branch --show-current) --json number --jq '.[0].number'
-gh pr view <number> --json state --jq '.state'
-```
+### 2. Update the local issues file
 
-If the state is not `MERGED`, stop and tell the user the PR has not been merged yet.
-
-### 2. Read the local issues file
-
-Read `.agent-docs/issues/<branch-name>.md`. Extract all GitHub issue numbers referenced in the file.
-
-### 3. Close GitHub issues
-
-For each issue number found:
-
-```bash
-gh issue close <number> --comment "Closed: merged via PR."
-```
-
-### 4. Check off items in the local issues file
-
-Update `.agent-docs/issues/<branch-name>.md` — mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top of the file:
+Read `.agent-docs/issues/$BRANCH.md`. Extract all GitHub issue numbers referenced in the file. Mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top:
 
 ```md
-> Merged and closed.
+> Work complete — PR ready to merge.
 ```
 
-### 5. Report
+### 3. Commit and push
 
-List the closed issue numbers and confirm the local file is updated.
+Stage the issues file and commit with the message `"Close <actual-branch-name> issues"` (substituting the real branch name from Step 1), then push the branch.
+
+### 4. Close GitHub issues
+
+For each issue number found in the issues file:
+
+```bash
+gh issue close <number> --comment "Closed: implementation complete, see PR for review."
+```
+
+### 5. Share PR link
+
+```bash
+gh pr view <PR-number> --json url --jq '.url'
+```
+
+Share the URL. The PR is ready to merge.
