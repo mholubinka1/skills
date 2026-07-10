@@ -1,5 +1,7 @@
 # Issues: bugfix/reply-endpoint-pull-number
 
+> Work complete — PR ready to merge.
+
 ## Fix reply endpoint to include pull_number
 
 **GitHub**: #32
@@ -14,8 +16,8 @@ Replace the broken path in both "Reply: fixed" and "Reply: push back" command bl
 
 ### Acceptance criteria
 
-- [ ] "Reply: fixed" block uses `pulls/{number}/comments/{comment_id}/replies`
-- [ ] "Reply: push back" block uses `pulls/{number}/comments/{comment_id}/replies`
-- [ ] No other lines in `REFERENCE.md` are changed
+- [x] "Reply: fixed" block uses `pulls/{number}/comments/{comment_id}/replies`
+- [x] "Reply: push back" block uses `pulls/{number}/comments/{comment_id}/replies`
+- [x] No other lines in `REFERENCE.md` are changed
 
 ---
