@@ -15,8 +15,10 @@ Runs a loop: fetch Copilot comments → fix or push back → commit → push →
 Step 0  gh available?
 Step 1  PR exists? ──No──► Step 2: create PR (review_round = 1)
         PR exists? ──Yes──► review_round = 1
-Step 3  Poll for unresolved Copilot review threads (60s)
-        Poll exhausted (0 threads after 10 attempts + fallback)? ──► Step 8
+Step 3  Record baseline Copilot review ID; poll every 60s:
+        thread count > 0? ─────────────────────────────────────────► Step 4
+        thread count = 0 + new Copilot review (IDs differ)? ───────► Step 8 (reviewed clean)
+        Poll exhausted (no new review, 0 threads, 10 attempts)? ───► Step 8
 Step 4  For each unresolved thread: decide fix or push-back; apply code changes
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
@@ -57,7 +59,7 @@ Note the PR number. Set `review_round = 1`. The first Copilot review triggers au
 
 ## Step 3 — Poll for Copilot review threads
 
-Poll every 60 seconds (max 10 attempts) until unresolved Copilot thread count > 0; one final check if still 0; if still empty after that, go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the GraphQL query.
+Before polling, capture the latest Copilot review ID as a baseline (empty if no review exists yet). Poll every 60 seconds (max 10 attempts): run the thread count check first; if > 0, exit to Step 4. If 0, check whether the latest Copilot review ID differs from the baseline — if yes, Copilot reviewed clean, go to Step 8 immediately. One final check after 10 attempts; if still no new clean review, go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for both queries.
 
 ## Step 4 — Decide and apply changes
 

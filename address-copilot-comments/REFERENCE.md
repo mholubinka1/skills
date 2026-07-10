@@ -12,7 +12,20 @@ Get `{owner}/{repo}` from:
 gh repo view --json nameWithOwner --jq '.nameWithOwner'
 ```
 
-Run every 60 seconds until the count is greater than zero. Use GraphQL — the REST `pulls/{number}/comments` endpoint misses threads posted as part of a review submission:
+### Capture baseline Copilot review ID (before the poll loop)
+
+Run once before polling begins. Records the latest Copilot review ID so the loop can detect when a new review is submitted.
+
+```bash
+BASELINE_REVIEW_ID=$(gh api repos/{owner}/{repo}/pulls/{number}/reviews \
+  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
+```
+
+Empty result means no Copilot review exists yet — any review that appears during polling is considered new.
+
+### Poll loop (every 60 seconds, max 10 attempts)
+
+**Step A — Thread count check.** Use GraphQL — the REST `pulls/{number}/comments` endpoint misses threads posted as part of a review submission:
 
 ```bash
 gh api graphql -f query='
@@ -32,7 +45,20 @@ query {
 }' --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login | test("copilot"; "i"))] | length'
 ```
 
-After 10 failed attempts (count still 0), perform one final direct check with the same query. If the final check also returns 0, Copilot has not reviewed or has nothing actionable — continue to Step 8.
+If count > 0 — exit the poll loop and continue to Step 4.
+
+**Step B — Reviews check (only when thread count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured:
+
+```bash
+CURRENT_REVIEW_ID=$(gh api repos/{owner}/{repo}/pulls/{number}/reviews \
+  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
+```
+
+If `CURRENT_REVIEW_ID` is non-empty and differs from `BASELINE_REVIEW_ID` — Copilot has submitted a new review with no actionable threads. **Go to Step 8 immediately.**
+
+If `CURRENT_REVIEW_ID` equals `BASELINE_REVIEW_ID` (or is still empty) — no new review yet. Wait 60 seconds and repeat.
+
+After 10 failed attempts (thread count still 0 and no new review detected), perform one final pass of Steps A and B with the same queries. If the final pass also returns 0 threads and no new review, Copilot has not yet reviewed or has nothing actionable — continue to Step 8.
 
 ---
 
@@ -171,6 +197,6 @@ The loop is complete when **any** of these conditions is met:
 
 1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
 2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger. PR is ready to merge.
-3. **No new unresolved threads** after re-triggering — poll in Step 7 returns zero unresolved Copilot threads.
+3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads. Either a new Copilot review was detected with no comments (exits immediately to Step 8), or 10 attempts elapsed with no new review (falls through to Step 8).
 
 In all cases the PR is considered clean and ready to merge.
