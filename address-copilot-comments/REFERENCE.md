@@ -102,14 +102,14 @@ The query returns two IDs per thread — use the right one for each operation:
 ### Reply: fixed
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/comments/{comment_id}/replies \
+gh api repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies \
   -X POST -f body="Fixed. <one-line explanation>"
 ```
 
 ### Reply: push back
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/comments/{comment_id}/replies \
+gh api repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies \
   -X POST -f body="Ignored. <reason>"
 ```
 
