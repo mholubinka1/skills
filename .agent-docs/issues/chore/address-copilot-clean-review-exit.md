@@ -1,5 +1,7 @@
 # Issues: chore/address-copilot-clean-review-exit
 
+> Work complete — PR ready to merge.
+
 ## Add clean-review early exit to Step 3 polling loop
 
 **Blocked by**: None
