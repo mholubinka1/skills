@@ -24,7 +24,15 @@ Read `.agent-docs/issues/<branch-name>.md`. Mark all acceptance criteria checkbo
 
 Stage the issues file and commit with the message `"Close <branch-name> issues"`.
 
-### 4. Share PR link
+### 4. Close GitHub issues
+
+For each issue number found in the issues file:
+
+```bash
+gh issue close <number> --comment "Closed: merged via PR."
+```
+
+### 5. Share PR link
 
 ```bash
 gh pr view <number> --json url --jq '.url'

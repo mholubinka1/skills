@@ -81,8 +81,4 @@ The PR link was shared at the end of `/code-review`. Prompt the user to merge it
   Use `gh pr view <number>` with the actual PR number — the `--head` flag is not supported by this version of `gh`.
 
 - If the state is not `MERGED`, tell the user and press them again.
-- Once verified as `MERGED`, close all GitHub issues referenced in `.agent-docs/issues/<branch-name>.md`:
-
-  ```bash
-  gh issue close <number> --comment "Closed: merged via PR."
-  ```
+- Once verified as `MERGED`, the workflow is complete.
