@@ -47,7 +47,15 @@ query {
 
 If count > 0 — exit the poll loop and continue to Step 4.
 
-**Step B — Reviews check (only when thread count = 0).** Re-run the baseline capture command above, assigning the result to `CURRENT_REVIEW_ID` instead of `BASELINE_REVIEW_ID`. Then:
+**Step B — Reviews check (only when thread count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured:
+
+```bash
+# Same query as baseline capture above — assigns to CURRENT_REVIEW_ID
+CURRENT_REVIEW_ID=$(gh api repos/{owner}/{repo}/pulls/{number}/reviews \
+  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
+```
+
+Then:
 
 If `CURRENT_REVIEW_ID` is non-empty and differs from `BASELINE_REVIEW_ID` — Copilot has submitted a new review with no actionable threads. **Go to Step 8 immediately.**
 

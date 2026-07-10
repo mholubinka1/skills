@@ -18,7 +18,8 @@ Step 1  PR exists? ──No──► Step 2: create PR (review_round = 1)
 Step 3  Record baseline Copilot review ID; poll every 60s:
         thread count > 0? ─────────────────────────────────────────► Step 4
         thread count = 0 + new Copilot review (IDs differ)? ───────► Step 8 (reviewed clean)
-        Poll exhausted (no new review, 0 threads, 10 attempts)? ───► Step 8
+        Poll exhausted? one final pass: threads > 0? ─────────────► Step 4
+                        final pass: 0 threads, no new review? ──► Step 8
 Step 4  For each unresolved thread: decide fix or push-back; apply code changes
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
@@ -68,7 +69,7 @@ Poll every 60 seconds, max 10 attempts:
 2. If 0, check whether the latest Copilot review ID differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
 3. If no new review, wait and repeat.
 
-After 10 attempts with no new clean review, perform one final check then go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the queries.
+After 10 attempts with no new clean review, perform one final check following the same branching: threads > 0 → exit to Step 4; otherwise go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the queries.
 
 ## Step 4 — Decide and apply changes
 
