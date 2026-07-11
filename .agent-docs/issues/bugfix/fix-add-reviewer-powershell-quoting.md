@@ -1,5 +1,7 @@
 # Issues: bugfix/fix-add-reviewer-powershell-quoting
 
+> Work complete — PR ready to merge.
+
 ## Fix `--add-reviewer` PowerShell quoting in REFERENCE.md Step 6
 
 **GitHub**: #34
@@ -18,9 +20,9 @@ Update Step 6 of `address-copilot-comments/REFERENCE.md` with three changes:
 
 ### Acceptance criteria
 
-- [ ] Option A code block reads `gh pr edit {number} --add-reviewer '@copilot'`
-- [ ] A note below Option A explains the PowerShell splat-operator issue
-- [ ] Option B heading reads `(fallback if gh pr edit is unavailable)`
-- [ ] No other lines in REFERENCE.md are modified
+- [x] Option A code block reads `gh pr edit {number} --add-reviewer '@copilot'`
+- [x] A note below Option A explains the PowerShell splat-operator issue
+- [x] Option B heading reads `(fallback if gh pr edit is unavailable)`
+- [x] No other lines in REFERENCE.md are modified
 
 ---
