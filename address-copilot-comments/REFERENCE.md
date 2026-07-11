@@ -159,7 +159,7 @@ mutation {
 gh pr edit {number} --add-reviewer '@copilot'
 ```
 
-> In PowerShell, bare `@copilot` is parsed as a splat operator and consumed before arguments are passed to `gh`, so `gh` never receives the reviewer value and errors with `flag needs an argument: --add-reviewer`. Single quotes prevent this.
+> In PowerShell, bare `@copilot` is parsed as a splat operator and consumed before arguments are passed to `gh`, so `gh` never receives the reviewer value and errors with `flag needs an argument: --add-reviewer`. Single-quote `'@copilot'` to prevent this.
 
 ### Option B — GraphQL `requestReviews` mutation (fallback if `gh pr edit` is unavailable)
 
