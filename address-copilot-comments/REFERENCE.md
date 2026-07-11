@@ -156,10 +156,12 @@ mutation {
 ### Option A — `gh pr edit` (most plans)
 
 ```bash
-gh pr edit {number} --add-reviewer @copilot
+gh pr edit {number} --add-reviewer '@copilot'
 ```
 
-### Option B — GraphQL `requestReviews` mutation (if Option A fails)
+> In PowerShell, bare `@copilot` is parsed as a splat operator and consumed before arguments are passed to `gh`, so `gh` never receives the reviewer value and errors with `flag needs an argument: --add-reviewer`. Single-quote `'@copilot'` to prevent this.
+
+### Option B — GraphQL `requestReviews` mutation (fallback if `gh pr edit` is unavailable)
 
 ```bash
 gh api graphql -f query='
