@@ -26,7 +26,24 @@ Break the spec into tracer bullet issues — each a thin vertical slice cutting 
 
 ### 4. Three amigos review
 
-Present the breakdown as a numbered list showing title, blocked-by, and user stories covered. Ask the user if the granularity, dependencies, and split/merge feel right. Iterate until approved.
+Run a **Three Amigos** conversation between:
+
+- **Business** (product/stakeholder): defines the problem and acceptance criteria in plain language
+- **Development**: proposes technical approach and constraints
+- **Testing**: questions edge cases and missing scenarios
+
+This produces agreed-upon scenarios that become your test plan. Then:
+
+- [ ] Capture behaviors as user stories: "As a [role], I want [feature], so that [benefit]"
+- [ ] Write acceptance criteria as Given-When-Then scenarios for each story
+- [ ] Confirm with user what interface changes are needed
+- [ ] Identify opportunities for deep modules (small interface, deep implementation) — see `deep-modules.md`
+- [ ] Design interfaces for testability — see `interface-design.md`
+- [ ] Get user approval on the scenario list
+
+Ask: "What should success look like for the user? Which scenarios are most important to get right?"
+
+**You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
 
 ### 5. Write the local issues file
 
