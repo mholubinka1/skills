@@ -81,7 +81,9 @@ Send a **single message** with two `Agent` tool calls (type: `general-purpose`):
 
 ## Step 5 — Address all findings
 
-Address findings in order — blocking first, then advisory. Both are equally gate-blocking: the loop does not exit until a pass returns zero findings on both axes:
+Address findings in this order: blocking first, then advisory.
+
+The loop does not exit until two consecutive passes return zero findings on both axes.
 
 - Use the `bdd` skill when changing or adding logic (write tests first).
 - Use the `design` skill if the fix involves design decisions against the existing domain model.
@@ -89,9 +91,9 @@ Address findings in order — blocking first, then advisory. Both are equally ga
 
 Once all findings are addressed, return to **Step 4** with brand new agents (fresh context windows).
 
-Repeat until a review pass reports zero findings on both axes — blocking **and** advisory.
+Repeat until two consecutive reviews reports zero findings on both axes — blocking **and** advisory.
 
-Do not move on to Step 6 until completing a full clean review pass with zero findings. If sub-agents are still executing, wait for them to finish and aggregate their findings before proceeding.
+Do not move on to Step 6 until completing two full clean review passes with zero findings. If sub-agents are still executing, wait for them to finish and aggregate their findings before proceeding.
 
 Always report aggregated findings to the user. If there are zero findings on both axes, report "no findings" and continue to Step 6.
 
