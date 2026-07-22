@@ -83,9 +83,17 @@ The red-green-refactor cycle used in the `behaviour-driven-development` skill: w
 _Avoid_: TDD cycle, test loop, test-first loop
 
 **Pre-commit check**:
-Validation run against changed files before a git commit, driven by `.pre-commit-config.yaml` or `.githooks/pre-commit`. Run by the `pre-commit-check` skill after every code change.
+Validation driven by `.pre-commit-config.yaml` or `.githooks/pre-commit`, run by the `pre-commit-check` skill after every code change. Runs in two sequential passes: changed files first, then a full-repo pass (`--all-files`) that fixes any drift found repo-wide, even in untouched files.
 _Avoid_: lint check, pre-commit hook run, validation step
 
 **Branch hygiene**:
 Validation that the current git branch follows naming conventions (correct type prefix, not a trunk branch, name relevant to the work). Run by the `branch-hygiene` skill.
 _Avoid_: branch naming check, branch validation
+
+**Dependency update**:
+The process of syncing a target repo with `main`/`master` (to absorb changes Dependabot already merged), then bumping patch/minor package versions per detected ecosystem (Python, .NET, Node/TypeScript) and updating pre-commit hook versions, committed locally without pushing. Run by the `update-dependencies` skill against whatever repo is currently open — not specific to this skills repo.
+_Avoid_: dependency bump, package update, dependency refresh
+
+**Ecosystem** (dependency update sense):
+A language/package-manager combination detected in a target repo via marker files (e.g. `pyproject.toml` → Poetry, `package.json` + lockfile → npm/yarn/pnpm, `*.csproj`/`*.sln` → dotnet/NuGet). A single repo may have more than one.
+_Avoid_: stack, toolchain, language target
