@@ -32,6 +32,16 @@ _Avoid_: phase, stage, action
 A defined iteration cycle within a skill's steps, with an explicit termination condition (e.g. "max 10 attempts", "until clean").
 _Avoid_: iteration, cycle, repeat
 
+### Isolation
+
+**Worktree session**:
+The isolated git worktree (created via the harness's `EnterWorktree` tool under `.claude/worktrees/`) that `/implement` and `/create-worktrees` run inside for the duration of a task, keeping the main checkout untouched.
+_Avoid_: sandbox, isolated checkout, workspace
+
+**Placeholder branch**:
+A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. Renamed by `branch-hygiene`'s existing mismatch resolution once the real name is confirmed from grill output.
+_Avoid_: temp branch, scratch branch
+
 ### PR Review Loop
 
 **Review round**:
