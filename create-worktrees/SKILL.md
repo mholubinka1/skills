@@ -38,14 +38,28 @@ Stop here. If none exist, or the user opts to start fresh, continue to Step 3.
 ## Step 3 — Ensure `.claude` is gitignored
 
 ```bash
-grep -qxF '.claude' .gitignore 2>/dev/null && echo present || echo missing
+grep -qxE '\.claude/?' .gitignore 2>/dev/null && echo present || echo missing
 ```
 
-If `missing` (including when `.gitignore` doesn't exist yet), add the entry and commit it as a standalone commit on whatever branch is currently checked out — this must happen before Step 4, so the worktree that Step 4 creates is never at risk of being committed:
+If `missing` (including when `.gitignore` doesn't exist yet), the entry must be added and committed before Step 4, so the worktree that Step 4 creates is never at risk of being committed. Check the current branch first:
+
+```bash
+git branch --show-current
+```
+
+- **Trunk branch** (`main`, `master`, `develop`): warn the user before committing — e.g. "`.claude` isn't gitignored yet, and the fix would land directly on `<branch>`. Commit it there?" — since this repo's standards call for branching from `main` rather than committing to it directly. Proceed only on confirmation.
+- **Any other branch**: commit directly, no confirmation needed.
+
+Either way, once cleared to proceed:
 
 ```bash
 echo '.claude' >> .gitignore
 git add .gitignore
+```
+
+Run the `pre-commit-check` skill, then commit:
+
+```bash
 git commit -m "chore: gitignore .claude/"
 ```
 

@@ -16,8 +16,9 @@ Work through the steps below in order.
 
 Run the `create-worktrees` skill. This must happen before anything else — later steps
 (`init-agent-docs`, `grill`) can write to the repo, and the main checkout must stay
-untouched. If an existing worktree is resumed instead of a new one being created, skip
-straight to the state-detection check below using that worktree's branch.
+untouched. Whether `create-worktrees` created a new worktree, resumed an existing one, or
+found the session already isolated, continue to Step 1 as normal — `init-agent-docs` is
+idempotent, so re-running it against an already-bootstrapped worktree is harmless.
 
 ## Step 1 — Bootstrap agent docs
 
