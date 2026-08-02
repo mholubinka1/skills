@@ -14,7 +14,7 @@ Turn the trigger message into a short kebab-case fragment:
 |---|---|
 | "Fix the flaky login test on CI" | `fix-flaky-login-test-ci` |
 | "Can you add caching to the search endpoint?" | `add-caching-search-endpoint` |
-| "The dependency update skill needs to also update pre-commit hooks" | `dependency-update-precommit-hooks` |
+| "Update pre-commit hooks to their latest versions" | `update-pre-commit-hooks-latest-versions` |
 
 Exact wording doesn't matter — the slug only has to be recognisable enough to identify the worktree in `git worktree list` before `branch-hygiene` renames it later. Don't spend time optimising it.
 

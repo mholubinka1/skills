@@ -1,6 +1,6 @@
 ---
 name: create-worktrees
-description: Enter an isolated git worktree for the current task so work never touches the main checkout. Resumes an existing worktree if one is found, otherwise ensures .claude is gitignored and creates a fresh worktree on a wip/<slug> placeholder branch. Use whenever starting implementation work that should be isolated from the main checkout, or as the first step of /implement.
+description: Enter an isolated git worktree for the current task so work never touches the main checkout. No-ops if the session is already isolated, resumes an existing worktree if one is found, otherwise ensures .claude is gitignored and creates a fresh worktree on a wip/<slug> placeholder branch. Use whenever starting implementation work that should be isolated from the main checkout, or as the first step of /implement.
 ---
 
 # Create Worktrees
