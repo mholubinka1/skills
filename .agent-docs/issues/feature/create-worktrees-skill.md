@@ -38,7 +38,7 @@ Also update `.agent-docs/context.md` with two new terms under an "Isolation" sub
 
 ### What to build
 
-Update `implement/WORKFLOW.md` to insert a new Step 0 that runs `create-worktrees` before `init-agent-docs`, since later steps (`init-agent-docs`, `grill`) can write to the repo and isolation must start before any file writes happen. Renumber all subsequent steps accordingly. Update Step 8 (merge) so that once `gh pr view --json state --jq '.state'` confirms `MERGED`, it calls `ExitWorktree(action: "remove")`. Update `implement/SKILL.md`'s description to mention the worktree step.
+Update `implement/WORKFLOW.md` to insert a new Step 0 that runs `create-worktrees` before `init-agent-docs`, since later steps (`init-agent-docs`, `grill`) can write to the repo and isolation must start before any file writes happen. Renumber all subsequent steps accordingly. Update Step 8 (merge) so that once `gh pr view --json state --jq '.state'` confirms `MERGED`, it calls `ExitWorktree(action: "remove", discard_changes: true)` — `discard_changes` is required since the branch necessarily has commits beyond its base ref. Update `implement/SKILL.md`'s description to mention the worktree step.
 
 ### Acceptance criteria
 

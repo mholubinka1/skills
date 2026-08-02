@@ -57,7 +57,7 @@ echo '.claude' >> .gitignore
 git add .gitignore
 ```
 
-Run the `pre-commit-check` skill, then commit:
+Run the `pre-commit-check` skill. If it surfaces an error, stop and resolve it before continuing. Once clean, commit:
 
 ```bash
 git commit -m "chore: gitignore .claude/"
@@ -72,3 +72,5 @@ EnterWorktree(name: "wip/<slug>")
 ```
 
 The `wip/` prefix is deliberate — `branch-hygiene` already classifies `wip/*` as a placeholder that "must be renamed before code is written," so its existing mismatch-resolution step already moves work off this branch automatically once the real name is known from later work (e.g. a `/implement` grill session). No new mismatch-detection logic is needed here.
+
+If `EnterWorktree` errors because a branch of that name already exists (e.g. a leftover `wip/<slug>` from an earlier aborted run that was never cleaned up), append a short disambiguating suffix to the slug and retry.
