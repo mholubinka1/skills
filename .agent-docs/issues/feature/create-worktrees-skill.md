@@ -44,7 +44,7 @@ Update `implement/WORKFLOW.md` to insert a new Step 0 that runs `create-worktree
 
 - [x] `implement/WORKFLOW.md` Step 0 runs `create-worktrees` before any other step.
 - [x] All steps after the inserted Step 0 are renumbered correctly and internal cross-references (e.g. "Resume at the BDD loop (Step 6)") are updated to match.
-- [x] Step 8 (merge) calls `ExitWorktree(action: "remove")` only after `MERGED` is confirmed.
+- [x] Step 8 (merge) calls `ExitWorktree(action: "remove", discard_changes: true)` only after `MERGED` is confirmed.
 - [x] `implement/SKILL.md` description mentions the worktree step.
 - [ ] Full `/implement` run end-to-end on a throwaway change: worktree created first, `branch-hygiene` switches off the `wip/` placeholder (which is then deleted) once grill output is available, and the worktree is removed after merge is confirmed.
 

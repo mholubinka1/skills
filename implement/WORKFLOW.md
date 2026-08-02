@@ -87,10 +87,13 @@ The PR link was shared by `/pr-cleanup` at the end of `/code-review`. Prompt the
   ```
 
 - If the state is not `MERGED`, tell the user and press them again.
-- Once verified as `MERGED`, remove the worktree:
+- Once verified as `MERGED`, remove the worktree. Its branch will have commits beyond the
+  base ref by design (that's the whole point of the branch), so `ExitWorktree` will refuse
+  to remove it unless told to discard those changes — safe here specifically because the
+  PR carrying them was just confirmed merged:
 
   ```text
-  ExitWorktree(action: "remove")
+  ExitWorktree(action: "remove", discard_changes: true)
   ```
 
   The workflow is complete.

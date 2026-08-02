@@ -29,7 +29,7 @@ A new standalone skill, `create-worktrees`, gets a session into an isolated git 
 - **`/implement` integration** (`implement/WORKFLOW.md`):
   - New Step 0 — run `create-worktrees` before `init-agent-docs`, since `init-agent-docs` and `grill` can both write to the repo and isolation must start before any file writes happen.
   - All subsequent steps renumber, offset by one to make room for the inserted Step 0: bootstrap agent docs (old Step 0) becomes Step 1, grill (old Step 1) becomes Step 2, branch hygiene (old Step 2) becomes Step 3, write spec (old Step 3) becomes Step 4, create issues (old Step 4) becomes Step 5, BDD loop (old Step 5) becomes Step 6, code review (old Step 6) becomes Step 7, merge (old Step 7) becomes Step 8.
-  - Step 8 (merge) gains a final action: once `gh pr view --json state --jq '.state'` confirms `MERGED`, call `ExitWorktree(action: "remove")`.
+  - Step 8 (merge) gains a final action: once `gh pr view --json state --jq '.state'` confirms `MERGED`, call `ExitWorktree(action: "remove", discard_changes: true)` — `discard_changes` is required because the branch necessarily has commits beyond its base ref, which `ExitWorktree` otherwise refuses to remove; safe here specifically because those commits were just confirmed merged.
   - `implement/SKILL.md` description updated to mention the worktree step.
 - **Domain docs**: `.agent-docs/context.md` gains two terms under a new "Isolation" subheading — `Worktree session` and `Placeholder branch`.
 
