@@ -39,7 +39,7 @@ The isolated git worktree (created via the harness's `EnterWorktree` tool under 
 _Avoid_: sandbox, isolated checkout, workspace
 
 **Placeholder branch**:
-A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. Renamed by `branch-hygiene`'s existing mismatch resolution once the real name is confirmed from grill output.
+A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. Replaced by `branch-hygiene`'s existing mismatch resolution once the real name is confirmed from grill output, and then deleted.
 _Avoid_: temp branch, scratch branch
 
 ### PR Review Loop
