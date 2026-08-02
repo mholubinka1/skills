@@ -87,38 +87,37 @@ The PR link was shared by `/pr-cleanup` at the end of `/code-review`. Prompt the
   ```
 
 - If the state is not `MERGED`, tell the user and press them again.
-- Once verified as `MERGED`, remove the worktree. How depends on how Step 0 entered it:
+- Once verified as `MERGED`, clean up. How depends on how Step 0 entered the worktree:
 
-  - **Step 0 created a fresh worktree this session** (`EnterWorktree(name: ...)`): its branch
-    will have commits beyond the base ref by design, so `ExitWorktree` will refuse to remove
-    it unless told to discard those changes — safe here specifically because the PR carrying
-    them was just confirmed merged:
+  - **Step 0 created a fresh worktree this session** (`EnterWorktree(name: ...)`): it's
+    exclusively this task's, so remove it automatically. Its branch will have commits beyond
+    the base ref by design, so `ExitWorktree` will refuse to remove it unless told to discard
+    those changes — safe here specifically because the PR carrying them was just confirmed
+    merged:
 
     ```text
     ExitWorktree(action: "remove", discard_changes: true)
     ```
 
-  - **Step 0 resumed an existing worktree** (`EnterWorktree(path: ...)`) **or found the
-    session already isolated with no `EnterWorktree` call this session**: `ExitWorktree`'s
-    `remove` action only ever operates on a worktree it created in the current session, so it
-    cannot remove either of these — for a resumed worktree it's an explicit no-op on removal,
-    and if `EnterWorktree` was never called this session `ExitWorktree` no-ops entirely.
-    Clean up with git directly instead:
+  - **Step 0 resumed an existing worktree, or found the session already isolated with no
+    `EnterWorktree` call this session**: don't auto-remove. Neither `create-worktrees` nor
+    this step ever confirmed the worktree is exclusively this task's — it could be a
+    long-lived worktree the user is reusing for other work, or have uncommitted changes of
+    its own — so force-deleting it here would risk destroying something this workflow
+    doesn't own. `ExitWorktree`'s `remove` action can't help either way (it only ever
+    operates on a worktree it created in the current session — an explicit no-op on removal
+    for a `path`-entered worktree, and a full no-op if `EnterWorktree` was never called this
+    session). Instead, report the path and branch so the user can decide:
 
     ```bash
-    WORKTREE_PATH=$(git rev-parse --show-toplevel)
-    WORKTREE_BRANCH=$(git branch --show-current)
+    git rev-parse --show-toplevel
+    git branch --show-current
     ```
 
-    If this session resumed via `EnterWorktree(path: ...)`, call `ExitWorktree(action:
-    "keep")` first to return to the original directory without touching the worktree. If the
-    session was already isolated with no `EnterWorktree` call, instead `cd` to the main
-    checkout's path (the entry in `git worktree list` not under `.claude/worktrees/`). Either
-    way, once back outside the worktree:
-
-    ```bash
-    git worktree remove "$WORKTREE_PATH" --force
-    git branch -D "$WORKTREE_BRANCH"
-    ```
+    Then call `ExitWorktree(action: "keep")` — safe either way, since it returns a resumed
+    session to its original directory and is a harmless no-op if `EnterWorktree` was never
+    called — and tell the user the worktree at that path is done and ready to remove
+    whenever they want (`git worktree remove <path>`, adding `--force` only if it reports
+    uncommitted changes they're fine discarding, then `git branch -D <branch>`).
 
   The workflow is complete.
