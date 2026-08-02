@@ -87,13 +87,38 @@ The PR link was shared by `/pr-cleanup` at the end of `/code-review`. Prompt the
   ```
 
 - If the state is not `MERGED`, tell the user and press them again.
-- Once verified as `MERGED`, remove the worktree. Its branch will have commits beyond the
-  base ref by design (that's the whole point of the branch), so `ExitWorktree` will refuse
-  to remove it unless told to discard those changes — safe here specifically because the
-  PR carrying them was just confirmed merged:
+- Once verified as `MERGED`, remove the worktree. How depends on how Step 0 entered it:
 
-  ```text
-  ExitWorktree(action: "remove", discard_changes: true)
-  ```
+  - **Step 0 created a fresh worktree this session** (`EnterWorktree(name: ...)`): its branch
+    will have commits beyond the base ref by design, so `ExitWorktree` will refuse to remove
+    it unless told to discard those changes — safe here specifically because the PR carrying
+    them was just confirmed merged:
+
+    ```text
+    ExitWorktree(action: "remove", discard_changes: true)
+    ```
+
+  - **Step 0 resumed an existing worktree** (`EnterWorktree(path: ...)`) **or found the
+    session already isolated with no `EnterWorktree` call this session**: `ExitWorktree`'s
+    `remove` action only ever operates on a worktree it created in the current session, so it
+    cannot remove either of these — for a resumed worktree it's an explicit no-op on removal,
+    and if `EnterWorktree` was never called this session `ExitWorktree` no-ops entirely.
+    Clean up with git directly instead:
+
+    ```bash
+    WORKTREE_PATH=$(git rev-parse --show-toplevel)
+    WORKTREE_BRANCH=$(git branch --show-current)
+    ```
+
+    If this session resumed via `EnterWorktree(path: ...)`, call `ExitWorktree(action:
+    "keep")` first to return to the original directory without touching the worktree. If the
+    session was already isolated with no `EnterWorktree` call, instead `cd` to the main
+    checkout's path (the entry in `git worktree list` not under `.claude/worktrees/`). Either
+    way, once back outside the worktree:
+
+    ```bash
+    git worktree remove "$WORKTREE_PATH" --force
+    git branch -D "$WORKTREE_BRANCH"
+    ```
 
   The workflow is complete.

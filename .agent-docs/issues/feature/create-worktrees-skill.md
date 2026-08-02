@@ -38,13 +38,13 @@ Also update `.agent-docs/context.md` with two new terms under an "Isolation" sub
 
 ### What to build
 
-Update `implement/WORKFLOW.md` to insert a new Step 0 that runs `create-worktrees` before `init-agent-docs`, since later steps (`init-agent-docs`, `grill`) can write to the repo and isolation must start before any file writes happen. Renumber all subsequent steps accordingly. Update Step 8 (merge) so that once `gh pr view --json state --jq '.state'` confirms `MERGED`, it calls `ExitWorktree(action: "remove", discard_changes: true)` — `discard_changes` is required since the branch necessarily has commits beyond its base ref. Update `implement/SKILL.md`'s description to mention the worktree step.
+Update `implement/WORKFLOW.md` to insert a new Step 0 that runs `create-worktrees` before `init-agent-docs`, since later steps (`init-agent-docs`, `grill`) can write to the repo and isolation must start before any file writes happen. Renumber all subsequent steps accordingly. Update Step 8 (merge) so that once `gh pr view --json state --jq '.state'` confirms `MERGED`, it removes the worktree — via `ExitWorktree(action: "remove", discard_changes: true)` when Step 0 created a fresh worktree this session, or via `git worktree remove --force` + `git branch -D` when Step 0 resumed an existing worktree or found the session already isolated, since `ExitWorktree` can't remove either of those. Update `implement/SKILL.md`'s description to mention the worktree step.
 
 ### Acceptance criteria
 
 - [x] `implement/WORKFLOW.md` Step 0 runs `create-worktrees` before any other step.
 - [x] All steps after the inserted Step 0 are renumbered correctly and internal cross-references (e.g. "Resume at the BDD loop (Step 6)") are updated to match.
-- [x] Step 8 (merge) calls `ExitWorktree(action: "remove", discard_changes: true)` only after `MERGED` is confirmed.
+- [x] Step 8 (merge) removes the worktree only after `MERGED` is confirmed, using `ExitWorktree(action: "remove", discard_changes: true)` for a freshly-created worktree and `git worktree remove --force` + `git branch -D` for a resumed or already-isolated one.
 - [x] `implement/SKILL.md` description mentions the worktree step.
 - [ ] Full `/implement` run end-to-end on a throwaway change: worktree created first, `branch-hygiene` switches off the `wip/` placeholder (which is then deleted) once grill output is available, and the worktree is removed after merge is confirmed.
 
