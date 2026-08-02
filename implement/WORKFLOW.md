@@ -46,7 +46,7 @@ Run the `grill` skill. Use the trigger context as the starting point — you alr
 
 ## Step 3 — Branch hygiene
 
-Run the `branch-hygiene` skill. Derive the change type and branch slug from the grill output in context. If the current branch is wrong (including the `wip/` placeholder branch created in Step 0), suggest and create the correct one — its existing mismatch-resolution flow handles renaming out of a `wip/` placeholder the same as any other mismatch.
+Run the `branch-hygiene` skill. Derive the change type and branch slug from the grill output in context. If the current branch is wrong (including the `wip/` placeholder branch created in Step 0), suggest and create the correct one — its existing mismatch-resolution flow creates the new branch from the remote default the same as any other mismatch. Since nothing is ever committed to a `wip/` placeholder before this point, delete it once the switch is done (`git branch -D wip/<slug>`) so it doesn't linger.
 
 ## Step 4 — Write spec
 
