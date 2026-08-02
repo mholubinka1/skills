@@ -41,7 +41,7 @@ A new standalone skill, `create-worktrees`, gets a session into an isolated git 
   2. Standalone `/create-worktrees` in a repo missing the `.claude` gitignore entry — entry added and committed before the worktree is created.
   3. `/create-worktrees` run from inside an already-active worktree session — no-ops.
   4. `/create-worktrees` run when another worktree already exists — lists it and asks before proceeding.
-  5. Full `/implement` run end-to-end on a throwaway change — worktree created first, `branch-hygiene` renames the `wip/` placeholder once grill output is available, and the worktree is removed after `gh pr view` confirms `MERGED`.
+  5. Full `/implement` run end-to-end on a throwaway change — worktree created first, `branch-hygiene` switches off the `wip/` placeholder (which is then deleted) once grill output is available, and the worktree is removed after `gh pr view` confirms `MERGED`.
 - Prior art: `init-agent-docs`'s scratch-repo verification pattern (Read → apply → verify by inspection) is the template for scenarios 1–4.
 
 ## Out of Scope
