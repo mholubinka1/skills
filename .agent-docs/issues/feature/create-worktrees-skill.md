@@ -2,6 +2,8 @@
 
 # Issues: feature/create-worktrees-skill
 
+> Work complete — PR ready to merge. One acceptance criterion in #37 (the live end-to-end `/implement` dry run) is outstanding manual verification, not implementation — it requires actually running `/create-worktrees` and a full `/implement` pass, which reading/reviewing code can't substitute for. Recommended as a follow-up after merge.
+
 ## Add create-worktrees skill (#36)
 
 **Blocked by**: None
