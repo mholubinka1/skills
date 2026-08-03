@@ -60,7 +60,7 @@ git add .gitignore
 Run the `pre-commit-check` skill. If it surfaces an error, stop and resolve it before continuing. Once clean, commit:
 
 ```bash
-git commit -m "chore: gitignore .claude/"
+git commit -m "chore: gitignore .claude"
 ```
 
 ## Step 4 — Create the worktree

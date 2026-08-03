@@ -20,4 +20,4 @@ Exact wording doesn't matter — the slug only has to be recognisable enough to 
 
 ## Why `.claude` and not `.claude/worktrees/`
 
-`.claude/` is gitignored wholesale, matching this skills repo's own `.gitignore` convention — it also covers `settings.local.json` and other local-only state under `.claude/`, not just worktree directories.
+`.claude` is gitignored wholesale, matching this skills repo's own `.gitignore` convention — it also covers `settings.local.json` and other local-only state under `.claude/`, not just worktree directories.
