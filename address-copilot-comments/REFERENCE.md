@@ -111,6 +111,12 @@ The query returns two IDs per thread — use the right one for each operation:
 - `threadId` (`PRRT_...` node ID) — used with `resolveReviewThread` GraphQL mutation
 - `comment_id` (numeric `databaseId`) — used with the REST reply endpoint below
 
+### Suppressed comments (no thread ID)
+
+Suppressed comments come from the same review body already fetched in Step A2 (`$REVIEW_BODY`) — re-fetch it here if it's out of scope. Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Treat each entry as its own finding — decide Fix or Push back exactly as for a thread (including the `.agent-docs/` push-back rule), and apply any code changes the same way.
+
+Suppressed entries have no `threadId` or `comment_id` — the reply and resolve steps below apply only to real threads. Skip straight to the "Acknowledge suppressed comments" section for these instead.
+
 ### Reply: fixed
 
 ```bash
@@ -160,6 +166,22 @@ mutation {
   }
 }'
 ```
+
+### Acknowledge suppressed comments — Step 4d
+
+Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
+
+```bash
+gh pr comment {number} --body "$(cat <<'EOF'
+Addressed this round's suppressed Copilot comments:
+
+- path/to/file.md:158 — Fixed. <one-line explanation>
+- path/to/other.json:1021 — Ignored. <reason>
+EOF
+)"
+```
+
+One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread replies. Post this whenever suppressed comments existed this round, even if every decision (threads and suppressed comments together) was a push-back — see Loop termination conditions below.
 
 ---
 
@@ -212,8 +234,8 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 
 The loop is complete when **any** of these conditions is met:
 
-1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
+1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
 2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger. PR is ready to merge.
-3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads. Either a new Copilot review was detected with no comments (exits immediately to Step 8), or 10 attempts elapsed with no new review (falls through to Step 8).
+3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments (exits immediately to Step 8), or 10 attempts elapsed with no new review (falls through to Step 8).
 
 In all cases the PR is considered clean and ready to merge.

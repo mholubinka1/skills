@@ -21,10 +21,11 @@ Step 3  Record baseline Copilot review ID; poll every 60s:
         both 0 + new Copilot review (IDs differ)? ───────────────────► Step 8 (reviewed clean)
         Poll exhausted? one final pass: threads > 0 or suppressed > 0? ► Step 4
                         final pass: both 0, no new review? ──────────► Step 8
-Step 4  For each unresolved thread: decide fix or push-back; apply code changes
+Step 4  For each unresolved thread and each suppressed-comment entry: decide fix or push-back; apply code changes
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
-        All push-backs? ──Yes──► Step 8 (skip Steps 5–7)
+Step 4d Suppressed comments this round? ──Yes──► post one PR comment summarizing fix/ignore outcomes
+        All push-backs (threads + suppressed)? ──Yes──► Step 8 (skip Steps 5–7)
 Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push
 Step 6  review_round < 2? ──Yes──► review_round++; re-trigger Copilot → Step 7
                           ──No ──► Step 8 (max 2 reviews; do not re-trigger)
@@ -75,7 +76,7 @@ After 10 attempts with no new clean review, perform one final check following th
 
 ## Step 4 — Decide and apply changes
 
-For each unresolved thread decide **Fix** or **Push back** (push back on any file contained within `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for fetch query and reply commands.
+For each unresolved thread, and each suppressed-comment entry found in Step 3/7, decide **Fix** or **Push back** (push back on any file contained within `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for fetch query, reply commands, and how to read suppressed-comment entries out of the review body.
 
 ## Step 4b — Validate changes with code-review
 
@@ -89,7 +90,13 @@ File type is not a skip condition.
 
 ## Step 4c — Reply and resolve threads
 
-Reply to each thread ("Fixed. ..." or "Ignored. ...") and immediately resolve via GraphQL — see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for the `resolveReviewThread` mutation. All push-backs → skip to Step 8; at least one fix → continue to Step 5.
+Reply to each **thread** ("Fixed. ..." or "Ignored. ...") and immediately resolve via GraphQL — see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for the `resolveReviewThread` mutation. This step applies only to real threads — suppressed-comment entries have no thread or comment ID, so there is nothing to reply to or resolve; they are acknowledged instead in Step 4d.
+
+## Step 4d — Acknowledge suppressed comments
+
+If any suppressed-comment entries were found in Step 3/7 this round, post a single PR-level comment summarizing the fix/ignore outcome for every one of them — see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for the `gh pr comment` command. Post this regardless of whether this round's decisions (threads and suppressed comments together) were all push-backs — it's the only record of a suppressed comment's outcome, since it has no per-comment reply target. Skip this step entirely if there were no suppressed comments this round.
+
+All push-backs across both threads and suppressed comments, and zero files modified → skip to Step 8 (skip Steps 5–7). At least one fix → continue to Step 5.
 
 ## Step 5 — Commit and push
 
