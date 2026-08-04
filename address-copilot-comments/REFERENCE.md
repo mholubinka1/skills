@@ -4,7 +4,7 @@ Full command detail for each step. Replace `{owner}`, `{repo}`, `{number}`, `{id
 
 ---
 
-## Step 3 — Poll for Copilot review threads
+## Step 3 — Poll for Copilot review threads and suppressed comments
 
 Get `{owner}/{repo}` from:
 
@@ -47,7 +47,19 @@ query {
 
 If count > 0 — exit the poll loop and continue to Step 4.
 
-**Step B — Reviews check (only when thread count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured:
+**Step A2 — Suppressed comments check.** Fetch the latest Copilot review body and check for a `### Suppressed comments (N)` block:
+
+```bash
+REVIEW_BODY=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
+  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .body // empty')
+
+SUPPRESSED_COUNT=$(echo "$REVIEW_BODY" | grep -oE 'Suppressed comments \([0-9]+\)' | grep -oE '[0-9]+' | head -1)
+SUPPRESSED_COUNT=${SUPPRESSED_COUNT:-0}
+```
+
+If `SUPPRESSED_COUNT` > 0 — exit the poll loop and continue to Step 4. Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings there instead of posting them as real review comments), not real PR review comments, so they never appear as `reviewThreads` and Step A's count reads 0 even when these exist.
+
+**Step B — Reviews check (only when thread count = 0 and suppressed count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured:
 
 ```bash
 # Same query as baseline capture above — assigns to CURRENT_REVIEW_ID
@@ -61,7 +73,7 @@ If `CURRENT_REVIEW_ID` is non-empty and differs from `BASELINE_REVIEW_ID` — Co
 
 If `CURRENT_REVIEW_ID` equals `BASELINE_REVIEW_ID` (or is still empty) — no new review yet. Wait 60 seconds and repeat.
 
-After 10 failed attempts (thread count still 0 and no new review detected), perform one final pass of Steps A and B with the same queries. If the final pass also returns 0 threads and no new review, Copilot has not yet reviewed or has nothing actionable — continue to Step 8.
+After 10 failed attempts (thread count still 0, suppressed count still 0, and no new review detected), perform one final pass of Steps A, A2, and B with the same queries. If the final pass also returns 0 threads, 0 suppressed comments, and no new review, Copilot has not yet reviewed or has nothing actionable — continue to Step 8.
 
 ---
 
