@@ -51,7 +51,7 @@ query {
 REVIEW_BODY=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
   --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .body // empty')
 
-SUPPRESSED_COUNT=$(echo "$REVIEW_BODY" | grep -oE 'Suppressed comments \([0-9]+\)' | grep -oE '[0-9]+' | head -1)
+SUPPRESSED_COUNT=$(printf '%s' "$REVIEW_BODY" | grep -oE 'Suppressed comments \([0-9]+\)' | grep -oE '[0-9]+' | head -1)
 SUPPRESSED_COUNT=${SUPPRESSED_COUNT:-0}
 ```
 
