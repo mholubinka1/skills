@@ -17,18 +17,20 @@ Step 1  PR exists? ──No──► Step 2: create PR (review_round = 1)
         PR exists? ──Yes──► review_round = 1
 Step 3  Record baseline Copilot review ID; poll every 60s:
         thread count > 0? ─────────────────────────────────────────► Step 4
-        thread count = 0 + new Copilot review (IDs differ)? ───────► Step 8 (reviewed clean)
-        Poll exhausted? one final pass: threads > 0? ─────────────► Step 4
-                        final pass: 0 threads, no new review? ──► Step 8
-Step 4  For each unresolved thread: decide fix or push-back; apply code changes
+        suppressed comments > 0 in latest review body? ─────────────► Step 4
+        both 0 + new Copilot review (IDs differ)? ───────────────────► Step 8 (reviewed clean)
+        Poll exhausted? one final pass: threads > 0 or suppressed > 0? ► Step 4
+                        final pass: both 0, no new review? ──────────► Step 8
+Step 4  For each unresolved thread and each suppressed-comment entry: decide fix or push-back; apply code changes
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
-        All push-backs? ──Yes──► Step 8 (skip Steps 5–7)
+Step 4d Suppressed comments this round? ──Yes──► post one PR comment summarizing fix/ignore outcomes
+        All push-backs (threads + suppressed)? ──Yes──► Step 8 (skip Steps 5–7)
 Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push
 Step 6  review_round < 2? ──Yes──► review_round++; re-trigger Copilot → Step 7
                           ──No ──► Step 8 (max 2 reviews; do not re-trigger)
 Step 7  Re-capture baseline; poll as in Step 3:
-        threads? ──► Step 4 | clean or exhausted? ──► Step 8
+        threads or suppressed comments? ──► Step 4 | clean or exhausted? ──► Step 8
 Step 8  Report PR link — PR is ready to merge
 ```
 
@@ -59,21 +61,21 @@ gh pr create --base "$BASE" --title "<title>" --body "<summary and test plan>"
 
 Note the PR number. Set `review_round = 1`. The first Copilot review triggers automatically.
 
-## Step 3 — Poll for Copilot review threads
+## Step 3 — Poll for Copilot review threads and suppressed comments
 
 Before polling, capture the latest Copilot review ID as a baseline (empty if no review exists yet).
 
 Poll every 60 seconds, max 10 attempts:
 
-1. Run the thread count check. If > 0, exit to Step 4.
-2. If 0, check whether the latest Copilot review ID is non-empty and differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
+1. Run the thread count check **and** the suppressed-comments check (both, every iteration — don't short-circuit one on the other, a round can have both real threads and suppressed comments at once). If either is non-zero, exit to Step 4. Suppressed comments are actionable Copilot findings folded into the review body's markdown instead of posted as real reviewThreads — they have no `databaseId`/thread ID, so they never show up in the thread count check even though they're unaddressed.
+2. If both checks are 0/absent, check whether the latest Copilot review ID is non-empty and differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
 3. If no new review, wait and repeat.
 
-After 10 attempts with no new clean review, perform one final check following the same branching: threads > 0 → exit to Step 4; otherwise go to Step 8. See the Poll for Copilot Review Threads section in [REFERENCE.md](REFERENCE.md) for the queries.
+After 10 attempts with no new clean review, perform one final check following the same branching: threads > 0 or suppressed comments > 0 → exit to Step 4; otherwise go to Step 8. See the Poll for Copilot Review Threads and Suppressed Comments section in [REFERENCE.md](REFERENCE.md) for the queries.
 
 ## Step 4 — Decide and apply changes
 
-For each unresolved thread decide **Fix** or **Push back** (push back on any file contained within `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for fetch query and reply commands.
+For each unresolved thread, and each suppressed-comment entry found in Step 3/7, decide **Fix** or **Push back** (push back on any file contained within `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for fetch query, reply commands, and how to read suppressed-comment entries out of the review body.
 
 ## Step 4b — Validate changes with code-review
 
@@ -87,7 +89,13 @@ File type is not a skip condition.
 
 ## Step 4c — Reply and resolve threads
 
-Reply to each thread ("Fixed. ..." or "Ignored. ...") and immediately resolve via GraphQL — see the Address Each Comment section in [REFERENCE.md](REFERENCE.md) for the `resolveReviewThread` mutation. All push-backs → skip to Step 8; at least one fix → continue to Step 5.
+Reply to each **thread** ("Fixed. ..." or "Ignored. ...") and immediately resolve via GraphQL — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `resolveReviewThread` mutation. This step applies only to real threads — suppressed-comment entries have no thread or comment ID, so there is nothing to reply to or resolve; they are acknowledged instead in Step 4d.
+
+## Step 4d — Acknowledge suppressed comments
+
+If any suppressed-comment entries were found in Step 3/7 this round, post a single PR-level comment summarizing the fix/ignore outcome for every one of them — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `gh pr comment` command. Post this regardless of whether this round's decisions (threads and suppressed comments together) were all push-backs — it's the only record of a suppressed comment's outcome, since it has no per-comment reply target. Skip this step entirely if there were no suppressed comments this round.
+
+All push-backs across both threads and suppressed comments, and zero files modified → skip to Step 8 (skip Steps 5–7). At least one fix → continue to Step 5.
 
 ## Step 5 — Commit and push
 
@@ -97,9 +105,9 @@ Stage files explicitly (`git add <file1> <file2> ...`), commit with `"address Co
 
 If `review_round >= 2`, skip to Step 8. Otherwise increment to 2 and re-trigger via `gh pr edit {number} --add-reviewer @copilot`. See the Re-trigger Copilot Review section in [REFERENCE.md](REFERENCE.md) if that command fails.
 
-## Step 7 — Check for new threads
+## Step 7 — Check for new threads and suppressed comments
 
-Re-capture the baseline Copilot review ID, then poll as in Step 3. New unresolved threads → return to Step 4. None (or clean review detected) → continue to Step 8.
+Re-capture the baseline Copilot review ID, then poll as in Step 3. New unresolved threads or suppressed comments → return to Step 4. Neither (or clean review detected) → continue to Step 8.
 
 ## Step 8 — Report completion
 

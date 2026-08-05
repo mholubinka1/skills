@@ -4,7 +4,7 @@ Full command detail for each step. Replace `{owner}`, `{repo}`, `{number}`, `{id
 
 ---
 
-## Step 3 — Poll for Copilot review threads
+## Step 3 — Poll for Copilot review threads and suppressed comments
 
 Get `{owner}/{repo}` from:
 
@@ -45,9 +45,21 @@ query {
 }' --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login | test("copilot"; "i"))] | length'
 ```
 
-If count > 0 — exit the poll loop and continue to Step 4.
+**Step A2 — Suppressed comments check.** Run every iteration alongside Step A — do not skip this because Step A already found threads. A round can have both real threads and suppressed comments at once, and Step 4 relies on this check having actually run to know about any suppressed entries. Fetch the latest Copilot review body and check for a `### Suppressed comments (N)` block:
 
-**Step B — Reviews check (only when thread count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured:
+```bash
+REVIEW_BODY=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
+  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .body // empty')
+
+SUPPRESSED_COUNT=$(printf '%s' "$REVIEW_BODY" | grep -oE 'Suppressed comments \([0-9]+\)' | grep -oE '[0-9]+' | head -1)
+SUPPRESSED_COUNT=${SUPPRESSED_COUNT:-0}
+```
+
+Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings there instead of posting them as real review comments), not real PR review comments, so they never appear as `reviewThreads` and Step A's count reads 0 even when these exist.
+
+**Decision.** If the Step A count > 0 **or** `SUPPRESSED_COUNT` > 0 — exit the poll loop and continue to Step 4, carrying forward `$REVIEW_BODY` for Step 4's suppressed-entry handling.
+
+**Step B — Reviews check (only when thread count = 0 and suppressed count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured. This re-fetches the same reviews endpoint as Step A2 rather than reusing its result — `gh api --jq` uses `gh`'s bundled jq internally, but combining Step A2 and Step B's extractions into a single call would require piping through a standalone `jq` binary, which isn't guaranteed to be on `PATH` even where `gh` is. The extra request is the safer trade:
 
 ```bash
 # Same query as baseline capture above — assigns to CURRENT_REVIEW_ID
@@ -61,11 +73,11 @@ If `CURRENT_REVIEW_ID` is non-empty and differs from `BASELINE_REVIEW_ID` — Co
 
 If `CURRENT_REVIEW_ID` equals `BASELINE_REVIEW_ID` (or is still empty) — no new review yet. Wait 60 seconds and repeat.
 
-After 10 failed attempts (thread count still 0 and no new review detected), perform one final pass of Steps A and B with the same queries. If the final pass also returns 0 threads and no new review, Copilot has not yet reviewed or has nothing actionable — continue to Step 8.
+After 10 failed attempts (thread count still 0, suppressed count still 0, and no new review detected), perform one final pass of Steps A, A2, and B with the same queries. If the final pass also returns 0 threads, 0 suppressed comments, and no new review, Copilot has not yet reviewed or has nothing actionable — continue to Step 8.
 
 ---
 
-## Step 4 — Address each comment
+## Step 4 — Address each comment and suppressed entry
 
 ### Fetch all unresolved Copilot review threads
 
@@ -98,6 +110,12 @@ The query returns two IDs per thread — use the right one for each operation:
 
 - `threadId` (`PRRT_...` node ID) — used with `resolveReviewThread` GraphQL mutation
 - `comment_id` (numeric `databaseId`) — used with the REST reply endpoint below
+
+### Suppressed comments (no thread ID)
+
+Suppressed comments come from the same review body already fetched in Step A2 (`$REVIEW_BODY`) — re-fetch it here if it's out of scope. Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Treat each entry as its own finding — decide Fix or Push back exactly as for a thread (including the `.agent-docs/` push-back rule), and apply any code changes the same way.
+
+Suppressed entries have no `threadId` or `comment_id` — the reply and resolve steps below apply only to real threads. Skip straight to the "Acknowledge suppressed comments" section for these instead.
 
 ### Reply: fixed
 
@@ -148,6 +166,22 @@ mutation {
   }
 }'
 ```
+
+### Acknowledge suppressed comments
+
+Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
+
+```bash
+gh pr comment {number} --body "$(cat <<'EOF'
+Addressed this round's suppressed Copilot comments:
+
+- path/to/file.md:158 — Fixed. <one-line explanation>
+- path/to/other.json:1021 — Ignored. <reason>
+EOF
+)"
+```
+
+One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread replies. Post this whenever suppressed comments existed this round, even if every decision (threads and suppressed comments together) was a push-back — see Loop termination conditions below.
 
 ---
 
@@ -200,8 +234,8 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 
 The loop is complete when **any** of these conditions is met:
 
-1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
+1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
 2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger. PR is ready to merge.
-3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads. Either a new Copilot review was detected with no comments (exits immediately to Step 8), or 10 attempts elapsed with no new review (falls through to Step 8).
+3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments (exits immediately to Step 8), or 10 attempts elapsed with no new review (falls through to Step 8).
 
 In all cases the PR is considered clean and ready to merge.

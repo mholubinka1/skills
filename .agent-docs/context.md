@@ -56,6 +56,10 @@ _Avoid_: open comment, pending thread, active comment
 A decision in the `address-copilot-comments` skill to reject a Copilot comment: reply "Ignored." and resolve the thread without applying a code change.
 _Avoid_: reject, dismiss, decline comment
 
+**Suppressed comment**:
+A Copilot finding folded into the review body's collapsible `### Suppressed comments (N)` markdown block instead of posted as a real Unresolved thread. Has no `databaseId`/thread ID, so it is invisible to thread-count checks and can't be replied-to or resolved individually — `address-copilot-comments` acknowledges these instead with a single PR-level comment.
+_Avoid_: hidden comment, collapsed comment, filtered finding
+
 ### Agent Docs
 
 **Agent docs**:
