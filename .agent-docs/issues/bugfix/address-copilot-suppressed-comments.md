@@ -1,5 +1,7 @@
 # Issues: bugfix/address-copilot-suppressed-comments
 
+> Work complete — PR ready to merge.
+
 ## Detect suppressed comments during polling
 
 **GitHub issue**: #39
@@ -14,11 +16,11 @@ Add a second check to the Step 3/7 poll (and its final pass after poll exhaustio
 
 ### Acceptance criteria
 
-- [ ] Step 3 and Step 7 poll logic (SKILL.md) check both thread count and suppressed-comment count before considering the PR reviewed clean
-- [ ] REFERENCE.md documents the suppressed-comment count extraction (Step A2) with a runnable command, alongside the existing Step A/B detail
-- [ ] The "Loop at a glance" diagram in SKILL.md reflects the new branch
-- [ ] Dry-run: piping the real sample review body (from the spec's Further Notes) through the new extraction command correctly returns 3 for the multi-entry example and would return 0 for a body with no `Suppressed comments` block
-- [ ] A review body with 0 threads and 0 suppressed comments still routes to Step 8 (clean) exactly as before
+- [x] Step 3 and Step 7 poll logic (SKILL.md) check both thread count and suppressed-comment count before considering the PR reviewed clean
+- [x] REFERENCE.md documents the suppressed-comment count extraction (Step A2) with a runnable command, alongside the existing Step A/B detail
+- [x] The "Loop at a glance" diagram in SKILL.md reflects the new branch
+- [x] Dry-run: piping the real sample review body (from the spec's Further Notes) through the new extraction command correctly returns 3 for the multi-entry example and would return 0 for a body with no `Suppressed comments` block
+- [x] A review body with 0 threads and 0 suppressed comments still routes to Step 8 (clean) exactly as before
 
 ---
 
@@ -36,11 +38,11 @@ Extend Step 4 so each suppressed-comment entry (identified by its bold `**path:l
 
 ### Acceptance criteria (issue 2)
 
-- [ ] SKILL.md Step 4 and REFERENCE.md's "Address each comment" section describe deciding Fix/Push-back per suppressed entry, using the same push-back rule as threads
-- [ ] REFERENCE.md documents suppressed-entry shape (bold path:line header, bullet text, optional fenced code quote) as prose, not a script
-- [ ] SKILL.md and REFERENCE.md explicitly state that suppressed entries are excluded from the Step 4c reply/`resolveReviewThread` mechanism
-- [ ] New Step 4d is documented in SKILL.md (prose + diagram) and REFERENCE.md: posts one PR-level comment per round summarizing every suppressed comment's outcome, fires whenever suppressed comments existed that round regardless of fix/push-back mix, and is skipped when there were none
-- [ ] Loop termination condition 1 in REFERENCE.md (all push-backs, no code changes) is updated to note both thread resolution (Step 4c) and suppressed-comment acknowledgment (Step 4d) happen before the skip to Step 8
-- [ ] Consistency read-through: step numbering (4a/4b/4c/4d), the diagram, and cross-references between SKILL.md and REFERENCE.md all agree
+- [x] SKILL.md Step 4 and REFERENCE.md's "Address each comment" section describe deciding Fix/Push-back per suppressed entry, using the same push-back rule as threads
+- [x] REFERENCE.md documents suppressed-entry shape (bold path:line header, bullet text, optional fenced code quote) as prose, not a script
+- [x] SKILL.md and REFERENCE.md explicitly state that suppressed entries are excluded from the Step 4c reply/`resolveReviewThread` mechanism
+- [x] New Step 4d is documented in SKILL.md (prose + diagram) and REFERENCE.md: posts one PR-level comment per round summarizing every suppressed comment's outcome, fires whenever suppressed comments existed that round regardless of fix/push-back mix, and is skipped when there were none
+- [x] Loop termination condition 1 in REFERENCE.md (all push-backs, no code changes) is updated to note both thread resolution (Step 4c) and suppressed-comment acknowledgment (Step 4d) happen before the skip to Step 8
+- [x] Consistency read-through: step numbering (4a/4b/4c/4d), the diagram, and cross-references between SKILL.md and REFERENCE.md all agree
 
 ---
