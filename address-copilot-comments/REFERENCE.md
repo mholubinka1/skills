@@ -59,7 +59,7 @@ SUPPRESSED_COUNT=${SUPPRESSED_COUNT:-0}
 
 If `SUPPRESSED_COUNT` > 0 — exit the poll loop and continue to Step 4. Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings there instead of posting them as real review comments), not real PR review comments, so they never appear as `reviewThreads` and Step A's count reads 0 even when these exist.
 
-**Step B — Reviews check (only when thread count = 0 and suppressed count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured:
+**Step B — Reviews check (only when thread count = 0 and suppressed count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured. This re-fetches the same reviews endpoint as Step A2 rather than reusing its result — `gh api --jq` uses `gh`'s bundled jq internally, but combining Step A2 and Step B's extractions into a single call would require piping through a standalone `jq` binary, which isn't guaranteed to be on `PATH` even where `gh` is. The extra request is the safer trade:
 
 ```bash
 # Same query as baseline capture above — assigns to CURRENT_REVIEW_ID
@@ -77,7 +77,7 @@ After 10 failed attempts (thread count still 0, suppressed count still 0, and no
 
 ---
 
-## Step 4 — Address each comment
+## Step 4 — Address each comment and suppressed entry
 
 ### Fetch all unresolved Copilot review threads
 
@@ -167,7 +167,7 @@ mutation {
 }'
 ```
 
-### Acknowledge suppressed comments — Step 4d
+### Acknowledge suppressed comments
 
 Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
 
