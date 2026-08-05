@@ -45,9 +45,7 @@ query {
 }' --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login | test("copilot"; "i"))] | length'
 ```
 
-If count > 0 — exit the poll loop and continue to Step 4.
-
-**Step A2 — Suppressed comments check.** Fetch the latest Copilot review body and check for a `### Suppressed comments (N)` block:
+**Step A2 — Suppressed comments check.** Run every iteration alongside Step A — do not skip this because Step A already found threads. A round can have both real threads and suppressed comments at once, and Step 4 relies on this check having actually run to know about any suppressed entries. Fetch the latest Copilot review body and check for a `### Suppressed comments (N)` block:
 
 ```bash
 REVIEW_BODY=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
@@ -57,7 +55,9 @@ SUPPRESSED_COUNT=$(echo "$REVIEW_BODY" | grep -oE 'Suppressed comments \([0-9]+\
 SUPPRESSED_COUNT=${SUPPRESSED_COUNT:-0}
 ```
 
-If `SUPPRESSED_COUNT` > 0 — exit the poll loop and continue to Step 4. Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings there instead of posting them as real review comments), not real PR review comments, so they never appear as `reviewThreads` and Step A's count reads 0 even when these exist.
+Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings there instead of posting them as real review comments), not real PR review comments, so they never appear as `reviewThreads` and Step A's count reads 0 even when these exist.
+
+**Decision.** If the Step A count > 0 **or** `SUPPRESSED_COUNT` > 0 — exit the poll loop and continue to Step 4, carrying forward `$REVIEW_BODY` for Step 4's suppressed-entry handling.
 
 **Step B — Reviews check (only when thread count = 0 and suppressed count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured. This re-fetches the same reviews endpoint as Step A2 rather than reusing its result — `gh api --jq` uses `gh`'s bundled jq internally, but combining Step A2 and Step B's extractions into a single call would require piping through a standalone `jq` binary, which isn't guaranteed to be on `PATH` even where `gh` is. The extra request is the safer trade:
 

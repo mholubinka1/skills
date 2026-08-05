@@ -67,10 +67,9 @@ Before polling, capture the latest Copilot review ID as a baseline (empty if no 
 
 Poll every 60 seconds, max 10 attempts:
 
-1. Run the thread count check. If > 0, exit to Step 4.
-2. Fetch the latest Copilot review body and check for a `### Suppressed comments (N)` block with N > 0. If found, exit to Step 4. Suppressed comments are actionable Copilot findings folded into the review body's markdown instead of posted as real reviewThreads — they have no `databaseId`/thread ID, so they never show up in the thread count check even though they're unaddressed.
-3. If both checks are 0/absent, check whether the latest Copilot review ID is non-empty and differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
-4. If no new review, wait and repeat.
+1. Run the thread count check **and** the suppressed-comments check (both, every iteration — don't short-circuit one on the other, a round can have both real threads and suppressed comments at once). If either is non-zero, exit to Step 4. Suppressed comments are actionable Copilot findings folded into the review body's markdown instead of posted as real reviewThreads — they have no `databaseId`/thread ID, so they never show up in the thread count check even though they're unaddressed.
+2. If both checks are 0/absent, check whether the latest Copilot review ID is non-empty and differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
+3. If no new review, wait and repeat.
 
 After 10 attempts with no new clean review, perform one final check following the same branching: threads > 0 or suppressed comments > 0 → exit to Step 4; otherwise go to Step 8. See the Poll for Copilot Review Threads and Suppressed Comments section in [REFERENCE.md](REFERENCE.md) for the queries.
 
