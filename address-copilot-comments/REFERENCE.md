@@ -19,7 +19,7 @@ Reads the full diff content of every changed file, in one call — the classific
 A diff is **review-required** if any changed file contains either of these:
 
 - A functional code change — new or modified logic, control flow, or scripts.
-- A step-logic edit to `SKILL.md` or `REFERENCE.md` — a new or changed bash/GraphQL command, a decisioning rule, a branching condition, or a mutation. Skill files in this repo are markdown, but their step logic is the executable behavior the harness runs — extension alone does not make them documentation.
+- A step-logic edit to `SKILL.md`, `REFERENCE.md`, or `WORKFLOW.md` — a new or changed bash/GraphQL command, a decisioning rule, a branching condition, or a mutation. Skill files in this repo are markdown, but their step logic is the executable behavior the harness runs — extension alone does not make them documentation.
 
 A diff is **exempt** only if every changed file is one of these:
 
@@ -27,7 +27,7 @@ A diff is **exempt** only if every changed file is one of these:
 - No-logic config — value or formatting changes to config files (`*.json`, `*.yaml`, `*.toml`) that don't add or change a script.
 - Formatting-only — whitespace, comment wording, or markdown formatting with no semantic change.
 
-**Worked examples:**
+### Worked examples
 
 | Diff | Classification |
 |---|---|
