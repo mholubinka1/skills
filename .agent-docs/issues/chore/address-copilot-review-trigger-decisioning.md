@@ -1,5 +1,7 @@
 # Issues: chore/address-copilot-review-trigger-decisioning
 
+> Work complete — PR ready to merge.
+
 ## Add Step 2b review-required decisioning to address-copilot-comments
 
 **GitHub issue**: #42
@@ -20,11 +22,11 @@ Remove Step 1/2's unconditional `review_round = 1` and Step 2's now-false "the f
 
 ### Acceptance criteria
 
-- [ ] Given a PR whose diff is entirely within `.agent-docs/`, when Step 2b runs, then it classifies as exempt and skips straight to Step 8 without triggering or polling.
-- [ ] Given a PR whose diff includes a step-logic edit to `SKILL.md`/`REFERENCE.md`, when Step 2b runs, then it classifies as review-required, triggers Copilot, sets `review_round = 1`, and continues to Step 3.
-- [ ] Given a PR whose diff mixes exempt files with one functional code file, when Step 2b runs, then it classifies as review-required (not every file exempt).
-- [ ] Given a review-required PR completes round 1 with unresolved threads, when Step 6 runs, then it still re-triggers for round 2, unaffected by Step 2b.
-- [ ] The "Loop at a glance" diagram reflects the new Step 2b branch.
-- [ ] `REFERENCE.md` documents the `gh pr diff` command and classification rule without duplicating Step 6's trigger command section.
+- [x] Given a PR whose diff is entirely within `.agent-docs/`, when Step 2b runs, then it classifies as exempt and skips straight to Step 8 without triggering or polling.
+- [x] Given a PR whose diff includes a step-logic edit to `SKILL.md`/`REFERENCE.md`, when Step 2b runs, then it classifies as review-required, triggers Copilot, sets `review_round = 1`, and continues to Step 3.
+- [x] Given a PR whose diff mixes exempt files with one functional code file, when Step 2b runs, then it classifies as review-required (not every file exempt).
+- [x] Given a review-required PR completes round 1 with unresolved threads, when Step 6 runs, then it still re-triggers for round 2, unaffected by Step 2b.
+- [x] The "Loop at a glance" diagram reflects the new Step 2b branch.
+- [x] `REFERENCE.md` documents the `gh pr diff` command and classification rule without duplicating Step 6's trigger command section.
 
 ---
