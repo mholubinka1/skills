@@ -267,9 +267,10 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 
 ## Loop termination conditions
 
-The loop is complete when **any** of these conditions is met:
+The loop (Steps 3–7) never starts at all if Step 2b judges the diff exempt — docs-only, config-only, or trivial. No review requested, no poll, no `review_round` set. PR is ready to merge.
 
-0. **Exempt at Step 2b** — the PR's diff is docs-only, config-only, or trivial. No review requested, no poll, no `review_round` set. PR is ready to merge.
+Otherwise, the loop is complete when **any** of these conditions is met:
+
 1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
 2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger. PR is ready to merge.
 3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments (exits immediately to Step 8), or 10 attempts elapsed with no new review (falls through to Step 8).
