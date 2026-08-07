@@ -4,6 +4,40 @@ Full command detail for each step. Replace `{owner}`, `{repo}`, `{number}`, `{id
 
 ---
 
+## Step 2b — Decide whether Copilot review is required
+
+### Fetch the diff
+
+```bash
+gh pr diff {number}
+```
+
+Reads the full diff content of every changed file, in one call — the classification below depends on what changed inside each file, not the file's extension.
+
+### Classification rule
+
+A diff is **review-required** if any changed file contains either of these:
+
+- A functional code change — new or modified logic, control flow, or scripts.
+- A step-logic edit to `SKILL.md` or `REFERENCE.md` — a new or changed bash/GraphQL command, a decisioning rule, a branching condition, or a mutation. Skill files in this repo are markdown, but their step logic is the executable behavior the harness runs — extension alone does not make them documentation.
+
+A diff is **exempt** only if every changed file is one of these:
+
+- Prose-only documentation — wording, explanation, or narrative changes that don't alter what a step does (e.g. `.agent-docs/context.md`, `README.md`, a clarifying sentence added to a skill file's prose without touching its commands or branching).
+- No-logic config — value or formatting changes to config files (`*.json`, `*.yaml`, `*.toml`) that don't add or change a script.
+- Formatting-only — whitespace, comment wording, or markdown formatting with no semantic change.
+
+**Worked examples:**
+
+| Diff | Classification |
+|---|---|
+| Only `.agent-docs/specs/*.md` and `.agent-docs/issues/*.md` changed | Exempt |
+| `SKILL.md` changed, but only a step's prose explanation was reworded | Exempt |
+| `SKILL.md` changed: a new `gh api` command added to a step | Review-required |
+| One `.agent-docs/` file and one `*.py` script changed | Review-required (not every file is exempt) |
+
+---
+
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 
 Get `{owner}/{repo}` from:
@@ -234,6 +268,7 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 
 The loop is complete when **any** of these conditions is met:
 
+0. **Exempt at Step 2b** — the PR's diff is docs-only, config-only, or trivial. No review requested, no poll, no `review_round` set. PR is ready to merge.
 1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
 2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger. PR is ready to merge.
 3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments (exits immediately to Step 8), or 10 attempts elapsed with no new review (falls through to Step 8).

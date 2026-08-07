@@ -13,8 +13,11 @@ Runs a loop: fetch Copilot comments → fix or push back → commit → push →
 
 ```text
 Step 0  gh available?
-Step 1  PR exists? ──No──► Step 2: create PR (review_round = 1)
-        PR exists? ──Yes──► review_round = 1
+Step 1  PR exists? ──No──► Step 2: create PR ──► Step 2b
+        PR exists? ──Yes──► Step 2b
+Step 2b Read PR diff (`gh pr diff`); review-required?
+        No (exempt: docs/config/trivial only) ──► Step 8 (no trigger, no poll)
+        Yes (functional code or skill step-logic) ──► trigger Copilot; review_round = 1 ──► Step 3
 Step 3  Record baseline Copilot review ID; poll every 60s:
         thread count > 0? ─────────────────────────────────────────► Step 4
         suppressed comments > 0 in latest review body? ─────────────► Step 4
@@ -49,7 +52,7 @@ Then `gh auth login`. Do not proceed until `gh --version` passes.
 gh pr list --head $(git branch --show-current) --json number,title,url
 ```
 
-PR found → note the number. Set `review_round = 1`. Skip to Step 3.
+PR found → note the number. Continue to Step 2b.
 No PR → go to Step 2.
 
 ## Step 2 — Create the PR
@@ -59,7 +62,22 @@ BASE=$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name')
 gh pr create --base "$BASE" --title "<title>" --body "<summary and test plan>"
 ```
 
-Note the PR number. Set `review_round = 1`. The first Copilot review triggers automatically.
+Note the PR number. Continue to Step 2b.
+
+## Step 2b — Decide whether Copilot review is required
+
+GitHub no longer auto-triggers a Copilot review on PR creation, so this step decides whether the PR needs one and, if so, requests it explicitly.
+
+Fetch the full diff content — not just changed filenames, since the decision depends on what changed, not the file extension (a prose edit and a step-logic edit to the same `SKILL.md` file must be classified differently):
+
+```bash
+gh pr diff {number}
+```
+
+See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFERENCE.md) for the classification rule and worked examples.
+
+**Review-required** → trigger via the same command Step 6 uses (see the Re-trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)); set `review_round = 1`; continue to Step 3.
+**Exempt** → skip straight to Step 8. Do not trigger, do not set `review_round`, do not poll.
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 

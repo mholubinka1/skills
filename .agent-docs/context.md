@@ -48,6 +48,10 @@ _Avoid_: temp branch, scratch branch
 In `address-copilot-comments`, a counter tracking how many times Copilot has been requested to review a PR. Capped at 2; incrementing past the cap skips re-triggering.
 _Avoid_: review iteration, Copilot attempt, pass
 
+**Review-required diff**:
+The judgment `address-copilot-comments` Step 2b makes about whether a PR's diff needs an initial Copilot review — based on diff content, not file extension. Functional code changes and skill step-logic edits (commands, decisioning, mutations in `SKILL.md`/`REFERENCE.md`) require review; prose-only documentation, no-logic config, and formatting-only diffs are exempt.
+_Avoid_: complex change, non-trivial diff, code change
+
 **Unresolved thread**:
 A PR review comment thread that has not yet been marked resolved via GitHub's `resolveReviewThread` GraphQL mutation.
 _Avoid_: open comment, pending thread, active comment
