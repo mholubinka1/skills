@@ -35,6 +35,7 @@ A diff is **exempt** only if every changed file is one of these:
 | `SKILL.md` changed, but only a step's prose explanation was reworded | Exempt |
 | `SKILL.md` changed: a new `gh api` command added to a step | Review-required |
 | One `.agent-docs/` file and one `*.py` script changed | Review-required (not every file is exempt) |
+| Diff is empty (no files changed, or rename/binary-only with no content diff) | Exempt — vacuously true that every changed file is exempt |
 
 ---
 
