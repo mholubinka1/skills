@@ -49,7 +49,7 @@ In `address-copilot-comments`, a counter tracking how many times Copilot has bee
 _Avoid_: review iteration, Copilot attempt, pass
 
 **Review-required diff**:
-The judgment `address-copilot-comments` Step 2b makes about whether a PR's diff needs an initial Copilot review — based on diff content, not file extension. Functional code changes and skill step-logic edits (commands, decisioning, mutations in `SKILL.md`/`REFERENCE.md`) require review; prose-only documentation, no-logic config, and formatting-only diffs are exempt.
+The judgment `address-copilot-comments` Step 2b makes about whether a PR's diff needs an initial Copilot review — based on diff content, not file extension. Functional code changes and skill step-logic edits (commands, decisioning, mutations in `SKILL.md`/`REFERENCE.md`/`WORKFLOW.md`) require review; prose-only documentation, no-logic config, and formatting-only diffs are exempt.
 _Avoid_: complex change, non-trivial diff, code change
 
 **Unresolved thread**:
