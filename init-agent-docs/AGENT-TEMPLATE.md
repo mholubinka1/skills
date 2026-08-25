@@ -68,3 +68,9 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 - Treat review feedback as input to improve the work. Engage with it constructively.
 - Disagree with feedback through productive discussion and reasoning. Do not silently revert to the same pattern on the next task.
 - Contribute context and experience to team decisions. Every level has useful perspective to share.
+
+---
+
+## 7. Environment Notes
+
+- On Windows, via a Bash-tool-style shell: a multi-line `python -c "<script>"` can silently produce no output — no error, just nothing. Write the script to a scratch file and run it directly instead of inlining multi-line Python.
