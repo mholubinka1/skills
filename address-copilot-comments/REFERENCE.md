@@ -69,68 +69,82 @@ Get `{owner}/{repo}` from:
 gh repo view --json nameWithOwner --jq '.nameWithOwner'
 ```
 
-### Capture baseline Copilot review ID (before the poll loop)
+### The status-check script
 
-Run once before polling begins. Records the latest Copilot review ID so the loop can detect when a new review is submitted.
+Steps 3 and 7 both need the same three checks — unresolved Copilot threads, suppressed
+comments folded into the review body, and whether a new review has landed — so both call one
+bundled script rather than repeating the `gh api`/GraphQL/jq logic inline:
+`scripts/check-review-status.sh`, resolved relative to **this skill's own base directory**
+(the path shown as "Base directory for this skill" when `address-copilot-comments` was
+invoked) — not the current working directory, which is the target repo being worked on:
 
 ```bash
-BASELINE_REVIEW_ID=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
-  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
+bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} [baseline_review_id]
 ```
 
-Empty result means no Copilot review exists yet — any review that appears during polling is considered new.
+It prints four lines:
+
+```text
+THREAD_COUNT=<n>          (always numeric, including 0 on ERROR)
+SUPPRESSED_COUNT=<n>      (always numeric, including 0 on ERROR)
+CURRENT_REVIEW_ID=<id or empty>
+DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
+```
+
+- **`ACTIONABLE`** — `THREAD_COUNT` or `SUPPRESSED_COUNT` is non-zero. Exit the poll loop and
+  go to Step 4.
+- **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied at all (even
+  if that argument was itself an empty string, meaning no prior review existed at capture
+  time): `CURRENT_REVIEW_ID` is non-empty and differs from the baseline, with nothing
+  actionable. Copilot has reviewed and left nothing to address — go to Step 8 immediately.
+- **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
+  nothing already actionable. Wait 60 seconds and call again.
+- **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do
+  not treat this as `PENDING` — stop polling and report the failure to the user instead of
+  looping until exhaustion.
+
+Exits 0 for any well-formed call, including `DECISION=ERROR` — branch on the `DECISION` line,
+not the exit code. Exits 2 with a usage message on stderr for a malformed invocation (wrong
+argument count, or an `{owner}`/`{repo}`/`{number}` that doesn't match GitHub's own identifier
+charset).
+
+### Capture baseline Copilot review ID (before the poll loop)
+
+Run the script once before polling begins, with no `baseline_review_id` argument, and take
+`CURRENT_REVIEW_ID` from its output as the baseline for every later call in this round:
+
+```bash
+bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number}
+```
+
+If this first call already prints `DECISION=ACTIONABLE`, skip the poll loop entirely and go
+straight to Step 4 — there's no need to wait when something is already there to address. An
+empty `CURRENT_REVIEW_ID` means no Copilot review exists yet; any review that appears during
+polling is considered new.
 
 ### Poll loop (every 60 seconds, max 10 attempts)
 
-**Step A — Thread count check.** Use GraphQL — the REST `pulls/{number}/comments` endpoint misses threads posted as part of a review submission:
+Call the script again on each iteration, passing the baseline captured above:
 
 ```bash
-gh api graphql -f query='
-query {
-  repository(owner: "{owner}", name: "{repo}") {
-    pullRequest(number: {number}) {
-      reviewThreads(first: 100) {
-        nodes {
-          isResolved
-          comments(first: 1) {
-            nodes { author { login } }
-          }
-        }
-      }
-    }
-  }
-}' --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login | test("copilot"; "i"))] | length'
+bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} {baseline_review_id}
 ```
 
-**Step A2 — Suppressed comments check.** Run every iteration alongside Step A — do not skip this because Step A already found threads. A round can have both real threads and suppressed comments at once, and Step 4 relies on this check having actually run to know about any suppressed entries. Fetch the latest Copilot review body and check for a `### Suppressed comments (N)` block:
+`DECISION=ACTIONABLE` → exit the poll loop and continue to Step 4. `DECISION=CLEAN` → go to
+Step 8 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
+polling immediately and report the failure to the user — do not count it as a `PENDING`
+attempt or keep retrying silently.
 
-```bash
-REVIEW_BODY=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
-  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .body // empty')
+After 10 `PENDING` attempts, call the script one final time with the same arguments. If that
+final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable —
+continue to Step 8.
 
-SUPPRESSED_COUNT=$(printf '%s' "$REVIEW_BODY" | grep -oE 'Suppressed comments \([0-9]+\)' | grep -oE '[0-9]+' | head -1)
-SUPPRESSED_COUNT=${SUPPRESSED_COUNT:-0}
-```
-
-Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings there instead of posting them as real review comments), not real PR review comments, so they never appear as `reviewThreads` and Step A's count reads 0 even when these exist.
-
-**Decision.** If the Step A count > 0 **or** `SUPPRESSED_COUNT` > 0 — exit the poll loop and continue to Step 4, carrying forward `$REVIEW_BODY` for Step 4's suppressed-entry handling.
-
-**Step B — Reviews check (only when thread count = 0 and suppressed count = 0).** Check whether the latest Copilot review ID has changed since the baseline was captured. This re-fetches the same reviews endpoint as Step A2 rather than reusing its result — `gh api --jq` uses `gh`'s bundled jq internally, but combining Step A2 and Step B's extractions into a single call would require piping through a standalone `jq` binary, which isn't guaranteed to be on `PATH` even where `gh` is. The extra request is the safer trade:
-
-```bash
-# Same query as baseline capture above — assigns to CURRENT_REVIEW_ID
-CURRENT_REVIEW_ID=$(gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
-  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
-```
-
-Then:
-
-If `CURRENT_REVIEW_ID` is non-empty and differs from `BASELINE_REVIEW_ID` — Copilot has submitted a new review with no actionable threads. **Go to Step 8 immediately.**
-
-If `CURRENT_REVIEW_ID` equals `BASELINE_REVIEW_ID` (or is still empty) — no new review yet. Wait 60 seconds and repeat.
-
-After 10 failed attempts (thread count still 0, suppressed count still 0, and no new review detected), perform one final pass of Steps A, A2, and B with the same queries. If the final pass also returns 0 threads, 0 suppressed comments, and no new review, Copilot has not yet reviewed or has nothing actionable — continue to Step 8.
+Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the
+review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings
+there instead of posting them as real review comments), not real PR review comments, so they
+never appear as `reviewThreads` and `THREAD_COUNT` reads 0 even when these exist. That's why
+the script checks both counts on every call rather than treating one as a fallback for the
+other — a round can have both real threads and suppressed comments at once.
 
 ---
 
@@ -170,7 +184,14 @@ The query returns two IDs per thread — use the right one for each operation:
 
 ### Suppressed comments (no thread ID)
 
-Suppressed comments come from the same review body already fetched in Step A2 (`$REVIEW_BODY`) — re-fetch it here if it's out of scope. Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Treat each entry as its own finding — decide Fix or Push back exactly as for a thread (including the `.agent-docs/` push-back rule), and apply any code changes the same way.
+`check-review-status.sh` reports only the suppressed-comment *count*, not their text — fetch the review body itself here:
+
+```bash
+gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
+  --jq '[.[] | select((.user.login // "") | test("copilot";"i"))] | last | .body // empty'
+```
+
+Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Treat each entry as its own finding — decide Fix or Push back exactly as for a thread (including the `.agent-docs/` push-back rule), and apply any code changes the same way.
 
 Suppressed entries have no `threadId` or `comment_id` — the reply and resolve steps below apply only to real threads. Skip straight to the "Acknowledge suppressed comments" section for these instead.
 

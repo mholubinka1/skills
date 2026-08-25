@@ -81,15 +81,13 @@ See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFE
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 
-Before polling, capture the latest Copilot review ID as a baseline (empty if no review exists yet).
+Both the thread-count check and the suppressed-comments check (a round can have both at once — suppressed comments are actionable Copilot findings folded into the review body's markdown instead of posted as real reviewThreads, so they never show up in the thread count even though they're unaddressed) run via one bundled script rather than inline commands — see the status-check script section in [REFERENCE.md](REFERENCE.md).
 
-Poll every 60 seconds, max 10 attempts:
+Before polling, capture the latest Copilot review ID as a baseline by calling the script once with no baseline argument (empty if no review exists yet; if this call already reports something actionable, skip straight to Step 4).
 
-1. Run the thread count check **and** the suppressed-comments check (both, every iteration — don't short-circuit one on the other, a round can have both real threads and suppressed comments at once). If either is non-zero, exit to Step 4. Suppressed comments are actionable Copilot findings folded into the review body's markdown instead of posted as real reviewThreads — they have no `databaseId`/thread ID, so they never show up in the thread count check even though they're unaddressed.
-2. If both checks are 0/absent, check whether the latest Copilot review ID is non-empty and differs from the baseline. If yes, Copilot reviewed clean — go to Step 8 immediately.
-3. If no new review, wait and repeat.
+Poll every 60 seconds, max 10 attempts, calling the script again each time: an actionable result exits to Step 4; a clean result (a new review with nothing to address) goes to Step 8 immediately; a failed `gh api` call is reported distinctly and must not be treated as "wait and retry"; otherwise wait and repeat.
 
-After 10 attempts with no new clean review, perform one final check following the same branching: threads > 0 or suppressed comments > 0 → exit to Step 4; otherwise go to Step 8. See the Poll for Copilot Review Threads and Suppressed Comments section in [REFERENCE.md](REFERENCE.md) for the queries.
+After 10 attempts with no new clean review, call the script one final time following the same branching. See the status-check script section in [REFERENCE.md](REFERENCE.md) for the full command and output contract.
 
 ## Step 4 — Decide and apply changes
 
