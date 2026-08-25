@@ -59,7 +59,8 @@ spell out identically, reporting it as a single `DECISION` value.
   reports `DECISION=ACTIONABLE`, the poll loop is skipped entirely.
 - Owner/repo/PR-number flow into a GraphQL query and a REST path; the script validates them
   against GitHub's own identifier charset before use, and the GraphQL query passes them as
-  bound `-F` variables (not string-concatenated into the query text) to avoid injection.
+  bound variables (not string-concatenated into the query text) to avoid injection — see the
+  `-f`/`-F` split described below for which flag each variable uses and why.
 - The script does not return the Copilot review body text (only the suppressed-comment
   count) — Step 4 re-fetches the body itself when it needs to read suppressed-comment entries
   for real, since embedding arbitrary multi-line markdown into single-line `KEY=value` output
