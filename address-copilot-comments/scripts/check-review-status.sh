@@ -72,7 +72,7 @@ query($owner: String!, $repo: String!, $number: Int!) {
     }
   }
 }' -f owner="$OWNER" -f repo="$REPO" -F number="$PR" \
-  --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login | test("copilot"; "i"))] | length')
+  --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select((.comments.nodes[0].author.login // "") | test("copilot"; "i"))] | length')
 THREAD_OK=$?
 
 # One call for both the id and the body: `--jq`'s comma operator emits each as its own

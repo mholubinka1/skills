@@ -67,6 +67,12 @@ spell out identically, reporting it as a single `DECISION` value.
   is fragile to parse reliably.
 - No ADR: reverting to inline bash later is a low-cost change if this pattern doesn't pan
   out, so it fails the "hard to reverse" bar for recording a decision.
+- The thread-count GraphQL `--jq` filter coerces `.comments.nodes[0].author.login` with
+  `// ""` before calling `test(...)`: `test` errors on a `null` input (jq requires a string),
+  and `.login` resolves to `null` whenever the thread has no comments or the first comment's
+  author is unavailable (e.g. a deleted GitHub account) — without the guard, that single
+  thread would fail the whole GraphQL call and misreport a successful API response as
+  `DECISION=ERROR`.
 - `owner`/`repo` are passed to the GraphQL call via `-f` (always a string), not `-F` (which
   auto-detects type): an all-digit owner or repo name is a legitimate GitHub identifier, and
   `-F` would otherwise send it as a JSON number, which the `String!`-typed query variables
