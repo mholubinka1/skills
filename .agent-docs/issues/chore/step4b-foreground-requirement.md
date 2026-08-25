@@ -1,5 +1,7 @@
 # Issues: chore/step4b-foreground-requirement
 
+> Work complete — PR ready to merge.
+
 ## Require Step 4b to run synchronously in the foreground
 
 **GitHub**: #50
@@ -21,13 +23,13 @@ them.
 
 ### Acceptance criteria
 
-- [ ] Step 4b's callout in `address-copilot-comments/SKILL.md` states the validation must run
+- [x] Step 4b's callout in `address-copilot-comments/SKILL.md` states the validation must run
       synchronously in the foreground.
-- [ ] The callout states the validation (including any fixes it applies) must fully complete
+- [x] The callout states the validation (including any fixes it applies) must fully complete
       before Step 4c and this round's Step 5 commit, without claiming Step 4b itself commits.
-- [ ] The callout explicitly forbids dispatching the validation as a background agent while
+- [x] The callout explicitly forbids dispatching the validation as a background agent while
       the main thread continues.
-- [ ] No other wording in Step 4b or elsewhere in SKILL.md changes.
-- [ ] `pre-commit-check` passes on the file.
+- [x] No other wording in Step 4b or elsewhere in SKILL.md changes.
+- [x] `pre-commit-check` passes on the file.
 
 ---
