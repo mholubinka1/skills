@@ -4,6 +4,28 @@ Full command detail for each step. Replace `{owner}`, `{repo}`, `{number}`, `{id
 
 ---
 
+## Common pitfalls
+
+**`gh api --jq` does not accept jq's `--arg` flag.** They share a name but are unrelated —
+`--jq` consumes exactly one token as its filter value. Writing `--arg foo "$bar" '<filter>'`
+after it means `gh` takes `--arg` itself as that filter value, and `foo`, `"$bar"`, and the
+real filter all become extra positional arguments to `gh api`, which only accepts one (the
+API path) — so the failure is a `gh api` argument-count error, not a jq error:
+
+```bash
+# Doesn't work — "--arg" becomes --jq's filter value; foo, "$bar", and the real filter
+# are then three extra positional args to `gh api`, which only accepts one:
+gh api "repos/{owner}/{repo}/pulls/{number}/reviews" \
+  --jq --arg foo "$bar" '.[] | select(.user.login == $foo)'
+# fails with: accepts 1 arg(s), received 4
+
+# Works — interpolate the shell value directly into the filter string instead:
+gh api "repos/{owner}/{repo}/pulls/{number}/reviews" \
+  --jq ".[] | select(.user.login == \"$bar\")"
+```
+
+---
+
 ## Step 2b — Decide whether Copilot review is required
 
 ### Fetch the diff
