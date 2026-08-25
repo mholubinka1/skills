@@ -37,9 +37,10 @@ instead.
   since it's about the same class of concern (identifier naming/renaming), not about git
   practice — renaming an identifier is a code-quality operation, not a source-control one.
 - Bullet content: never use unanchored `sed`/regex find-replace for identifier renames — a
-  pattern like `_parse_window_date` will also match inside `test_parse_window_date_x`. Use
-  word-boundary-anchored patterns (e.g. `\b`) or a proper multi-file rename that respects
-  token boundaries instead.
+  pattern like `_parse_window_date` also matches inside `test_parse_window_date_x`. Anchor on
+  word boundaries or use a proper multi-file rename tool instead. Trimmed after review to one
+  concrete example and a short recommendation, matching the terse, single-clause style of the
+  file's other Production Code Quality bullets rather than the initial longer draft.
 - Both files updated in the same commit, matching fix #3's own lesson: when a template and
   its mirrored copy both need to change, sweep them together rather than letting one drift.
 - No ADR: reverting a single bullet from two files is trivial.
