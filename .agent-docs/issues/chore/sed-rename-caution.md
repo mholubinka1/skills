@@ -1,5 +1,7 @@
 # Issues: chore/sed-rename-caution
 
+> Work complete — PR ready to merge.
+
 ## Warn against unanchored sed renames in agent standards
 
 **GitHub**: #52
@@ -17,11 +19,11 @@ proper multi-file rename tool instead.
 
 ### Acceptance criteria
 
-- [ ] `init-agent-docs/AGENT-TEMPLATE.md` has a new bullet under Production Code Quality
+- [x] `init-agent-docs/AGENT-TEMPLATE.md` has a new bullet under Production Code Quality
       covering this warning.
-- [ ] `.agent-docs/agent.md` has the identical bullet in the identical location.
-- [ ] Both files remain byte-identical after the change.
-- [ ] No existing bullet's wording changes in either file.
-- [ ] `pre-commit-check` passes on both files.
+- [x] `.agent-docs/agent.md` has the identical bullet in the identical location.
+- [x] Both files remain byte-identical after the change.
+- [x] No existing bullet's wording changes in either file.
+- [x] `pre-commit-check` passes on both files.
 
 ---
