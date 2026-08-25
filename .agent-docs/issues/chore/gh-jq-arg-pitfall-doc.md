@@ -1,5 +1,7 @@
 # Issues: chore/gh-jq-arg-pitfall-doc
 
+> Work complete — PR ready to merge.
+
 ## Document the gh api --jq / jq --arg pitfall
 
 **GitHub**: #44
@@ -17,12 +19,12 @@ directly into the query string.
 
 ### Acceptance criteria
 
-- [ ] `address-copilot-comments/REFERENCE.md` has a "Common pitfalls" section placed before
+- [x] `address-copilot-comments/REFERENCE.md` has a "Common pitfalls" section placed before
       Step 2b.
-- [ ] The section states plainly that `gh`'s `--jq` flag does not accept jq's `--arg` flag.
-- [ ] The section shows both a non-working `--jq --arg ...` example and the correct
+- [x] The section states plainly that `gh`'s `--jq` flag does not accept jq's `--arg` flag.
+- [x] The section shows both a non-working `--jq --arg ...` example and the correct
       inline-substitution alternative.
-- [ ] No existing snippet's behavior or wording elsewhere in the file changes.
-- [ ] `pre-commit-check` passes on the file.
+- [x] No existing snippet's behavior or wording elsewhere in the file changes.
+- [x] `pre-commit-check` passes on the file.
 
 ---
