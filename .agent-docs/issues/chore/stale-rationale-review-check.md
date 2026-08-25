@@ -1,5 +1,7 @@
 # Issues: chore/stale-rationale-review-check
 
+> Work complete — PR ready to merge.
+
 ## Flag unswept stale design-rationale comments in code review
 
 **GitHub**: #48
@@ -19,15 +21,15 @@ inline.
 
 ### Acceptance criteria
 
-- [ ] `code-review/REVIEW-CRITERIA.md`'s Documentation section has a new bullet covering this
+- [x] `code-review/REVIEW-CRITERIA.md`'s Documentation section has a new bullet covering this
       check.
-- [ ] The bullet specifies the trigger (a diff changes or removes a documented
+- [x] The bullet specifies the trigger (a diff changes or removes a documented
       rationale/invariant) and
       the action (search the repo for other copies of that rationale, including paraphrases,
       not just an exact-phrase match), and flags any left unswept.
-- [ ] The bullet does not assert its own blocking/advisory verdict — classification is left
+- [x] The bullet does not assert its own blocking/advisory verdict — classification is left
       to the file's existing judgement-call framing, matching sibling bullets.
-- [ ] No existing bullet's wording changes.
-- [ ] `pre-commit-check` passes on the file.
+- [x] No existing bullet's wording changes.
+- [x] `pre-commit-check` passes on the file.
 
 ---
