@@ -85,17 +85,18 @@ bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} [
 It prints four lines:
 
 ```text
-THREAD_COUNT=<n>
-SUPPRESSED_COUNT=<n>
+THREAD_COUNT=<n>          (always numeric, including 0 on ERROR)
+SUPPRESSED_COUNT=<n>      (always numeric, including 0 on ERROR)
 CURRENT_REVIEW_ID=<id or empty>
 DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
 ```
 
 - **`ACTIONABLE`** — `THREAD_COUNT` or `SUPPRESSED_COUNT` is non-zero. Exit the poll loop and
   go to Step 4.
-- **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied: it is
-  non-empty and `CURRENT_REVIEW_ID` differs from it, with nothing actionable. Copilot has
-  reviewed and left nothing to address — go to Step 8 immediately.
+- **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied at all (even
+  if that argument was itself an empty string, meaning no prior review existed at capture
+  time): `CURRENT_REVIEW_ID` is non-empty and differs from the baseline, with nothing
+  actionable. Copilot has reviewed and left nothing to address — go to Step 8 immediately.
 - **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
   nothing already actionable. Wait 60 seconds and call again.
 - **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do

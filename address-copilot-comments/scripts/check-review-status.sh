@@ -4,14 +4,18 @@
 # Usage: check-review-status.sh <owner> <repo> <pr_number> [baseline_review_id]
 #
 # Prints, one per line:
-#   THREAD_COUNT=<n>
-#   SUPPRESSED_COUNT=<n>
+#   THREAD_COUNT=<n>          (always numeric, including 0 on ERROR)
+#   SUPPRESSED_COUNT=<n>      (always numeric, including 0 on ERROR)
 #   CURRENT_REVIEW_ID=<id or empty>
 #   DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
 #
 # ACTIONABLE — unresolved Copilot threads or suppressed comments exist; go to Step 4.
-# CLEAN      — called WITH a baseline (4th argument supplied) and CURRENT_REVIEW_ID is
-#              non-empty and differs from it, with nothing actionable; go to Step 8.
+# CLEAN      — called WITH a baseline (4th argument supplied, even if it was itself an empty
+#              string), CURRENT_REVIEW_ID is non-empty, and it differs from the baseline, with
+#              nothing actionable; go to Step 8. The baseline itself may legitimately be
+#              empty (it means no prior review existed at capture time) — what matters is
+#              that a baseline argument was supplied at all (see HAS_BASELINE below), not
+#              that its value is non-empty.
 # PENDING    — no new review yet, or this is the no-baseline capture call (see below) and
 #              nothing is already actionable; wait and call again.
 # ERROR      — a `gh api` call itself failed (network/auth/not-found). Never treated as
@@ -82,8 +86,8 @@ CURRENT_REVIEW_ID=$(printf '%s\n' "$REVIEWS_RESULT" | head -1)
 REVIEW_BODY=$(printf '%s\n' "$REVIEWS_RESULT" | tail -n +2)
 
 if [ "$THREAD_OK" -ne 0 ] || [ "$REVIEWS_OK" -ne 0 ]; then
-  echo "THREAD_COUNT="
-  echo "SUPPRESSED_COUNT="
+  echo "THREAD_COUNT=0"
+  echo "SUPPRESSED_COUNT=0"
   echo "CURRENT_REVIEW_ID="
   echo "DECISION=ERROR"
   exit 0
