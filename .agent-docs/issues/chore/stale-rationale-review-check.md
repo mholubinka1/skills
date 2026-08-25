@@ -11,9 +11,11 @@
 ### What to build
 
 Add a bullet to `code-review/REVIEW-CRITERIA.md`'s `## Documentation` section instructing
-the Standards reviewer: when a diff changes a documented design rationale or invariant, grep
-the repo for the old rationale phrase and flag (blocking) any other occurrence left unswept
-in the same diff.
+the Standards reviewer: when a diff changes a documented design rationale or invariant,
+search the repo for other copies of that rationale (including paraphrases, not just an
+exact-phrase match) and flag any left contradicting the new code. Classification (blocking
+vs. advisory) is left to the file's existing judgement-call framing rather than asserted
+inline.
 
 ### Acceptance criteria
 

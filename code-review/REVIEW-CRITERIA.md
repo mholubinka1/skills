@@ -75,4 +75,4 @@ If screenshots are included in the PR, review them against all acceptance criter
 
 - **READMEs and runbooks**: check that READMEs, runbooks, wikis, and architecture docs are not outdated because of this PR. Authors must document their changes.
 - **Environment variables and configuration**: new environment variables or configuration values must be documented.
-- **Stale rationale sweep**: if the diff changes or removes a design-rationale or invariant comment (the _why_, not the _what_), search the repo for other copies of that rationale — restated in a class comment, an inline comment, a test comment, or a spec doc — since these are often paraphrased rather than repeated verbatim, and flag any left contradicting the new code.
+- **Stale rationale sweep**: if the diff changes or removes a design-rationale or invariant comment (why something works a certain way, not what it does), search the repo for other copies of that rationale — restated in a class comment, an inline comment, a test comment, or a spec doc — since these are often paraphrased rather than repeated verbatim, and flag any left contradicting the new code.
