@@ -71,11 +71,15 @@ spell out identically, reporting it as a single `DECISION` value.
   auto-detects type): an all-digit owner or repo name is a legitimate GitHub identifier, and
   `-F` would otherwise send it as a JSON number, which the `String!`-typed query variables
   reject. `-F` is still used for `number`, which must bind to the `Int!` variable.
-- The two identical-endpoint calls for `.body` and `.id` stay separate rather than merging
-  into one `--jq` call with a delimited (e.g. `@tsv`) output: a review body is arbitrary
-  multi-line markdown, and safely combining it with the id in one line would need base64-style
-  encoding — whose decode flag differs between GNU (`base64 -d`) and BSD/macOS (`base64 -D`)
-  coreutils. The extra request is the accepted trade-off over that portability split.
+- `.id` and `.body` are fetched in a single call via `--jq`'s comma operator
+  (`(.id // empty), (.body // empty)`), not two separate requests: `gh api --jq` prints one
+  raw-text result per line, the id is always single-line (a bare number or empty), so it
+  always lands on line 1, and the (possibly multi-line) body is unambiguously everything from
+  line 2 onward (`head -1` / `tail -n +2`) — no delimiter or encoding required. An earlier
+  version of this script issued two identical requests and justified it with a since-disproven
+  claim that combining them would require base64 encoding; that rationale was wrong on both
+  counts (a plain line-1/rest-of-lines split works, and even an encoding-based approach
+  wouldn't have needed a full round-trip duplication).
 
 ## Testing Decisions
 
@@ -92,6 +96,9 @@ spell out identically, reporting it as a single `DECISION` value.
   Also verified the usage-error path (wrong argument count, and an owner containing `"`)
   exits 2 with a message on stderr rather than crashing under `set -u`, and the `ERROR` path
   (a nonexistent PR number) reports `DECISION=ERROR` rather than `PENDING`.
+- Re-verified all of the above after merging the `.id`/`.body` fetch into one call: `PENDING`
+  (3-arg), `CLEAN` (4-arg, baseline `0`), `PENDING` (4-arg, baseline matches current),
+  `DECISION=ERROR` (nonexistent PR), and the usage-error exit — all unchanged against #45.
 
 ## Out of Scope
 

@@ -71,21 +71,17 @@ query($owner: String!, $repo: String!, $number: Int!) {
   --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login | test("copilot"; "i"))] | length')
 THREAD_OK=$?
 
-REVIEW_BODY=$(gh api "repos/$OWNER/$REPO/pulls/$PR/reviews?per_page=100" \
-  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .body // empty')
-BODY_OK=$?
+# One call for both the id and the body: `--jq`'s comma operator emits each as its own
+# top-level result, and gh prints one raw-text result per line — the id is always a single
+# line (a bare number or empty), so it always occupies line 1, with the (possibly multi-line)
+# body making up everything from line 2 on. No delimiter or encoding is needed to split them.
+REVIEWS_RESULT=$(gh api "repos/$OWNER/$REPO/pulls/$PR/reviews?per_page=100" \
+  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | (.id // empty), (.body // empty)')
+REVIEWS_OK=$?
+CURRENT_REVIEW_ID=$(printf '%s\n' "$REVIEWS_RESULT" | head -1)
+REVIEW_BODY=$(printf '%s\n' "$REVIEWS_RESULT" | tail -n +2)
 
-# A second, identical-endpoint call rather than reusing the one above. `gh api --jq` could
-# extract both fields in one request (e.g. via @tsv), but a review body is arbitrary
-# multi-line markdown — safely combining it with a single-line id in one delimited output
-# would need base64-style encoding, whose decode flag differs between GNU (`base64 -d`) and
-# BSD/macOS (`base64 -D`) coreutils. Two simple, single-value calls avoid that portability
-# split; the extra request is the accepted trade-off.
-CURRENT_REVIEW_ID=$(gh api "repos/$OWNER/$REPO/pulls/$PR/reviews?per_page=100" \
-  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
-ID_OK=$?
-
-if [ "$THREAD_OK" -ne 0 ] || [ "$BODY_OK" -ne 0 ] || [ "$ID_OK" -ne 0 ]; then
+if [ "$THREAD_OK" -ne 0 ] || [ "$REVIEWS_OK" -ne 0 ]; then
   echo "THREAD_COUNT="
   echo "SUPPRESSED_COUNT="
   echo "CURRENT_REVIEW_ID="
