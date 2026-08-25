@@ -4,19 +4,19 @@
 
 `code-review/REVIEW-CRITERIA.md`'s Documentation section checks that READMEs/runbooks and
 environment variables stay current, but has no check for a narrower, previously-observed
-failure mode: a diff changes a documented design rationale or invariant (e.g. a "singleton
-returned by reference" comment), but other copies of that same rationale — a class comment,
-an inline comment, a test comment, a spec doc — are left stale, still describing the old
-behavior. In a real PR, this required a reviewer (GitHub Copilot) to flag all 4 stale copies
-individually across a review, rather than catching them together in one pass.
+failure mode: a diff changes or removes a documented design rationale or invariant (e.g. a
+"singleton returned by reference" comment), but other copies of that same rationale — a class
+comment, an inline comment, a test comment, a spec doc — are left stale, still describing the
+old behavior. In a real PR, this required a reviewer (GitHub Copilot) to flag all 4 stale
+copies individually across a review, rather than catching them together in one pass.
 
 ## Solution
 
 Add a Documentation bullet to `REVIEW-CRITERIA.md` instructing the Standards reviewer: when a
-diff changes a documented design rationale or invariant, search the repo for other copies of
-that rationale and flag any left unswept in the same diff. Classification (blocking vs.
-advisory) is left to the file's existing judgement-call framing rather than asserted inline,
-matching every other bullet in the file.
+diff changes or removes a documented design rationale or invariant, search the repo for other
+copies of that rationale and flag any left contradicting the new code. Classification
+(blocking vs. advisory) is left to the file's existing judgement-call framing rather than
+asserted inline, matching every other bullet in the file.
 
 ## User Stories
 
@@ -38,9 +38,10 @@ matching every other bullet in the file.
   fixed blocking/advisory verdict inline — the file's own "always a judgement call" framing
   rule already governs that.
 - The search is framed as "other copies of that rationale," not "grep for the exact phrase
-  being changed": a rationale is often paraphrased across a class comment, a test comment,
-  and a spec doc rather than repeated verbatim, and an exact-string grep would systematically
-  miss the paraphrased copies — exactly the failure mode this bullet exists to catch.
+  being changed": a rationale is often paraphrased across a class comment, an inline comment,
+  a test comment, and a spec doc rather than repeated verbatim, and an exact-string grep
+  would systematically miss the paraphrased copies — exactly the failure mode this bullet
+  exists to catch.
 - No new section, no new tooling, no automation — this is an instruction to the sub-agent
   reviewer, who already has full repo search tools (Bash/Grep) available when spawned by
   `code-review` Step 4.
