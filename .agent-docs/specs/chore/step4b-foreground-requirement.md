@@ -15,8 +15,13 @@ other.
 ## Solution
 
 Add a sentence to Step 4b's existing callout: the validation must run synchronously in the
-foreground and fully complete — including any fixes it produces being committed — before
-Step 4c proceeds. Never dispatched as a background agent while the main thread continues.
+foreground and fully complete — including any fixes it applies — before Step 4c and this
+round's Step 5 commit. Never dispatched as a background agent while the main thread
+continues. Note: `code-review` Steps 1–5 (what Step 4b invokes) don't themselves commit
+anything — Step 5's actual instruction is "apply fixes, then re-run pre-commit hooks"; the
+commit happens later, in `address-copilot-comments`' own Step 5. The requirement is that any
+fixes Step 4b's validation applies land before that later commit, not that Step 4b commits
+them itself.
 
 ## User Stories
 
@@ -32,8 +37,8 @@ Step 4c proceeds. Never dispatched as a background agent while the main thread c
 - File touched: `address-copilot-comments/SKILL.md` only, within Step 4b's existing
   `> **MUST NOT SKIP.**` callout.
 - Added sentence: the validation must run synchronously in the foreground and complete
-  entirely — including any fixes it produces being committed — before Step 4c proceeds; never
-  dispatched as a background agent while the main thread continues to Step 4c/5.
+  entirely — including any fixes it applies — before Step 4c and this round's Step 5 commit;
+  never dispatched as a background agent while the main thread continues.
 - No REFERENCE.md change: Step 4b has no corresponding REFERENCE.md section (its content is
   fully inline in SKILL.md already), so there is nothing else to update.
 - No ADR: reverting a single sentence in an existing callout is trivial.
