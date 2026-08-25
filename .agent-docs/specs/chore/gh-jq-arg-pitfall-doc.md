@@ -13,9 +13,8 @@ query string instead.
 ## Solution
 
 Add a single, canonical "Common pitfalls" note near the top of `REFERENCE.md` that states the
-limitation plainly and shows the correct pattern already used throughout the rest of the
-document: inline the shell variable directly into the query string rather than passing
-`--arg` through `--jq`.
+limitation plainly and shows the correct fix: inline the shell variable directly into the
+query string rather than passing `--arg` through `--jq`.
 
 ## User Stories
 
@@ -35,9 +34,10 @@ document: inline the shell variable directly into the query string rather than p
   follow.
 - Content: state that `gh`'s `--jq` does not accept jq's `--arg` flag (the two are unrelated
   flags despite the shared name), show a short "doesn't work" vs "works" pair of snippets —
-  the "works" side being the inline-substitution pattern (e.g. `--jq '... "{value}" ...'`
-  with the shell variable interpolated directly into the query string), matching the pattern
-  every existing snippet in the file already uses.
+  the "works" side interpolating the shell variable directly into the double-quoted filter
+  string (the only mechanism that both expands the shell variable and stays a single `--jq`
+  argument; existing snippets elsewhere in the file don't face this problem since none of
+  them interpolate a shell variable into a filter).
 - No changes to any existing bash/GraphQL snippet's behavior — this is additive documentation
   only.
 

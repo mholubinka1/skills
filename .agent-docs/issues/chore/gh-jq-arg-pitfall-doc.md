@@ -13,7 +13,7 @@
 Add a "Common pitfalls" section near the top of `address-copilot-comments/REFERENCE.md`,
 before Step 2b, stating that `gh api --jq` does not accept jq's own `--arg` flag. Show a
 "doesn't work" vs "works" pair of snippets, where the "works" side inlines the shell value
-directly into the query string — the pattern every other snippet in the file already uses.
+directly into the query string.
 
 ### Acceptance criteria
 
