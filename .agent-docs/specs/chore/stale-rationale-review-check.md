@@ -13,9 +13,10 @@ individually across a review, rather than catching them together in one pass.
 ## Solution
 
 Add a Documentation bullet to `REVIEW-CRITERIA.md` instructing the Standards reviewer: when a
-diff changes a documented design rationale or invariant, grep the repo for the old rationale
-phrase and flag (blocking, per the existing "documented-standard breaches may be blocking"
-rule) any other occurrence left unswept in the same diff.
+diff changes a documented design rationale or invariant, search the repo for other copies of
+that rationale and flag any left unswept in the same diff. Classification (blocking vs.
+advisory) is left to the file's existing judgement-call framing rather than asserted inline,
+matching every other bullet in the file.
 
 ## User Stories
 
@@ -31,10 +32,15 @@ rule) any other occurrence left unswept in the same diff.
 - File touched: `code-review/REVIEW-CRITERIA.md` only, under the existing `## Documentation`
   section.
 - New bullet: when a diff changes or removes a comment/doc line explaining a design rationale
-  or invariant (the *why*, not the *what*), grep the repo for the phrase being changed and
-  check every match; any other occurrence left contradicting the new code is a blocking
-  finding, since REVIEW-CRITERIA.md's existing rule already treats documented-standard
-  breaches as blocking (this bullet itself is now such a standard).
+  or invariant (the *why*, not the *what*), search the repo for other copies of that
+  rationale and flag any left contradicting the new code. Written concisely, matching the
+  single-sentence style of the two sibling Documentation bullets, and without asserting a
+  fixed blocking/advisory verdict inline — the file's own "always a judgement call" framing
+  rule already governs that.
+- The search is framed as "other copies of that rationale," not "grep for the exact phrase
+  being changed": a rationale is often paraphrased across a class comment, a test comment,
+  and a spec doc rather than repeated verbatim, and an exact-string grep would systematically
+  miss the paraphrased copies — exactly the failure mode this bullet exists to catch.
 - No new section, no new tooling, no automation — this is an instruction to the sub-agent
   reviewer, who already has full repo search tools (Bash/Grep) available when spawned by
   `code-review` Step 4.
