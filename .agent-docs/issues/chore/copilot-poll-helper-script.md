@@ -22,8 +22,12 @@ Step 3's own inline bash, since that logic now lives in a separate script proces
 
 - [ ] `address-copilot-comments/scripts/check-review-status.sh` exists, is invoked via
       `bash <path>`, and outputs the four documented `KEY=value` lines.
-- [ ] The script correctly reports `ACTIONABLE`, `CLEAN`, and `PENDING` against real `gh api`
-      data (verified manually against a real PR).
+- [ ] The script correctly reports `ACTIONABLE`, `CLEAN`, `PENDING`, and `ERROR` against real
+      `gh api` data (verified manually against a real PR), including that a 3-argument
+      (no-baseline) call never reports `CLEAN` even when a prior review already exists.
+- [ ] Owner/repo/pr_number are validated against GitHub's identifier charset and passed as
+      bound GraphQL variables (not string-concatenated into the query), and a malformed
+      invocation exits 2 with a usage message rather than crashing under `set -u`.
 - [ ] `REFERENCE.md`'s Step 3 baseline capture and poll loop call the script instead of
       repeating the inline `gh api`/GraphQL/jq blocks.
 - [ ] `REFERENCE.md`'s Step 4 suppressed-comments section fetches the review body itself

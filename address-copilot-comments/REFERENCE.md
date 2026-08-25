@@ -88,18 +88,24 @@ It prints four lines:
 THREAD_COUNT=<n>
 SUPPRESSED_COUNT=<n>
 CURRENT_REVIEW_ID=<id or empty>
-DECISION=ACTIONABLE|CLEAN|PENDING
+DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
 ```
 
 - **`ACTIONABLE`** — `THREAD_COUNT` or `SUPPRESSED_COUNT` is non-zero. Exit the poll loop and
   go to Step 4.
-- **`CLEAN`** — `CURRENT_REVIEW_ID` is non-empty and differs from the `baseline_review_id`
-  argument, with nothing actionable. Copilot has reviewed and left nothing to address — go to
-  Step 8 immediately.
-- **`PENDING`** — no new review yet. Wait 60 seconds and call again.
+- **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied: it is
+  non-empty and `CURRENT_REVIEW_ID` differs from it, with nothing actionable. Copilot has
+  reviewed and left nothing to address — go to Step 8 immediately.
+- **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
+  nothing already actionable. Wait 60 seconds and call again.
+- **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do
+  not treat this as `PENDING` — stop polling and report the failure to the user instead of
+  looping until exhaustion.
 
-Always exits 0 regardless of which decision it prints — branch on the `DECISION` line, not
-the exit code.
+Exits 0 for any well-formed call, including `DECISION=ERROR` — branch on the `DECISION` line,
+not the exit code. Exits 2 with a usage message on stderr for a malformed invocation (wrong
+argument count, or an `{owner}`/`{repo}`/`{number}` that doesn't match GitHub's own identifier
+charset).
 
 ### Capture baseline Copilot review ID (before the poll loop)
 
@@ -124,7 +130,9 @@ bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} {
 ```
 
 `DECISION=ACTIONABLE` → exit the poll loop and continue to Step 4. `DECISION=CLEAN` → go to
-Step 8 immediately. `DECISION=PENDING` → wait 60 seconds and repeat.
+Step 8 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
+polling immediately and report the failure to the user — do not count it as a `PENDING`
+attempt or keep retrying silently.
 
 After 10 `PENDING` attempts, call the script one final time with the same arguments. If that
 final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable —

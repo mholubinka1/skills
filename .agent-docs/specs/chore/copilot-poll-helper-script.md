@@ -37,11 +37,25 @@ spell out identically, reporting it as a single `DECISION` value.
   `address-copilot-comments` is invoked — not the caller's working directory, which is the
   target repo being worked on, not the skills repo.
 - Output: four `KEY=value` lines on stdout — `THREAD_COUNT`, `SUPPRESSED_COUNT`,
-  `CURRENT_REVIEW_ID`, and a computed `DECISION` (`ACTIONABLE` | `CLEAN` | `PENDING`). Always
-  exits 0; callers branch on the `DECISION` line, not the exit code.
-- The one-time "capture baseline before polling" step becomes a single no-baseline call to
-  the same script, using its `CURRENT_REVIEW_ID` output as the baseline for later calls. If
-  that first call already reports `DECISION=ACTIONABLE`, the poll loop is skipped entirely.
+  `CURRENT_REVIEW_ID`, and a computed `DECISION` (`ACTIONABLE` | `CLEAN` | `PENDING` |
+  `ERROR`). Exits 0 for any well-formed call, including `ERROR` — callers branch on the
+  `DECISION` line, not the exit code. Exits 2 with a usage message on stderr for a malformed
+  invocation (wrong argument count, or an owner/repo/pr_number that fails a GitHub-identifier
+  charset check).
+- `DECISION=ERROR` covers a `gh api` call itself failing (network, auth, not-found) — this is
+  reported distinctly rather than folded into `PENDING`, so a real failure doesn't get treated
+  as "nothing to do yet, keep polling."
+- The one-time "capture baseline before polling" step becomes a single no-baseline (3-argument)
+  call to the same script, using its `CURRENT_REVIEW_ID` output as the baseline for later
+  calls. Whether a baseline was supplied is tracked via argument count (`$#`), not by treating
+  an empty 4th argument as "no baseline" — those are different cases: a 3-argument call means
+  "nothing to compare against yet" and must never report `CLEAN`, while a genuine empty-string
+  baseline (a 4-argument call where the captured baseline was itself empty, meaning no prior
+  review existed) is a real basis for comparison. If the first (3-argument) call already
+  reports `DECISION=ACTIONABLE`, the poll loop is skipped entirely.
+- Owner/repo/PR-number flow into a GraphQL query and a REST path; the script validates them
+  against GitHub's own identifier charset before use, and the GraphQL query passes them as
+  bound `-F` variables (not string-concatenated into the query text) to avoid injection.
 - The script does not return the Copilot review body text (only the suppressed-comment
   count) — Step 4 re-fetches the body itself when it needs to read suppressed-comment entries
   for real, since embedding arbitrary multi-line markdown into single-line `KEY=value` output
@@ -58,6 +72,12 @@ spell out identically, reporting it as a single `DECISION` value.
   implementation: confirmed `CLEAN` (thread resolved, review ID present) and `PENDING`
   (explicit baseline equal to current ID) outputs against live `gh api` data. `ACTIONABLE`
   was already exercised live during that PR's own review round.
+- Additionally verified, after a code-review round found the 3-argument call could
+  incorrectly report `CLEAN` against a PR with a pre-existing review: a 3-argument call
+  against #45 now reports `PENDING` (not `CLEAN`) despite a non-empty `CURRENT_REVIEW_ID`.
+  Also verified the usage-error path (wrong argument count, and an owner containing `"`)
+  exits 2 with a message on stderr rather than crashing under `set -u`, and the `ERROR` path
+  (a nonexistent PR number) reports `DECISION=ERROR` rather than `PENDING`.
 
 ## Out of Scope
 
