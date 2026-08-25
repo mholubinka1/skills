@@ -95,7 +95,7 @@ For each unresolved thread, and each suppressed-comment entry found in Step 3/7,
 
 ## Step 4b — Validate changes with code-review
 
-> **MUST NOT SKIP.** The only valid reason to skip this step is if every single decision in Step 4 was a push-back and zero files were modified.
+> **MUST NOT SKIP.** The only valid reason to skip this step is if every single decision in Step 4 was a push-back and zero files were modified. Run it synchronously in the foreground and let it fully complete — including any fixes it applies — before continuing to Step 4c and this round's Step 5 commit. Never dispatch it as a background agent while the main thread moves on: a background agent editing the same files the main thread might also touch mid-review is a coordination hazard.
 
 If at least one fix was applied, run `code-review` Steps 1–5 only. Pass the explicit instruction to stop after Step 5 to avoid re-invoking this skill.
 
