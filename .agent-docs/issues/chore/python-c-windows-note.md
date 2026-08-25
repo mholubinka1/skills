@@ -1,5 +1,7 @@
 # Issues: chore/python-c-windows-note
 
+> Work complete — PR ready to merge.
+
 ## Document Windows python -c Bash-tool gotcha
 
 **GitHub**: #54
@@ -18,13 +20,13 @@ a scratch file and running it directly instead.
 
 ### Acceptance criteria
 
-- [ ] `init-agent-docs/AGENT-TEMPLATE.md` has a new `## 7. Environment Notes` section covering
+- [x] `init-agent-docs/AGENT-TEMPLATE.md` has a new `## 7. Environment Notes` section covering
       this gotcha.
-- [ ] `.agent-docs/agent.md` has the identical section in the identical location.
-- [ ] Both files remain byte-identical after the change.
-- [ ] The note is explicitly scoped to Windows + Bash-tool-style shells, not stated as a
+- [x] `.agent-docs/agent.md` has the identical section in the identical location.
+- [x] Both files remain byte-identical after the change.
+- [x] The note is explicitly scoped to Windows + Bash-tool-style shells, not stated as a
       universal rule.
-- [ ] No existing section's wording changes in either file.
-- [ ] `pre-commit-check` passes on both files.
+- [x] No existing section's wording changes in either file.
+- [x] `pre-commit-check` passes on both files.
 
 ---
