@@ -2,7 +2,7 @@
 
 ## Document the gh api --jq / jq --arg pitfall
 
-**Issue**: #44
+**GitHub**: #44
 
 **Blocked by**: None
 

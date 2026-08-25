@@ -7,18 +7,19 @@ Full command detail for each step. Replace `{owner}`, `{repo}`, `{number}`, `{id
 ## Common pitfalls
 
 **`gh api --jq` does not accept jq's `--arg` flag.** They share a name but are unrelated —
-`gh`'s `--jq` flag takes a single jq filter string, not a place to pass jq's own CLI flags.
-Combining them fails with a confusing `gh` argument-count error, not a jq error:
+`--jq` consumes exactly one token as its filter value. Writing `--arg foo "$bar" '<filter>'`
+after it means `gh` takes `--arg` itself as that filter value, and `foo`, `"$bar"`, and the
+real filter all become extra positional arguments to `gh api`, which only accepts one (the
+API path) — so the failure is a `gh api` argument-count error, not a jq error:
 
 ```bash
-# Doesn't work — `gh` parses `--arg`, "foo", "$bar", and the filter as four separate
-# positional arguments to --jq, not as jq's --arg syntax:
+# Doesn't work — "--arg" becomes --jq's filter value; foo, "$bar", and the real filter
+# are then three extra positional args to `gh api`, which only accepts one:
 gh api "repos/{owner}/{repo}/pulls/{number}/reviews" \
   --jq --arg foo "$bar" '.[] | select(.user.login == $foo)'
-# → unknown command "..." for "gh api"  /  accepts 1 arg(s), received 4
+# fails with: accepts 1 arg(s), received 4
 
-# Works — inline the shell value directly into the query string instead,
-# the pattern every snippet below this line uses:
+# Works — interpolate the shell value directly into the filter string instead:
 gh api "repos/{owner}/{repo}/pulls/{number}/reviews" \
   --jq ".[] | select(.user.login == \"$bar\")"
 ```
