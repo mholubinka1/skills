@@ -19,6 +19,7 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 - Favour clarity over brevity. Prefer maintainability over micro-efficiency.
 - Give every function and class a single, clear responsibility. Keep methods short enough that their behaviour is understood without extensive scrolling.
 - Name everything descriptively. Choose names for variables, methods, classes, and files that communicate intent without requiring the reader to open another file.
+- Never use unanchored `sed`/regex find-replace to rename an identifier — a pattern like `_parse_window_date` also matches inside `test_parse_window_date_x`. Anchor on word boundaries or use a proper multi-file rename tool instead.
 - Never hardcode values, magic numbers, secrets, credentials, URLs, or environment-specific strings. Use secret-safe configuration.
 - Never leave commented-out code, dead code, or deprecated code in committed changes. Replace unnecessary TODOs with proper work items — do not leave them in the codebase.
 - Never leave debug output (`console.log`, `print`, `System.out.println`, etc.) in committed code.
