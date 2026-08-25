@@ -73,6 +73,10 @@ query($owner: String!, $repo: String!, $number: Int!) {
   }
 }' -f owner="$OWNER" -f repo="$REPO" -F number="$PR" \
   --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select((.comments.nodes[0].author.login // "") | test("copilot"; "i"))] | length')
+# The `// ""` above guards against `test()` erroring on a null login (a thread with no
+# comments, or whose first comment's author is a deleted/unavailable GitHub account) — without
+# it, one such thread fails the whole GraphQL call and misreports a successful response as
+# DECISION=ERROR. The same guard is applied to .user.login below for the same reason.
 THREAD_OK=$?
 
 # One call for both the id and the body: `--jq`'s comma operator emits each as its own
@@ -80,7 +84,7 @@ THREAD_OK=$?
 # line (a bare number or empty), so it always occupies line 1, with the (possibly multi-line)
 # body making up everything from line 2 on. No delimiter or encoding is needed to split them.
 REVIEWS_RESULT=$(gh api "repos/$OWNER/$REPO/pulls/$PR/reviews?per_page=100" \
-  --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | (.id // empty), (.body // empty)')
+  --jq '[.[] | select((.user.login // "") | test("copilot";"i"))] | last | (.id // empty), (.body // empty)')
 REVIEWS_OK=$?
 CURRENT_REVIEW_ID=$(printf '%s\n' "$REVIEWS_RESULT" | head -1)
 REVIEW_BODY=$(printf '%s\n' "$REVIEWS_RESULT" | tail -n +2)
