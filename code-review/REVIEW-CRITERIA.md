@@ -75,3 +75,4 @@ If screenshots are included in the PR, review them against all acceptance criter
 
 - **READMEs and runbooks**: check that READMEs, runbooks, wikis, and architecture docs are not outdated because of this PR. Authors must document their changes.
 - **Environment variables and configuration**: new environment variables or configuration values must be documented.
+- **Stale rationale sweep**: if the diff changes or removes a comment or doc line explaining a design rationale or invariant (the _why_, not the _what_ — e.g. "returns the singleton by reference because callers may not mutate it"), grep the repo for the phrase being changed. Any other occurrence left contradicting the new code is a blocking finding — a stale rationale copy left in a class comment, an inline comment, a test comment, or a spec doc is exactly as misleading as the one already caught in the diff.
