@@ -49,6 +49,10 @@ if ! [[ "$OWNER" =~ ^[A-Za-z0-9-]+$ ]] || ! [[ "$REPO" =~ ^[A-Za-z0-9._-]+$ ]] |
   exit 2
 fi
 
+# -f always sends a string (needed for owner/repo — an all-digit org or user name is valid
+# on GitHub, and -F's type auto-detection would otherwise send it as a JSON number, which the
+# $owner/$repo: String! variables below would reject). -F sends $number as an actual number,
+# matching its Int! declaration.
 THREAD_COUNT=$(gh api graphql -f query='
 query($owner: String!, $repo: String!, $number: Int!) {
   repository(owner: $owner, name: $repo) {
@@ -63,7 +67,7 @@ query($owner: String!, $repo: String!, $number: Int!) {
       }
     }
   }
-}' -F owner="$OWNER" -F repo="$REPO" -F number="$PR" \
+}' -f owner="$OWNER" -f repo="$REPO" -F number="$PR" \
   --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | select(.comments.nodes[0].author.login | test("copilot"; "i"))] | length')
 THREAD_OK=$?
 
@@ -71,10 +75,12 @@ REVIEW_BODY=$(gh api "repos/$OWNER/$REPO/pulls/$PR/reviews?per_page=100" \
   --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .body // empty')
 BODY_OK=$?
 
-# A second, identical-endpoint call rather than reusing the one above — combining both
-# extractions into a single call would require piping the already-fetched JSON through a
-# standalone `jq` binary, which isn't guaranteed to be on PATH even where `gh` is. The extra
-# request is the accepted trade-off.
+# A second, identical-endpoint call rather than reusing the one above. `gh api --jq` could
+# extract both fields in one request (e.g. via @tsv), but a review body is arbitrary
+# multi-line markdown — safely combining it with a single-line id in one delimited output
+# would need base64-style encoding, whose decode flag differs between GNU (`base64 -d`) and
+# BSD/macOS (`base64 -D`) coreutils. Two simple, single-value calls avoid that portability
+# split; the extra request is the accepted trade-off.
 CURRENT_REVIEW_ID=$(gh api "repos/$OWNER/$REPO/pulls/$PR/reviews?per_page=100" \
   --jq '[.[] | select(.user.login | test("copilot";"i"))] | last | .id // empty')
 ID_OK=$?

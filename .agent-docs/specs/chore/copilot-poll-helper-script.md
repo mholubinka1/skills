@@ -29,6 +29,10 @@ spell out identically, reporting it as a single `DECISION` value.
 ## Implementation Decisions
 
 - New file: `address-copilot-comments/scripts/check-review-status.sh`.
+- New file: `.gitattributes`, forcing `*.sh text eol=lf` — this repo's `core.autocrlf=true`
+  default would otherwise convert this script to CRLF on a fresh checkout, breaking its `\`
+  line continuations. This is the first shell script in the repo, so no prior file needed
+  this protection.
 - Interface: `check-review-status.sh <owner> <repo> <pr_number> [baseline_review_id]`,
   invoked as `bash "<skill-base-dir>/scripts/check-review-status.sh" ...` — always via `bash
   <path>`, never relying on the shebang/execute bit, since skill files sync across OSes and
@@ -62,6 +66,15 @@ spell out identically, reporting it as a single `DECISION` value.
   is fragile to parse reliably.
 - No ADR: reverting to inline bash later is a low-cost change if this pattern doesn't pan
   out, so it fails the "hard to reverse" bar for recording a decision.
+- `owner`/`repo` are passed to the GraphQL call via `-f` (always a string), not `-F` (which
+  auto-detects type): an all-digit owner or repo name is a legitimate GitHub identifier, and
+  `-F` would otherwise send it as a JSON number, which the `String!`-typed query variables
+  reject. `-F` is still used for `number`, which must bind to the `Int!` variable.
+- The two identical-endpoint calls for `.body` and `.id` stay separate rather than merging
+  into one `--jq` call with a delimited (e.g. `@tsv`) output: a review body is arbitrary
+  multi-line markdown, and safely combining it with the id in one line would need base64-style
+  encoding — whose decode flag differs between GNU (`base64 -d`) and BSD/macOS (`base64 -D`)
+  coreutils. The extra request is the accepted trade-off over that portability split.
 
 ## Testing Decisions
 
