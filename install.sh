@@ -25,36 +25,45 @@ block="$marker_start
 $path_line
 $marker_end"
 
-# --- already set up? -------------------------------------------------
-# "Set up" means our own marker block exists AND carries the current path_line.
-# Matching path_line anywhere in the file would be fooled by a hand-added
-# identical export sitting next to a stale (old-clone) marker block.
+# --- inspect any existing marker block(s) --------------------------------
+# One nesting-aware pass over the rc file classifies the current state:
+#   MALFORMED <why>       markers nested, out of order, or unterminated
+#   OK blocks=<n> match=<0|1>   n well-formed blocks; match=1 iff some block
+#                              already carries the exact current path_line
+# "Already set up" (no edit) is ONLY blocks=1 match=1. Anything else — a stale
+# path, or duplicate blocks — is normalised to a single fresh block. A
+# MALFORMED file is left untouched: the removal pass could otherwise swallow
+# the user's real config below a broken marker.
 if [ -f "$rc" ] && grep -qF "$marker_start" "$rc"; then
-	# Refuse to touch the file if the block is malformed (start without a
-	# matching end, or vice versa): the removal awk below would otherwise treat
-	# everything after a lone start marker as "inside the block" and drop it.
-	starts="$(grep -cF "$marker_start" "$rc")"
-	ends="$(grep -cF "$marker_end" "$rc")"
-	if [ "$starts" != "$ends" ]; then
-		echo "install.sh: $rc has an unbalanced update-skills block ($starts start / $ends end marker(s))." >&2
-		echo "Fix or delete that block by hand, then re-run — refusing to edit and risk clobbering your shell config." >&2
-		exit 1
-	fi
-	current_block="$(awk -v s="$marker_start" -v e="$marker_end" '
-		$0 == s { inblock = 1 }
-		inblock { print }
-		$0 == e { inblock = 0 }
+	state="$(awk -v s="$marker_start" -v e="$marker_end" -v want="$path_line" '
+		$0 == s { if (depth) { done = 1; print "MALFORMED nested-start-marker"; exit } depth = 1; blocks++; next }
+		$0 == e { if (!depth) { done = 1; print "MALFORMED end-marker-before-start"; exit } depth = 0; next }
+		depth && $0 == want { match_found = 1 }
+		END {
+			if (done) { exit }
+			if (depth) { print "MALFORMED unterminated-block"; exit }
+			printf "OK blocks=%d match=%d\n", blocks, match_found
+		}
 	' "$rc")"
-	if printf '%s\n' "$current_block" | grep -qxF "$path_line"; then
-		echo "update-skills is already set up in $rc — nothing to do."
-		echo "If it isn't on your PATH yet, open a new terminal or run: source $rc"
-		exit 0
-	fi
-	echo "Refreshing the update-skills block in $rc (clone path changed)."
+
+	case "$state" in
+		MALFORMED*)
+			echo "install.sh: $rc has a broken update-skills block (${state#MALFORMED })." >&2
+			echo "Fix or delete that block by hand, then re-run — refusing to edit and risk clobbering your shell config." >&2
+			exit 1
+			;;
+		"OK blocks=1 match=1")
+			echo "update-skills is already set up in $rc — nothing to do."
+			echo "If it isn't on your PATH yet, open a new terminal or run: source $rc"
+			exit 0
+			;;
+	esac
+
+	echo "Refreshing the update-skills block in $rc."
 	remaining="$(awk -v s="$marker_start" -v e="$marker_end" '
-		$0 == s { skip = 1 }
+		$0 == s { skip = 1; next }
+		$0 == e { skip = 0; next }
 		!skip  { print }
-		$0 == e { skip = 0 }
 	' "$rc")"
 	if [ -n "$remaining" ]; then
 		printf '%s\n' "$remaining" > "$rc"
