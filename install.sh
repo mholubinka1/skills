@@ -3,8 +3,9 @@
 #
 # Adds this repo's bin/ directory to PATH via a marker-delimited block in your
 # shell rc file (~/.zshrc for zsh, ~/.bashrc otherwise — including Git Bash on
-# Windows). Idempotent: re-running replaces a stale block in place (e.g. after
-# moving the clone) rather than duplicating it.
+# Windows). Idempotent: re-running drops any existing block(s) and appends one
+# current block at the end of the file, so a moved clone or a duplicate is
+# corrected without ever stacking blocks up.
 set -euo pipefail
 
 repo="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

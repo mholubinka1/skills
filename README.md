@@ -36,12 +36,17 @@ pre-commit install
 
 ### Python environment
 
-The `Sync Claude Skills` post-commit hook runs `sync_claude_skills.py` using the first Python it finds, checked in this order:
+The `Sync Claude Skills` post-commit hook and the `update-skills` command both run
+`sync_claude_skills.py` using the first Python they find, checked in this order:
 
 1. `.venv/Scripts/python` (Windows venv)
-2. `.venv/bin/python` (macOS/Linux venv)
-3. System `python3`
-4. System `python`
+2. `.venv/Scripts/python.exe` (Windows venv, as seen from Git Bash)
+3. `.venv/bin/python` (macOS/Linux venv)
+4. System `python3`
+5. System `python`
+
+`update-skills` only uses the system interpreters (4–5) to *create* the `.venv`; it always
+runs `pip` and the sync against the venv.
 
 **macOS/Linux:**
 

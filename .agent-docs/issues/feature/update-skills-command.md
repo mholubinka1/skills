@@ -73,9 +73,10 @@ A checked-in `install.sh` at the repo root, run once after cloning, that puts
    otherwise `~/.bashrc`. Creates it if absent.
 3. Appends a block delimited by `# >>> skills update-skills >>>` /
    `# <<< skills update-skills <<<` markers containing `export PATH="<repo>/bin:$PATH"`.
-4. Idempotent: an existing marker block is rewritten in place (handles a moved clone),
-   never duplicated. If `<repo>/bin` is already on `PATH` and the block is already correct,
-   reports "already set up" and makes no edit.
+4. Idempotent: on any change, existing marker block(s) are dropped and one current block is
+   appended at the end of the file (handles a moved clone; collapses accidental duplicates).
+   If exactly one well-formed block already carries the current PATH line, reports "already
+   set up" and makes no edit.
 5. Prints that the current shell needs a new terminal or `source <rc-file>` to pick up the
    change.
 
@@ -88,7 +89,8 @@ the Git Bash `~/.bashrc` note.
       `PATH`, running `./install.sh` appends exactly one marker-delimited block adding
       `<repo>/bin` to `PATH` to the correct rc file, and prints how to activate it now.
 - [x] **Setup is idempotent** — running `./install.sh` again leaves exactly one marker
-      block; a moved clone's stale block is rewritten in place, never duplicated.
+      block; a moved clone's stale block (and any accidental duplicates) are dropped and one
+      current block is re-appended, never stacked.
 - [x] `install.sh` is executable and passes `shellcheck` via pre-commit.
 - [x] `README.md` documents the one-time step and the Git Bash `.bashrc` convention.
 - [x] `pre-commit-check` passes.

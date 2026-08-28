@@ -37,7 +37,7 @@ A command placed on the user's `PATH` by `install.sh` that fast-forwards the loc
 _Avoid_: updater, refresh script, sync command
 
 **`install.sh`**:
-The one-time setup script at the repo root. Adds the repo's `bin/` directory to `PATH` via a marker-delimited block in the user's shell rc file (`~/.zshrc` for zsh, else `~/.bashrc`). Idempotent — re-running replaces a stale block in place.
+The one-time setup script at the repo root. Adds the repo's `bin/` directory to `PATH` via a marker-delimited block in the user's shell rc file (`~/.zshrc` for zsh, else `~/.bashrc`). Idempotent — re-running drops any existing block(s) and re-appends a single current one.
 _Avoid_: installer, bootstrap script
 
 ### Workflow Execution

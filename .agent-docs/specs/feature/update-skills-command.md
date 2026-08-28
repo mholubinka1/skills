@@ -71,8 +71,10 @@ moves.
     does not exist it is created.
   - Appends a block delimited by marker comments
     (`# >>> skills update-skills >>>` / `# <<< skills update-skills <<<`) containing
-    `export PATH="<repo>/bin:$PATH"`. Idempotent: if a block with those markers already
-    exists it is replaced (handles a moved clone), not duplicated.
+    `export PATH="<repo>/bin:$PATH"`. Idempotent: any existing marker block(s) are removed
+    and one current block is appended at the end of the file (handles a moved clone;
+    collapses accidental duplicates) — not a literal in-place rewrite, so a refreshed block
+    moves to the end.
   - Prints that the current shell needs a new terminal or `source <rc-file>` to pick up the
     change — a child process cannot mutate its parent shell's environment.
   - If `<repo>/bin` is already on `PATH` and the marker block is already present and
@@ -128,8 +130,8 @@ moves.
      `PATH` is appended to the correct rc file, and the script prints how to activate it
      now.
   2. *Setup is idempotent.* Given `install.sh` has already run, when it runs again, then the
-     rc file still contains exactly one marker block and it is unchanged (or rewritten in
-     place if the clone moved), never duplicated.
+     rc file still contains exactly one marker block — unchanged when already current, or
+     dropped and re-appended (moving to the end) if the clone moved — never stacked.
   3. *Refresh pulls and syncs.* Given `update-skills` is on `PATH` and the tree is clean,
      when it runs from any directory, then the clone is on `main`, fast-forwarded to
      `origin/main`, and `~/.claude/skills/` reflects the repo's current `SKILL.md`
