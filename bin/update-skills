@@ -42,7 +42,7 @@ say "Switching to $BRANCH"
 git checkout "$BRANCH"
 
 say "Fast-forwarding to origin/$BRANCH"
-if ! git pull --ff-only; then
+if ! git pull --ff-only origin "$BRANCH"; then
 	echo "update-skills: origin/$BRANCH could not be fast-forwarded (history has diverged)." >&2
 	echo "Resolve it manually — update-skills will not force or reset." >&2
 	exit 1
@@ -58,11 +58,14 @@ for candidate in python3 python; do
 done
 
 pick_venv_py() {
-	if [ -x .venv/Scripts/python ]; then
-		printf '%s' .venv/Scripts/python
-	elif [ -x .venv/bin/python ]; then
-		printf '%s' .venv/bin/python
-	fi
+	# Windows venvs first (Git Bash sees python.exe), then POSIX — same
+	# precedence as .pre-commit-config.yaml's sync-claude-skills hook.
+	for p in .venv/Scripts/python .venv/Scripts/python.exe .venv/bin/python; do
+		if [ -x "$p" ]; then
+			printf '%s' "$p"
+			return
+		fi
+	done
 }
 
 # --- first-run bootstrap: .venv + pre-commit hooks ----------------------
