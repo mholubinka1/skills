@@ -1,5 +1,7 @@
 # Issues: feature/update-skills-command
 
+> Work complete — PR ready to merge.
+
 ## `update-skills` refresh command
 
 **GitHub**: #56
@@ -33,22 +35,22 @@ to `.agent-docs/context.md` defining `update-skills`, `install.sh`, and the
 
 ### Acceptance criteria
 
-- [ ] **Refresh pulls and syncs** — given `update-skills` runs from any directory with a
+- [x] **Refresh pulls and syncs** — given `update-skills` runs from any directory with a
       clean tree, the clone ends on `main` fast-forwarded to `origin/main` and
       `~/.claude/skills/` reflects the repo's current `SKILL.md` directories.
-- [ ] **First run bootstraps** — given no `.venv` and no installed pre-commit hook, the run
+- [x] **First run bootstraps** — given no `.venv` and no installed pre-commit hook, the run
       creates `.venv`, installs `pre-commit`, installs the hooks, and still completes the
       sync; a second run skips the bootstrap.
-- [ ] **Dirty tree is refused** — given uncommitted changes, the run prints `git status`,
+- [x] **Dirty tree is refused** — given uncommitted changes, the run prints `git status`,
       changes no git state, runs no sync, and exits non-zero.
-- [ ] **Diverged `main` is refused** — given local `main` has a commit not on
+- [x] **Diverged `main` is refused** — given local `main` has a commit not on
       `origin/main`, `git pull --ff-only` fails, the script reports it, and exits non-zero
       without forcing or resetting.
-- [ ] **Interpreter resolution matches the hook** — the sync is invoked with the same
+- [x] **Interpreter resolution matches the hook** — the sync is invoked with the same
       interpreter the `sync-claude-skills` hook resolves, falling back `python3` → `python`
       when no venv exists.
-- [ ] `shellcheck` runs on `bin/update-skills` via pre-commit and passes clean.
-- [ ] `pre-commit-check` passes.
+- [x] `shellcheck` runs on `bin/update-skills` via pre-commit and passes clean.
+- [x] `pre-commit-check` passes.
 
 ---
 
@@ -82,13 +84,13 @@ the Git Bash `~/.bashrc` note.
 
 ### Acceptance criteria
 
-- [ ] **Fresh setup puts the command on PATH** — given a clone whose `bin/` is not on
+- [x] **Fresh setup puts the command on PATH** — given a clone whose `bin/` is not on
       `PATH`, running `./install.sh` appends exactly one marker-delimited block adding
       `<repo>/bin` to `PATH` to the correct rc file, and prints how to activate it now.
-- [ ] **Setup is idempotent** — running `./install.sh` again leaves exactly one marker
+- [x] **Setup is idempotent** — running `./install.sh` again leaves exactly one marker
       block; a moved clone's stale block is rewritten in place, never duplicated.
-- [ ] `install.sh` is executable and passes `shellcheck` via pre-commit.
-- [ ] `README.md` documents the one-time step and the Git Bash `.bashrc` convention.
-- [ ] `pre-commit-check` passes.
+- [x] `install.sh` is executable and passes `shellcheck` via pre-commit.
+- [x] `README.md` documents the one-time step and the Git Bash `.bashrc` convention.
+- [x] `pre-commit-check` passes.
 
 ---
