@@ -26,6 +26,9 @@ $path_line
 $marker_end"
 
 # --- inspect any existing marker block(s) --------------------------------
+# Trigger on EITHER marker: a lone end marker (from a half-deleted block) must
+# reach the validator and fail safely now, not be ignored so a fresh block is
+# appended and the next run bricks on end-before-start.
 # One nesting-aware pass over the rc file classifies the current state:
 #   MALFORMED <why>       markers nested, out of order, or unterminated
 #   OK blocks=<n> match=<0|1>   n well-formed blocks; match=1 iff some block
@@ -34,7 +37,7 @@ $marker_end"
 # path, or duplicate blocks — is normalised to a single fresh block. A
 # MALFORMED file is left untouched: the removal pass could otherwise swallow
 # the user's real config below a broken marker.
-if [ -f "$rc" ] && grep -qF "$marker_start" "$rc"; then
+if [ -f "$rc" ] && { grep -qF "$marker_start" "$rc" || grep -qF "$marker_end" "$rc"; }; then
 	state="$(awk -v s="$marker_start" -v e="$marker_end" -v want="$path_line" '
 		$0 == s { if (depth) { done = 1; print "MALFORMED nested-start-marker"; exit } depth = 1; blocks++; next }
 		$0 == e { if (!depth) { done = 1; print "MALFORMED end-marker-before-start"; exit } depth = 0; next }
