@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# update-skills — refresh ~/.claude/skills from this repo's main branch.
+#
+# Fast-forwards this clone to origin/main, bootstraps the local .venv and the
+# pre-commit hooks on first run, then runs sync_claude_skills.py. Safe to run
+# from any directory. Refuses to run if the working tree is dirty — it never
+# stashes, resets, or force-pulls.
+#
+# Works the same on macOS and on Windows (Git Bash).
+set -euo pipefail
+
+BRANCH="main"
+
+# --- resolve the repo root from this script's own location ------------------
+# Follow symlinks so it works when invoked directly, through a PATH entry
+# pointing at bin/, or via a symlink into bin/.
+script="${BASH_SOURCE[0]}"
+while [ -h "$script" ]; do
+	dir="$(cd -P "$(dirname "$script")" && pwd)"
+	script="$(readlink "$script")"
+	case "$script" in
+		/*) ;;
+		*) script="$dir/$script" ;;
+	esac
+done
+bin_dir="$(cd -P "$(dirname "$script")" && pwd)"
+repo="$(cd -P "$bin_dir/.." && pwd)"
+cd "$repo"
+
+say() { printf '==> %s\n' "$1"; }
+
+# --- guard: refuse on a dirty working tree --------------------------------
+if [ -n "$(git status --porcelain)" ]; then
+	echo "update-skills: working tree has uncommitted changes — aborting." >&2
+	echo >&2
+	git status >&2
+	exit 1
+fi
+
+# --- refresh the branch --------------------------------------------------
+say "Switching to $BRANCH"
+git checkout "$BRANCH"
+
+say "Fast-forwarding to origin/$BRANCH"
+if ! git pull --ff-only; then
+	echo "update-skills: origin/$BRANCH could not be fast-forwarded (history has diverged)." >&2
+	echo "Resolve it manually — update-skills will not force or reset." >&2
+	exit 1
+fi
+
+# --- resolve a Python interpreter (mirrors .pre-commit-config.yaml) --------
+sys_py=""
+for candidate in python3 python; do
+	if command -v "$candidate" >/dev/null 2>&1; then
+		sys_py="$candidate"
+		break
+	fi
+done
+
+pick_venv_py() {
+	if [ -x .venv/Scripts/python ]; then
+		printf '%s' .venv/Scripts/python
+	elif [ -x .venv/bin/python ]; then
+		printf '%s' .venv/bin/python
+	fi
+}
+
+# --- first-run bootstrap: .venv + pre-commit hooks ----------------------
+venv_py="$(pick_venv_py)"
+if [ -z "$venv_py" ]; then
+	if [ -z "$sys_py" ]; then
+		echo "update-skills: no python3 or python on PATH; cannot create .venv." >&2
+		exit 1
+	fi
+	say "Creating .venv"
+	"$sys_py" -m venv .venv
+	venv_py="$(pick_venv_py)"
+fi
+
+py="$venv_py"
+[ -n "$py" ] || py="$sys_py"
+
+hook_path="$(git rev-parse --git-path hooks/pre-commit)"
+if [ ! -e "$hook_path" ]; then
+	if ! "$py" -m pre_commit --version >/dev/null 2>&1; then
+		say "Installing pre-commit"
+		"$py" -m pip install --quiet pre-commit
+	fi
+	say "Installing git hooks"
+	"$py" -m pre_commit install
+fi
+
+# --- sync --------------------------------------------------------------
+say "Syncing skills to ~/.claude/skills"
+"$py" sync_claude_skills.py
+
+say "Done — ~/.claude/skills is up to date with origin/$BRANCH."
