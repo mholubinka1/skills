@@ -25,9 +25,15 @@ while [ -h "$script" ]; do
 done
 bin_dir="$(cd -P "$(dirname "$script")" && pwd)"
 repo="$(cd -P "$bin_dir/.." && pwd)"
-cd "$repo"
 
 say() { printf '==> %s\n' "$1"; }
+die() { echo "update-skills: $1" >&2; exit 1; }
+
+# --- sanity: are we actually in this repo? ------------------------------
+# Guards against the script being copied out of bin/, or an unexpected $0.
+cd "$repo" || die "cannot enter repo root $repo"
+[ -f "$repo/sync_claude_skills.py" ] || die "$repo does not look like the skills repo (no sync_claude_skills.py) — run the copy that lives in the cloned repo's bin/."
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "$repo is not a git work tree."
 
 # --- guard: refuse on a dirty working tree --------------------------------
 if [ -n "$(git status --porcelain)" ]; then
@@ -73,20 +79,20 @@ pick_venv_py() {
 }
 
 # --- first-run bootstrap: .venv + pre-commit hooks ----------------------
+# runs_ok <interpreter> — true if it executes at all
+runs_ok() { [ -n "$1" ] && "$1" -c '' >/dev/null 2>&1; }
+
 venv_py="$(pick_venv_py)"
+if [ -n "$venv_py" ] && ! runs_ok "$venv_py"; then
+	die ".venv exists but its interpreter ($venv_py) won't run — delete .venv and re-run."
+fi
 if [ -z "$venv_py" ]; then
-	if [ -z "$sys_py" ]; then
-		echo "update-skills: no python3 or python on PATH; cannot create .venv." >&2
-		exit 1
-	fi
+	[ -n "$sys_py" ] || die "no python3 or python on PATH; cannot create .venv."
 	say "Creating .venv"
 	"$sys_py" -m venv .venv
 	venv_py="$(pick_venv_py)"
-	if [ -z "$venv_py" ]; then
-		echo "update-skills: created .venv but no interpreter appeared inside it." >&2
-		echo "Your platform's python venv package is probably missing — install it and re-run." >&2
-		echo "Refusing to continue against system Python (would install pre-commit globally)." >&2
-		exit 1
+	if ! runs_ok "$venv_py"; then
+		die "created .venv but its interpreter is missing or won't run — your platform's python venv package is probably absent; install it and re-run. (Refusing to fall back to system Python: that would install pre-commit globally.)"
 	fi
 fi
 
