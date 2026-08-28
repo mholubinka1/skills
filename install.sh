@@ -26,8 +26,16 @@ $path_line
 $marker_end"
 
 # --- already set up? -------------------------------------------------
+# "Set up" means our own marker block exists AND carries the current path_line.
+# Matching path_line anywhere in the file would be fooled by a hand-added
+# identical export sitting next to a stale (old-clone) marker block.
 if [ -f "$rc" ] && grep -qF "$marker_start" "$rc"; then
-	if grep -qxF "$path_line" "$rc"; then
+	current_block="$(awk -v s="$marker_start" -v e="$marker_end" '
+		$0 == s { inblock = 1 }
+		inblock { print }
+		$0 == e { inblock = 0 }
+	' "$rc")"
+	if printf '%s\n' "$current_block" | grep -qxF "$path_line"; then
 		echo "update-skills is already set up in $rc — nothing to do."
 		echo "If it isn't on your PATH yet, open a new terminal or run: source $rc"
 		exit 0
