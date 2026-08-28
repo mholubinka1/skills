@@ -96,14 +96,26 @@ if [ -z "$venv_py" ]; then
 	fi
 fi
 
-hook_path="$(git rev-parse --git-path hooks/pre-commit)"
-if [ ! -e "$hook_path" ]; then
-	if ! "$venv_py" -m pre_commit --version >/dev/null 2>&1; then
-		say "Installing pre-commit into .venv"
-		"$venv_py" -m pip install --quiet pre-commit
-	fi
+# hooks_ok — true only if BOTH hook types this repo configures
+# (default_install_hook_types in .pre-commit-config.yaml: pre-commit, post-commit)
+# are present and pre-commit-generated. Checking just hooks/pre-commit would let
+# a lone pre-commit hook mask a missing post-commit hook — and post-commit is
+# the one that runs sync_claude_skills.py.
+hooks_ok() {
+	local h p
+	for h in pre-commit post-commit; do
+		p="$(git rev-parse --git-path "hooks/$h")"
+		[ -f "$p" ] && grep -q 'pre-commit\.com' "$p" || return 1
+	done
+}
+
+if ! "$venv_py" -m pre_commit --version >/dev/null 2>&1; then
+	say "Installing pre-commit into .venv"
+	"$venv_py" -m pip install --quiet pre-commit
+fi
+if ! hooks_ok; then
 	say "Installing git hooks"
-	"$venv_py" -m pre_commit install
+	"$venv_py" -m pre_commit install >/dev/null
 fi
 
 # --- sync --------------------------------------------------------------
