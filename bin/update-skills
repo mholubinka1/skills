@@ -48,7 +48,12 @@ if ! git pull --ff-only origin "$BRANCH"; then
 	exit 1
 fi
 
-# --- resolve a Python interpreter (mirrors .pre-commit-config.yaml) --------
+# --- resolve Python interpreters ----------------------------------------
+# Overall precedence matches .pre-commit-config.yaml's sync-claude-skills hook
+# (.venv/Scripts/python[.exe] -> .venv/bin/python -> python3 -> python), but the
+# two system candidates are only ever used to *create* the venv, never to run
+# pip or the sync — every install and the sync itself run against the venv, so
+# `pip install` can't leak into system/user site-packages.
 sys_py=""
 for candidate in python3 python; do
 	if command -v "$candidate" >/dev/null 2>&1; then
@@ -58,8 +63,7 @@ for candidate in python3 python; do
 done
 
 pick_venv_py() {
-	# Windows venvs first (Git Bash sees python.exe), then POSIX — same
-	# precedence as .pre-commit-config.yaml's sync-claude-skills hook.
+	# Windows venvs first (Git Bash sees python.exe), then POSIX.
 	for p in .venv/Scripts/python .venv/Scripts/python.exe .venv/bin/python; do
 		if [ -x "$p" ]; then
 			printf '%s' "$p"
@@ -78,23 +82,26 @@ if [ -z "$venv_py" ]; then
 	say "Creating .venv"
 	"$sys_py" -m venv .venv
 	venv_py="$(pick_venv_py)"
+	if [ -z "$venv_py" ]; then
+		echo "update-skills: created .venv but no interpreter appeared inside it." >&2
+		echo "Your platform's python venv package is probably missing — install it and re-run." >&2
+		echo "Refusing to continue against system Python (would install pre-commit globally)." >&2
+		exit 1
+	fi
 fi
-
-py="$venv_py"
-[ -n "$py" ] || py="$sys_py"
 
 hook_path="$(git rev-parse --git-path hooks/pre-commit)"
 if [ ! -e "$hook_path" ]; then
-	if ! "$py" -m pre_commit --version >/dev/null 2>&1; then
-		say "Installing pre-commit"
-		"$py" -m pip install --quiet pre-commit
+	if ! "$venv_py" -m pre_commit --version >/dev/null 2>&1; then
+		say "Installing pre-commit into .venv"
+		"$venv_py" -m pip install --quiet pre-commit
 	fi
 	say "Installing git hooks"
-	"$py" -m pre_commit install
+	"$venv_py" -m pre_commit install
 fi
 
 # --- sync --------------------------------------------------------------
 say "Syncing skills to ~/.claude/skills"
-"$py" sync_claude_skills.py
+"$venv_py" sync_claude_skills.py
 
 say "Done — ~/.claude/skills is up to date with origin/$BRANCH."
