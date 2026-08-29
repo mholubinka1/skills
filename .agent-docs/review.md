@@ -17,4 +17,7 @@ from — for example:
 
 ## Criteria
 
-_None yet._
+- **Incomplete cross-reference**: when a change adds a fresh statement of a fact that is
+  defined canonically elsewhere (a rule, a constraint, an enumeration), it must carry the
+  same qualifiers as the canonical version — a summary that silently drops a caveat reads as
+  a contradiction between the two places. (PR #64)
