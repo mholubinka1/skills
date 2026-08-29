@@ -325,7 +325,8 @@ absent in the target repo, and a little overlap between the two files is accepta
 
 - **File exists**: append the surviving criteria to the end of its `## Criteria` list. If
   that list holds only the placeholder `_None yet._`, replace that line with the first
-  criterion rather than leaving it above the list.
+  criterion rather than leaving it above the list. If the file has been hand-edited and has
+  no `## Criteria` heading, add one at the end of the file, then append under it.
 - **File does not exist** (the target repo never ran `init-agent-docs`): create
   `.agent-docs/review.md` using the header from the `init-agent-docs` skill's
   `REVIEW-TEMPLATE.md` (its sibling skill directory — do not paste a copy of that header
