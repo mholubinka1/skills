@@ -25,8 +25,8 @@ A checked-in `bin/update-skills` script (no file extension) that refreshes a mac
 5. Runs `sync_claude_skills.py` with the resolved interpreter.
 
 Interpreter resolution mirrors the `sync-claude-skills` post-commit hook, same order:
-`.venv/Scripts/python` → `.venv/bin/python` → `python3` → `python`. Works identically on
-macOS and Windows (Git Bash).
+`.venv/Scripts/python` → `.venv/Scripts/python.exe` (Git Bash) → `.venv/bin/python` →
+`python3` → `python`. Works identically on macOS and Windows (Git Bash).
 
 Supporting changes: add the `shellcheck-py` hook to `.pre-commit-config.yaml`; add
 `bin/update-skills` to the `.gitattributes` LF rule; add a "Skill Distribution" subsection

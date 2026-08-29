@@ -88,8 +88,9 @@ moves.
   - `git checkout main` then `git pull --ff-only`. A non-fast-forward pull fails on its own;
     the script surfaces the failure and exits non-zero. No `--force`, no reset.
   - Interpreter resolution mirrors `.pre-commit-config.yaml`'s `sync-claude-skills` hook, in
-    the same order: `.venv/Scripts/python` (Windows venv) → `.venv/bin/python`
-    (macOS/Linux venv) → `python3` → `python`.
+    the same order: `.venv/Scripts/python` → `.venv/Scripts/python.exe` (Windows venv, the
+    latter as seen from Git Bash) → `.venv/bin/python` (macOS/Linux venv) → `python3` →
+    `python`. The two system interpreters are used only to create the venv.
   - Bootstrap runs only when needed: if no `.venv`, create it with the first system
     interpreter found and `pip install pre-commit` into it; if the pre-commit hook is not
     installed (`git rev-parse --git-path hooks/pre-commit` missing), run
@@ -146,10 +147,11 @@ moves.
   6. *Diverged `main` is refused.* Given local `main` has a commit not on `origin/main`,
      when `update-skills` runs, then `git pull --ff-only` fails, the script reports it, and
      exits non-zero without forcing or resetting.
-  7. *Interpreter resolution matches the hook.* Given a Windows-style `.venv/Scripts/python`
-     or a POSIX `.venv/bin/python`, when `update-skills` runs the sync, then it uses the
-     same interpreter the `sync-claude-skills` hook would, falling back to `python3` then
-     `python` when no venv exists.
+  7. *Interpreter resolution matches the hook.* Given a Windows-style
+     `.venv/Scripts/python` or `.venv/Scripts/python.exe` (Git Bash), or a POSIX
+     `.venv/bin/python`, when `update-skills` runs the sync, then it uses the same
+     interpreter the `sync-claude-skills` hook would, using `python3` then `python` only to
+     create the venv when none exists.
 
 ## Out of Scope
 
