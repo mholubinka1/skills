@@ -5,8 +5,6 @@ All content here is passed verbatim to the Standards sub-agent. Two rule binding
 - **The repo overrides.** A documented repo standard always wins; where it endorses something that the smell baseline would flag, suppress the smell.
 - **Always a judgement call.** Smells are labelled heuristics, not hard violations. Documented-standard breaches may be blocking; smells are always advisory. Skip anything tooling already enforces.
 
----
-
 ## Smell Baseline (Fowler, _Refactoring_ ch. 3 — via Matt Pocock)
 
 Each smell: _what it is_ → _how to fix_:
@@ -24,8 +22,6 @@ Each smell: _what it is_ → _how to fix_:
 - **Middle Man** — a class or function that mostly just delegates onward. → Cut it, call the real target directly.
 - **Refused Bequest** — a subclass or implementer that ignores most of what it inherits. → Drop the inheritance, use composition.
 
----
-
 ## Code Correctness
 
 - **Acceptance Criteria**: step through each criterion and find the lines that satisfy it. If you cannot locate them, raise a blocking finding — code looking reasonable is insufficient.
@@ -37,8 +33,6 @@ Each smell: _what it is_ → _how to fix_:
 - **Async and concurrency safety**: verify logic is async-safe, uses approved libraries, and synchronous I/O is not blocking an event loop.
 - **Backwards compatibility**: check for breaking changes to response/request shapes or database column renames/removals. If other services need companion PRs, flag this explicitly.
 
----
-
 ## Code Quality
 
 - **Type annotations**: all functions and classes must be meaningfully annotated. Types should be honest and specific — not `dict`, `list`, or `Any`. API responses must use Pydantic models.
@@ -48,14 +42,6 @@ Each smell: _what it is_ → _how to fix_:
 - **Mutation and I/O hygiene**: functions must not mutate their arguments. `__init__` must not perform I/O. Default arguments must not be mutable.
 - **Observability**: new code paths must have required logging and tests and meet existing observability non-functional requirements.
 - **Claims that outrun the code**: flag a comment, docstring, or doc line promising a stronger guarantee than the code delivers — "exactly one", "in place", "atomic", "idempotent", "always", "never". Resolve by tightening the code or correcting the claim.
-
----
-
-## Screenshot Review
-
-If screenshots are included in the PR, review them against all acceptance criteria above. If requirements are not met, raise a blocking finding with a short comment — do not let it slide.
-
----
 
 ## Security and Performance
 
@@ -67,15 +53,11 @@ If screenshots are included in the PR, review them against all acceptance criter
 - **Unsafe fallback**: flag code that, when its preferred resource is missing, silently does something materially riskier instead of failing — installing into system/global scope when a virtualenv is absent, using an unpinned version when the pinned one is unavailable, writing to a world-writable or predictable path when a private one cannot be created. Failing with a clear message is usually the safer default.
 - **Predictable temp paths**: flag temp files or directories named from a fixed string, the PID (`$$`), or another guessable pattern instead of `mktemp` or the language's secure equivalent — they collide across concurrent runs and enable symlink attacks — and flag temp files left behind on the error path.
 
----
-
 ## Testing
 
 - **Meaningful assertions**: tests should test behaviour, not the shape of the code. Assertions must provide information on failure. Flag tests that catch exceptions and assert nothing about them.
 - **Mock only at system boundaries**: do not mock code that can be controlled — only mock external systems (databases, APIs, queues).
 - **Coverage target**: there is an 80% code coverage requirement enforced at the pipeline level. Flag new code paths lacking test coverage.
-
----
 
 ## Documentation
 
