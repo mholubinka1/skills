@@ -56,7 +56,7 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 
 ## Step 4 — Spawn parallel review agents
 
-Read [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md) in full. Capture the diff:
+Read [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md) in full, and the target repo's `.agent-docs/review.md` if it exists (repo-specific criteria accumulated by `address-copilot-comments` from past Copilot reviews). Capture the diff:
 
 ```bash
 git diff origin/$BASE...HEAD
@@ -68,7 +68,7 @@ Send a **single message** with two `Agent` tool calls (type: `general-purpose`):
 **Standards sub-agent prompt** — include:
 
 - The full diff and commit list.
-- The complete contents of REVIEW-CRITERIA.md (smell baseline + project standards).
+- The complete contents of REVIEW-CRITERIA.md (smell baseline + project standards), and — if the target repo has one — the contents of its `.agent-docs/review.md` (repo-specific criteria accumulated from past Copilot reviews; treat its entries as documented standards, same status as REVIEW-CRITERIA.md).
 - Brief: "Report per file/hunk: (a) every place the diff violates a documented standard — cite the rule; (b) every baseline smell — name and quote the hunk. Mark each finding as **blocking** or **advisory**. Documented-standard breaches may be blocking; baseline smells are always advisory. Skip anything tooling already enforces. Under 500 words."
 
 **Spec sub-agent prompt** — include:
