@@ -74,16 +74,27 @@ only `[tool.bandit]` and `requirements.txt` is a hand-written "no dependencies" 
   - `pyproject-fmt` — `tox-dev/pyproject-fmt`, id `pyproject-fmt`.
   - `uv-export` — `astral-sh/uv-pre-commit`, id `uv-export`, args
     `["--frozen", "--no-hashes", "--output-file", "requirements.txt"]`.
-- Exact `rev` values: set to current releases, then run `pre-commit autoupdate` so every
-  pin (new and existing) is the latest tag, and commit that.
+- Exact `rev` values for the **new** hooks: pinned to their current latest tags (obtained
+  by running `pre-commit autoupdate` and taking only the new repos' results).
+- **Existing** hooks (`markdownlint`, `markdown-link-check`, `codespell`, `shellcheck`,
+  `mypy`, `isort`, `black`, `ruff`, `gitleaks`, `bandit`) keep their current `rev`s. A full
+  `pre-commit autoupdate` was run and then reverted for these: bumping `markdownlint`
+  v0.41→v0.49 rewrote every table divider across five unrelated skill files, and
+  `ruff` v0.15→v0.16 raised a pre-existing `EXE001` on `sync_claude_skills.py` — churn
+  outside this change's scope. A dedicated dependency-bump change can pick those up.
 - **Remove** the second `pre-commit/pre-commit-hooks` block (the `rev: v6.0.0` one near the
-  end); keep a single `pre-commit-hooks` block and bump its `rev` to v6.0.0 (the newer of
-  the two that were present), still running `trailing-whitespace` + `end-of-file-fixer`.
+  end); keep a single `pre-commit-hooks` block and bump its `rev` from v4.6.0 to v6.0.0 (the
+  newer of the two that were present), still running `trailing-whitespace` +
+  `end-of-file-fixer`.
 - **Spacing**: exactly one blank line between every top-level `- repo:` block, including
   around the `local` `sync-claude-skills` block.
-- `shellcheck` (`shellcheck-py`) is already present — unchanged apart from any `rev` bump
-  from `autoupdate`.
-- Hook ordering is not otherwise reshuffled.
+- `shellcheck` (`shellcheck-py`) is already present and unchanged.
+- Hook ordering is not otherwise reshuffled; new blocks are grouped by concern
+  (`actionlint`/pyproject hooks after `shellcheck`, `pip-audit` near `gitleaks`).
+- `pyproject-fmt`'s first run rewrites `pyproject.toml`: it adds a `classifiers` list
+  derived from `requires-python` and pads the `[tool.bandit]` arrays (`[ ".venv" ]`). That
+  output is committed as the canonical formatting — the `classifiers` on a
+  `package = false` project are inert metadata but are what the formatter emits.
 
 ### Not in scope of the diff
 
@@ -91,7 +102,8 @@ only `[tool.bandit]` and `requirements.txt` is a hand-written "no dependencies" 
   decision).
 - No `uv-lock` hook.
 - No change to `mypy` / `isort` / `black` / `ruff` / `bandit` / `gitleaks` / `markdownlint`
-  / `codespell` hook definitions beyond `autoupdate` rev bumps.
+  / `codespell` hook definitions, including their `rev`s (see the scoped-autoupdate note
+  above).
 - No ADR — a config + lockfile change, reversible as one diff.
 
 ## Testing Decisions
@@ -113,7 +125,8 @@ only `[tool.bandit]` and `requirements.txt` is a hand-written "no dependencies" 
 - Adding real dependencies or a `[build-system]`.
 - A CI workflow (deferred — see the `.github/` decision above).
 - `uv-lock` hook, `uv sync` in the workflow, dependency groups.
-- Reordering or re-pinning unrelated hooks beyond `pre-commit autoupdate`.
+- Reordering or re-pinning the pre-existing hooks (a full `autoupdate` was tried and
+  reverted — it reformatted five unrelated files; leave it to a dependency-bump change).
 - Migrating `bandit` config out of `pyproject.toml`.
 
 ## Further Notes

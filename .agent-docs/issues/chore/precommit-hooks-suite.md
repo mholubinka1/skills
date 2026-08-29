@@ -45,7 +45,9 @@
   - `pyproject-fmt` (`tox-dev/pyproject-fmt`, id `pyproject-fmt`)
   - `uv-export` (`astral-sh/uv-pre-commit`, id `uv-export`, args
     `["--frozen", "--no-hashes", "--output-file", "requirements.txt"]`)
-- Run `pre-commit autoupdate`; commit the resulting rev bumps (new and existing).
+- Pin the new hooks to their current latest tags (run `pre-commit autoupdate`, take only the
+  new repos' results). Leave the pre-existing hooks' `rev`s alone — a full `autoupdate`
+  reformats five unrelated markdown files and raises a pre-existing `ruff` finding.
 - Remove the duplicate `pre-commit/pre-commit-hooks` block (the `v6.0.0` one near the end);
   keep a single block at `rev: v6.0.0` running `trailing-whitespace` + `end-of-file-fixer`.
 - Exactly one blank line between every top-level `- repo:` block.
@@ -63,7 +65,7 @@
 - [ ] `actionlint` runs without error (no workflows present).
 - [ ] `pre-commit run --all-files` passes on both the changed-files and full-repo passes;
       any new-hook finding is fixed, not `# noqa`/skipped.
-- [ ] `shellcheck` unchanged except a possible `autoupdate` rev bump; no `poetry-export`
-      referenced anywhere.
+- [ ] `shellcheck` and every other pre-existing hook keep their current `rev`; no
+      `poetry-export` referenced anywhere.
 
 ---
