@@ -1,5 +1,7 @@
 # Issues: chore/review-criteria-change-hygiene
 
+> Work complete — PR ready to merge.
+
 ## Add change-hygiene review criteria to `code-review/REVIEW-CRITERIA.md`
 
 **GitHub**: #59
@@ -41,17 +43,17 @@ No new section. Fowler smell baseline and the top-of-file preamble unchanged.
 
 ### Acceptance criteria
 
-- [ ] `code-review/REVIEW-CRITERIA.md` contains all seven points: 3 in Code Correctness, 1
+- [x] `code-review/REVIEW-CRITERIA.md` contains all seven points: 3 in Code Correctness, 1
       in Code Quality, 2 in Security and Performance, and the rewritten Documentation
       bullet.
-- [ ] The Documentation "Stale rationale sweep" bullet is rewritten (not duplicated) and
+- [x] The Documentation "Stale rationale sweep" bullet is rewritten (not duplicated) and
       still covers everything the original did, plus restated values/orders/enumerations.
-- [ ] Every new bullet is generic — no `update-skills`, shell-rc, or PR-#58 specifics — and
+- [x] Every new bullet is generic — no `update-skills`, shell-rc, or PR-#58 specifics — and
       matches the length/voice of the other bullets in its section.
-- [ ] The Fowler smell baseline section and the two-rule preamble are byte-unchanged.
-- [ ] `code-review/SKILL.md` is unchanged.
-- [ ] Cross-check recorded: each of the 15 retrospective findings maps to at least one
+- [x] The Fowler smell baseline section and the two-rule preamble are byte-unchanged.
+- [x] `code-review/SKILL.md` is unchanged.
+- [x] Cross-check recorded: each of the 15 retrospective findings maps to at least one
       bullet (existing or new) that would now flag it.
-- [ ] `pre-commit-check` passes.
+- [x] `pre-commit-check` passes.
 
 ---
