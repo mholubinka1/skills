@@ -21,19 +21,21 @@ Step 2b Read PR diff (`gh pr diff`); review-required?
 Step 3  Record baseline Copilot review ID; poll every 60s:
         thread count > 0? ─────────────────────────────────────────► Step 4
         suppressed comments > 0 in latest review body? ─────────────► Step 4
-        both 0 + new Copilot review (IDs differ)? ───────────────────► Step 8 (reviewed clean)
+        both 0 + new Copilot review (IDs differ)? ───────────────────► Step 7b (reviewed clean)
         Poll exhausted? one final pass: threads > 0 or suppressed > 0? ► Step 4
-                        final pass: both 0, no new review? ──────────► Step 8
+                        final pass: both 0, no new review? ──────────► Step 7b
 Step 4  For each unresolved thread and each suppressed-comment entry: decide fix or push-back; apply code changes
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
 Step 4d Suppressed comments this round? ──Yes──► post one PR comment summarizing fix/ignore outcomes
-        All push-backs (threads + suppressed)? ──Yes──► Step 8 (skip Steps 5–7)
+        All push-backs (threads + suppressed)? ──Yes──► Step 7b (skip Steps 5–7)
 Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push
 Step 6  review_round < 2? ──Yes──► review_round++; re-trigger Copilot → Step 7
-                          ──No ──► Step 8 (max 2 reviews; do not re-trigger)
+                          ──No ──► Step 7b (max 2 reviews; do not re-trigger)
 Step 7  Re-capture baseline; poll as in Step 3:
-        threads or suppressed comments? ──► Step 4 | clean or exhausted? ──► Step 8
+        threads or suppressed comments? ──► Step 4 | clean or exhausted? ──► Step 7b
+Step 7b Not exempt and ≥1 Fix applied this invocation? ──► generalise each fixed finding,
+        dedupe against .agent-docs/review.md, append, commit + push. Else ──► Step 8
 Step 8  Report PR link — PR is ready to merge
 ```
 
@@ -85,7 +87,7 @@ Both the thread-count check and the suppressed-comments check (a round can have 
 
 Before polling, capture the latest Copilot review ID as a baseline by calling the script once with no baseline argument (empty if no review exists yet; if this call already reports something actionable, skip straight to Step 4).
 
-Poll every 60 seconds, max 10 attempts, calling the script again each time: an actionable result exits to Step 4; a clean result (a new review with nothing to address) goes to Step 8 immediately; a failed `gh api` call is reported distinctly and must not be treated as "wait and retry"; otherwise wait and repeat.
+Poll every 60 seconds, max 10 attempts, calling the script again each time: an actionable result exits to Step 4; a clean result (a new review with nothing to address) goes to Step 7b immediately; a failed `gh api` call is reported distinctly and must not be treated as "wait and retry"; otherwise wait and repeat.
 
 After 10 attempts with no new clean review, call the script one final time following the same branching. See the status-check script section in [REFERENCE.md](REFERENCE.md) for the full command and output contract.
 
@@ -111,7 +113,7 @@ Reply to each **thread** ("Fixed. ..." or "Ignored. ...") and immediately resolv
 
 If any suppressed-comment entries were found in Step 3/7 this round, post a single PR-level comment summarizing the fix/ignore outcome for every one of them — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `gh pr comment` command. Post this regardless of whether this round's decisions (threads and suppressed comments together) were all push-backs — it's the only record of a suppressed comment's outcome, since it has no per-comment reply target. Skip this step entirely if there were no suppressed comments this round.
 
-All push-backs across both threads and suppressed comments, and zero files modified → skip to Step 8 (skip Steps 5–7). At least one fix → continue to Step 5.
+All push-backs across both threads and suppressed comments, and zero files modified → skip to Step 7b (skip Steps 5–7). At least one fix → continue to Step 5.
 
 ## Step 5 — Commit and push
 
@@ -119,11 +121,48 @@ Stage files explicitly (`git add <file1> <file2> ...`), commit with `"address Co
 
 ## Step 6 — Re-trigger Copilot (if within limit)
 
-If `review_round >= 2`, skip to Step 8. Otherwise increment to 2 and re-trigger via `gh pr edit {number} --add-reviewer @copilot`. See the Re-trigger Copilot Review section in [REFERENCE.md](REFERENCE.md) if that command fails.
+If `review_round >= 2`, skip to Step 7b. Otherwise increment to 2 and re-trigger via `gh pr edit {number} --add-reviewer @copilot`. See the Re-trigger Copilot Review section in [REFERENCE.md](REFERENCE.md) if that command fails.
 
 ## Step 7 — Check for new threads and suppressed comments
 
-Re-capture the baseline Copilot review ID, then poll as in Step 3. New unresolved threads or suppressed comments → return to Step 4. Neither (or clean review detected) → continue to Step 8.
+Re-capture the baseline Copilot review ID, then poll as in Step 3. New unresolved threads or suppressed comments → return to Step 4. Neither (or clean review detected) → continue to Step 7b.
+
+## Step 7b — Distil review criteria into `.agent-docs/review.md`
+
+Turn what Copilot caught on this PR into repo review criteria the `code-review` skill will
+apply to the next one.
+
+**Guard.** Run this step only if `review_round` was set at Step 2b (an exempt PR triggered
+no review, so there is nothing to learn) **and** at least one Step 4 decision across the
+whole invocation — any round — was **Fix**. Otherwise skip to Step 8.
+
+**Collect.** Take every finding this invocation whose decision was Fix: real threads you
+replied to with "Fixed.", and suppressed entries recorded as "Fixed." in a Step 4d PR
+comment. Exclude every push-back ("Ignored.") — `.agent-docs/review.md` records only
+criteria the team accepted by changing code.
+
+**Generalise.** For each fixed finding, write one criterion: drop the specifics — the file
+name, the line number, the concrete identifier or literal value — and keep the *class* of
+mistake, phrased as a bold-label + imperative rule in the voice of the `code-review` skill's
+`REVIEW-CRITERIA.md` bullets, ending with `(PR #<this PR number>)`. Two findings that
+generalise to the same rule become one entry.
+
+**Dedupe.** Read the target repo's existing `.agent-docs/review.md` (only that file — not
+the `code-review` skill's `REVIEW-CRITERIA.md`) and drop any candidate whose meaning an
+entry there already covers.
+
+**Write and commit.** See the Distil Review Criteria section in [REFERENCE.md](REFERENCE.md)
+for the append rules and the header to use when the file must be created. Then commit the
+file on its own:
+
+```bash
+git add .agent-docs/review.md
+git commit -m "docs: record <N> review criteria from Copilot review"
+git push
+```
+
+`<N>` is the number of criteria actually added. If dedupe removed every candidate, make no
+commit. Continue to Step 8.
 
 ## Step 8 — Report completion
 
