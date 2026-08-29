@@ -317,8 +317,8 @@ catches it. Phrase every entry as a bold label + imperative rule matching the bu
 ### Dedupe
 
 Compare each candidate against the entries already in the target repo's
-`.agent-docs/review.md`, matching on meaning rather than wording, and skip any a current
-entry already covers. Do not read the `code-review` skill's `REVIEW-CRITERIA.md` — it may be
+`.agent-docs/review.md`, matching on meaning rather than wording, and skip any that a
+current entry already covers. Do not read the `code-review` skill's `REVIEW-CRITERIA.md` — it may be
 absent in the target repo, and a little overlap between the two files is acceptable.
 
 ### Writing the file
