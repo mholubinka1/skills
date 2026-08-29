@@ -299,6 +299,43 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 
 ---
 
+## Distil review criteria (Step 7b)
+
+### What generalising looks like
+
+A fixed finding names a specific mistake in a specific place. The criterion is the reusable
+shape of it. Strip, in order: the file path, the line number, the concrete identifier or
+literal value, and the specific tool or command — keep the failure mode and the check that
+catches it. Phrase every entry as a bold label + imperative rule matching the bullets in the
+`code-review` skill's `REVIEW-CRITERIA.md`, ending with `(PR #<number>)`.
+
+| Fixed finding (specific) | Criterion (general) |
+|---|---|
+| `install.sh` checked `hooks/pre-commit` only and missed a needed `hooks/post-commit` | `- **Partial checks for compound state**: flag a readiness check that inspects one artefact when the state it gates has several parts. (PR #58)` |
+| A `git pull` error message asserted "history has diverged" when a network failure hits the same path | `- **Single-cause error text**: flag an error message that names one cause when the same failure has several. (PR #58)` |
+
+### Dedupe
+
+Compare each candidate against the entries already in the target repo's
+`.agent-docs/review.md`, matching on meaning rather than wording, and skip any a current
+entry already covers. Do not read the `code-review` skill's `REVIEW-CRITERIA.md` — it may be
+absent in the target repo, and a little overlap between the two files is acceptable.
+
+### Writing the file
+
+- **File exists**: append the surviving criteria to the end of its `## Criteria` list. If
+  that list holds only the placeholder `_None yet._`, replace that line with the first
+  criterion rather than leaving it above the list.
+- **File does not exist** (the target repo never ran `init-agent-docs`): create
+  `.agent-docs/review.md` using the header from the `init-agent-docs` skill's
+  `REVIEW-TEMPLATE.md` (its sibling skill directory — do not paste a copy of that header
+  here), then add the criteria under `## Criteria`.
+- Commit only that file, on its own commit, message
+  `docs: record <N> review criteria from Copilot review` where `<N>` is the count actually
+  added. If dedupe removed every candidate, make no commit.
+
+---
+
 ## Staging rules
 
 | Situation | Command |
@@ -310,12 +347,12 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 
 ## Loop termination conditions
 
-The loop (Steps 3–7) never starts at all if Step 2b judges the diff exempt — docs-only, config-only, or trivial. No review requested, no poll, no `review_round` set. PR is ready to merge.
+The loop (Steps 3–7) never starts at all if Step 2b judges the diff exempt — docs-only, config-only, or trivial. No review requested, no poll, no `review_round` set. Step 7b is also skipped (nothing was reviewed). PR is ready to merge.
 
 Otherwise, the loop is complete when **any** of these conditions is met:
 
-1. **All push-backs in a round** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Steps 5–7; do not re-trigger Copilot. PR is ready to merge.
-2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger. PR is ready to merge.
-3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments (exits immediately to Step 8), or 10 attempts elapsed with no new review (falls through to Step 8).
+1. **All push-backs in a round** — no code changes were made this round. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Steps 5–7 and do not re-trigger Copilot, then go to Step 7b.
+2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger; go to Step 7b.
+3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 7b.
 
-In all cases the PR is considered clean and ready to merge.
+In every non-exempt case, Step 7b runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.
