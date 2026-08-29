@@ -1,5 +1,7 @@
 # Issues: feature/review-md-feedback-loop
 
+> Work complete — PR ready to merge.
+
 ## 1. `.agent-docs/review.md` + `init-agent-docs` bootstrap
 
 **GitHub**: #61
@@ -30,18 +32,18 @@ Introduce the `.agent-docs/review.md` file and have `init-agent-docs` create it.
 
 ### Acceptance criteria
 
-- [ ] `init-agent-docs/REVIEW-TEMPLATE.md` exists with the header + `## Criteria` +
+- [x] `init-agent-docs/REVIEW-TEMPLATE.md` exists with the header + `## Criteria` +
       `_None yet._`.
-- [ ] `init-agent-docs` Step 6b is defined in SKILL.md (steps list) and REFERENCE.md with
+- [x] `init-agent-docs` Step 6b is defined in SKILL.md (steps list) and REFERENCE.md with
       the check → skip / write-verbatim shape, matching the `agent.md` steps' style.
-- [ ] Re-running `init-agent-docs` when `.agent-docs/review.md` already exists is a no-op
+- [x] Re-running `init-agent-docs` when `.agent-docs/review.md` already exists is a no-op
       that reports "already exists — skipping".
-- [ ] `init-agent-docs` frontmatter `description`, intro sentence, and all three REFERENCE.md
+- [x] `init-agent-docs` frontmatter `description`, intro sentence, and all three REFERENCE.md
       Step 10 summary examples mention `.agent-docs/review.md`.
-- [ ] Steps 7–10 and their cross-references are not renumbered.
-- [ ] This repo has `.agent-docs/review.md` (template, `_None yet._`) and a `review.md`
+- [x] Steps 7–10 and their cross-references are not renumbered.
+- [x] This repo has `.agent-docs/review.md` (template, `_None yet._`) and a `review.md`
       entry in `.agent-docs/context.md`.
-- [ ] `pre-commit-check` passes.
+- [x] `pre-commit-check` passes.
 
 ---
 
@@ -79,15 +81,15 @@ Step 8 of `address-copilot-comments`.
 
 ### Acceptance criteria
 
-- [ ] Step 7b is in the SKILL.md loop diagram and has a `## Step 7b` section; REFERENCE.md
+- [x] Step 7b is in the SKILL.md loop diagram and has a `## Step 7b` section; REFERENCE.md
       has the "Distil review criteria" detail.
-- [ ] The guard is explicit: exempt PR or zero fixes → no write, skip to Step 8.
-- [ ] The step text states that only Fixed findings are recorded and push-backs
+- [x] The guard is explicit: exempt PR or zero fixes → no write, skip to Step 8.
+- [x] The step text states that only Fixed findings are recorded and push-backs
       (`Ignored.`) are never written.
-- [ ] The dedup rule (against `.agent-docs/review.md` only) and the "replace `_None yet._`"
+- [x] The dedup rule (against `.agent-docs/review.md` only) and the "replace `_None yet._`"
       behaviour are specified.
-- [ ] The commit is a standalone commit to the PR branch with the specified message shape.
-- [ ] `pre-commit-check` passes.
+- [x] The commit is a standalone commit to the PR branch with the specified message shape.
+- [x] `pre-commit-check` passes.
 
 ---
 
@@ -116,14 +118,14 @@ Step 8 of `address-copilot-comments`.
 
 ### Acceptance criteria
 
-- [ ] `code-review/SKILL.md` Step 4 reads `.agent-docs/review.md` when present and passes it
+- [x] `code-review/SKILL.md` Step 4 reads `.agent-docs/review.md` when present and passes it
       to the Standards sub-agent as documented standards.
-- [ ] When `.agent-docs/review.md` is absent, the Standards sub-agent prompt is unchanged
+- [x] When `.agent-docs/review.md` is absent, the Standards sub-agent prompt is unchanged
       from today.
-- [ ] `REVIEW-CRITERIA.md`, the Fowler baseline, and the rest of `code-review/SKILL.md` are
+- [x] `REVIEW-CRITERIA.md`, the Fowler baseline, and the rest of `code-review/SKILL.md` are
       untouched.
-- [ ] Consistency check recorded: file name / path / header / "fixes only" wording match
+- [x] Consistency check recorded: file name / path / header / "fixes only" wording match
       across all three skills (restated-fact sweep applied to this change).
-- [ ] `pre-commit-check` passes.
+- [x] `pre-commit-check` passes.
 
 ---
