@@ -1,3 +1,18 @@
+[project]
+name = "skills"
+version = "0.0.0"
+description = "A collection of Claude Code skills that sync to ~/.claude/skills."
+requires-python = ">=3.13"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+dependencies = []
+
+[tool.uv]
+package = false
+
 [tool.bandit]
-exclude_dirs = [".venv"]
-skips = ["B404", "B603", "B607"]
+exclude_dirs = [ ".venv" ]
+skips = [ "B404", "B603", "B607" ]
