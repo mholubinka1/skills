@@ -17,13 +17,16 @@ questions correctly.
 
 - **Diff resolution**: an explicit PR number/URL argument is used directly; with no
   argument the skill resolves the current branch's open PR via `gh`; with no PR, or when
-  `gh` is unavailable or unauthenticated, it falls back to
-  `git diff --merge-base <default-branch> HEAD` and teaches without PR title/description.
-- **Documentation-exclusion filter**: pure-doc files (`*.md`, `*.mdx`, `*.rst`, `*.txt`,
-  `LICENSE`, `docs/**`, `.agent-docs/**`) and comment/docstring-only hunks are out of
-  scope; logic, config, tests, CI, lockfiles, and schema are in scope. If the in-scope
-  diff is empty (a documentation-only PR), the skill reports this and exits before
-  teaching or quizzing.
+  `gh` is unavailable or unauthenticated, it reads the `origin/`-qualified base ref from
+  `git symbolic-ref`, runs `git fetch` (proceeding if offline), then
+  `git diff --merge-base <base-ref> HEAD`, teaching without PR title/description.
+- **Documentation-exclusion filter**: classified by the purpose of each change, not the
+  file extension. Out of scope: content that explains the project to a human (`README*`,
+  `CHANGELOG*`, `docs/**`, `.agent-docs/**`, `LICENSE`, `*.rst`, `*.txt`, narrative `.md`)
+  and comment/docstring/prose-only hunks. In scope: code, config, tests, CI, lockfiles,
+  schema, and step-logic edits to agent-instruction files (`SKILL.md`, `REFERENCE.md`,
+  `WORKFLOW.md`, `AGENTS.md`, `CLAUDE.md`). If the in-scope diff is empty (a
+  documentation-only PR), the skill reports this and exits before teaching or quizzing.
 - **Mission question**: one skippable question up front asking why the reader is studying
   the PR, shifting teaching emphasis.
 - **Teach phase**: inline, structured Background -> Intuition -> Code walkthrough, every
@@ -59,10 +62,12 @@ review checklist.
 - [ ] Given no argument on a branch with an open PR, when the skill runs, then it resolves
       the branch's PR via `gh` without the number being supplied.
 - [ ] Given no PR or `gh` unavailable, when the skill runs, then it falls back to a local
-      `git diff --merge-base <default-branch> HEAD` and proceeds without PR title/body.
-- [ ] Given a PR containing both documentation and code changes, when the skill teaches and
-      quizzes, then documentation files and comment-only hunks are never taught as focus or
-      used as a question subject, while code/config/test/CI hunks are.
+      `git diff --merge-base <base-ref> HEAD` (base ref from `git symbolic-ref`, after
+      `git fetch`) and proceeds without PR title/body.
+- [ ] Given a PR containing both documentation and behaviour changes, when the skill
+      teaches and quizzes, then documentation files and comment/prose-only hunks are never
+      taught as focus or used as a question subject, while code/config/test/CI hunks and
+      step-logic edits to `SKILL.md`/`REFERENCE.md`/`WORKFLOW.md` are.
 - [ ] Given a documentation-only PR, when the skill runs, then it reports there is nothing
       non-documentation to examine and exits before the mission question, teach phase, and
       exam.
@@ -76,7 +81,8 @@ review checklist.
       drawn from a different part of the diff.
 - [ ] Given the reader has answered ten questions correctly, when the tenth correct answer
       is graded, then the exam ends and a recap lists covered concepts, the re-taught
-      misses, and one or two primary-source pointers.
+      misses, and one or two primary-source pointers (or none where the diff has no
+      worthwhile source).
 - [ ] Given a trivial in-scope diff (~15 changed lines or fewer), when the skill starts,
       then it warns the reader before teaching and still reaches ten questions by
       examining hunks from different angles.

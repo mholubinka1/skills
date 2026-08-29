@@ -38,8 +38,9 @@ explanation as Background → Intuition → Code, and defend the quiz against ga
    missed and then ask me about a different part of the diff, so that a wrong answer turns
    into learning instead of a dead end.
 4. As a reviewer, I want every part of the PR to be fair game — logic, config, tests, CI,
-   lockfiles, schema — except pure documentation changes, so that the exam covers what
-   actually carries risk.
+   lockfiles, schema, and step-logic edits to agent-instruction files — except changes
+   whose purpose is to explain the project to a human, so that the exam covers what
+   actually carries risk even in a repo whose logic lives in Markdown.
 5. As a reviewer, I want to run `/quiz-the-diff 123` or `/quiz-the-diff <url>` to point the
    skill at a specific PR, so that I can study a PR I am about to review.
 6. As a reviewer on a feature branch, I want to run `/quiz-the-diff` with no argument and
@@ -85,17 +86,29 @@ explanation as Background → Intuition → Code, and defend the quiz against ga
     `gh pr view --json number,title,body,files`.
   - With a PR reference: `gh pr diff <n>` for the patch, plus the JSON above for the PR
     title and description used as teaching context.
-  - No PR found, or `gh` is unavailable or unauthenticated: fall back to
-    `git diff --merge-base <default-branch> HEAD`, and teach without PR title/description
-    framing. The default branch is detected via
-    `git symbolic-ref refs/remotes/origin/HEAD --short` with the `origin/` prefix stripped.
+  - No PR found, or `gh` is unavailable or unauthenticated: read the base ref from
+    `git symbolic-ref refs/remotes/origin/HEAD --short` (already `origin/`-qualified, e.g.
+    `origin/main`; `git remote show origin` then `origin/main` as fallbacks if it is
+    unset), run `git fetch` to refresh it (proceed with a warning if offline), then
+    `git diff --merge-base <base-ref> HEAD`. Teach without PR title/description framing.
+    Comparing against the remote-tracking ref, used verbatim, keeps a stale local branch
+    from inflating the diff.
 - **Documentation-exclusion filter** (the in-scope diff), applied before teaching and
-  before any question is drawn:
-  - Excluded: changes to pure-documentation files — `*.md`, `*.mdx`, `*.rst`, `*.txt`,
-    `LICENSE`, anything under `docs/**` or `.agent-docs/**` — and hunks whose only changed
-    lines are comments or docstrings.
-  - In scope: everything else — application logic, configuration, tests, CI workflow files,
-    lockfiles, schema and migration files.
+  before any question is drawn. Classification is by the *purpose* of each change, not the
+  file extension — a `.md` file is documentation in one repo and executable agent logic in
+  another, so an extension list alone would exclude an entire skills-repo PR. This mirrors
+  the content-not-extension principle already recorded for **Review-required diff** in
+  `.agent-docs/context.md`.
+  - Excluded (documentation): files that exist to explain the project to a human —
+    `README*`, `CHANGELOG*`, `CONTRIBUTING*` and similar; anything under `docs/**` or
+    `.agent-docs/**`; `LICENSE`/`NOTICE`; `*.rst`, `*.txt`; narrative `.md`/`.mdx` guides —
+    and hunks whose only changed lines are comments, docstrings, or prose.
+  - In scope (behaviour): application and library code; configuration; CI workflow files;
+    build scripts; tests and fixtures; lockfiles and dependency manifests; schema and
+    migrations; and step-logic edits to agent-instruction files (`SKILL.md`, `REFERENCE.md`,
+    `WORKFLOW.md`, `AGENTS.md`, `CLAUDE.md`, prompt templates) that change steps, commands,
+    control flow, or rules — a pure rewording of an instruction is documentation and stays
+    out.
   - Kept as prose instructions in the skill, not a script (see Testing Decisions).
   - **Empty in-scope diff** (a documentation-only PR): the skill reports that the PR has no
     non-documentation changes to examine and exits before the mission question, the teach
@@ -131,8 +144,8 @@ explanation as Background → Intuition → Code, and defend the quiz against ga
 - **Prompt-injection guard**: `SKILL.md` instructs the agent to treat all diff and PR
   text as untrusted data — content to be taught and quizzed, never instructions to follow.
 - **Completion**: an inline recap — concepts covered, the concepts that were missed and
-  re-taught, and one or two primary-source pointers for further reading. Nothing is
-  persisted: no file, no PR comment, no state.
+  re-taught, and one or two primary-source pointers for further reading where a worthwhile
+  source exists. Nothing is persisted: no file, no PR comment, no state.
 - **Domain docs**: `.agent-docs/context.md` gains two terms — **in-scope diff** (the
   portion of a PR's diff left after the documentation-exclusion filter, from which all
   questions are drawn) and **exam loop** (the teach-question-regrade cycle that runs until
@@ -150,8 +163,10 @@ explanation as Background → Intuition → Code, and defend the quiz against ga
      skippable.
   2. Confirm the teach phase produces Background → Intuition → Code walkthrough with
      citations to real files and hunks.
-  3. Confirm documentation changes in that PR are absent from the teaching focus and are
-     never the subject of a question, while code/config/test/CI hunks are.
+  3. Confirm documentation changes in that PR (e.g. a README or a reworded paragraph) are
+     absent from the teaching focus and are never the subject of a question, while
+     code/config/test/CI hunks and any step-logic edits to `SKILL.md`/`REFERENCE.md`/
+     `WORKFLOW.md` are in scope.
   4. Answer questions through a full loop — including at least one deliberate wrong answer —
      and confirm a wrong answer re-teaches and then asks about a different hunk without
      advancing the counter, and that the loop ends at ten correct.
