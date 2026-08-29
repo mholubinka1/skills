@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+# update-skills — refresh ~/.claude/skills from this repo's main branch.
+#
+# Fast-forwards this clone to origin/main, bootstraps the local .venv and the
+# pre-commit hooks on first run, then runs sync_claude_skills.py. Safe to run
+# from any directory. Refuses to run if the working tree is dirty — it never
+# stashes, resets, or force-pulls.
+#
+# Works the same on macOS and on Windows (Git Bash).
+set -euo pipefail
+
+BRANCH="main"
+
+# --- resolve the repo root from this script's own location ------------------
+# Follow symlinks so it works when invoked directly, through a PATH entry
+# pointing at bin/, or via a symlink into bin/.
+script="${BASH_SOURCE[0]}"
+while [ -h "$script" ]; do
+	dir="$(cd -P "$(dirname "$script")" && pwd)"
+	script="$(readlink "$script")"
+	case "$script" in
+		/*) ;;
+		*) script="$dir/$script" ;;
+	esac
+done
+bin_dir="$(cd -P "$(dirname "$script")" && pwd)"
+repo="$(cd -P "$bin_dir/.." && pwd)"
+
+say() { printf '==> %s\n' "$1"; }
+die() { echo "update-skills: $1" >&2; exit 1; }
+
+# --- sanity: are we actually in this repo? ------------------------------
+# Guards against the script being copied out of bin/, or an unexpected $0.
+cd "$repo" || die "cannot enter repo root $repo"
+[ -f "$repo/sync_claude_skills.py" ] || die "$repo does not look like the skills repo (no sync_claude_skills.py) — run the copy that lives in the cloned repo's bin/."
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "$repo is not a git work tree."
+
+# --- guard: refuse on a dirty working tree --------------------------------
+if [ -n "$(git status --porcelain)" ]; then
+	echo "update-skills: working tree has uncommitted changes — aborting." >&2
+	echo >&2
+	git status >&2
+	exit 1
+fi
+
+# --- refresh the branch --------------------------------------------------
+say "Switching to $BRANCH"
+git checkout "$BRANCH"
+
+say "Fast-forwarding to origin/$BRANCH"
+if ! git pull --ff-only origin "$BRANCH"; then
+	echo "update-skills: 'git pull --ff-only origin $BRANCH' failed — see the git output above for the reason." >&2
+	echo "If the histories have diverged, resolve it by hand; update-skills will not force or reset." >&2
+	echo "It could also be a network or auth problem reaching origin." >&2
+	exit 1
+fi
+
+# --- resolve Python interpreters ----------------------------------------
+# Overall precedence matches .pre-commit-config.yaml's sync-claude-skills hook
+# (.venv/Scripts/python[.exe] -> .venv/bin/python -> python3 -> python), but the
+# two system candidates are only ever used to *create* the venv, never to run
+# pip or the sync — every install and the sync itself run against the venv, so
+# `pip install` can't leak into system/user site-packages.
+sys_py=""
+for candidate in python3 python; do
+	if command -v "$candidate" >/dev/null 2>&1; then
+		sys_py="$candidate"
+		break
+	fi
+done
+
+pick_venv_py() {
+	# Windows venvs first (Git Bash sees python.exe), then POSIX.
+	for p in .venv/Scripts/python .venv/Scripts/python.exe .venv/bin/python; do
+		if [ -x "$p" ]; then
+			printf '%s' "$p"
+			return
+		fi
+	done
+}
+
+# --- first-run bootstrap: .venv + pre-commit hooks ----------------------
+# runs_ok <interpreter> — true if it executes at all
+runs_ok() { [ -n "$1" ] && "$1" -c '' >/dev/null 2>&1; }
+
+venv_py="$(pick_venv_py)"
+if [ -n "$venv_py" ] && ! runs_ok "$venv_py"; then
+	die ".venv exists but its interpreter ($venv_py) won't run — delete .venv and re-run."
+fi
+if [ -z "$venv_py" ]; then
+	[ -n "$sys_py" ] || die "no python3 or python on PATH; cannot create .venv."
+	say "Creating .venv"
+	"$sys_py" -m venv .venv
+	venv_py="$(pick_venv_py)"
+	if ! runs_ok "$venv_py"; then
+		die "created .venv but its interpreter is missing or won't run — your platform's python venv package is probably absent; install it and re-run. (Refusing to fall back to system Python: that would install pre-commit globally.)"
+	fi
+fi
+
+# hooks_ok — true only if BOTH hook types this repo configures
+# (default_install_hook_types in .pre-commit-config.yaml: pre-commit, post-commit)
+# are present and pre-commit-generated. Checking just hooks/pre-commit would let
+# a lone pre-commit hook mask a missing post-commit hook — and post-commit is
+# the one that runs sync_claude_skills.py.
+hooks_ok() {
+	local h p
+	for h in pre-commit post-commit; do
+		p="$(git rev-parse --git-path "hooks/$h")"
+		[ -f "$p" ] && grep -q 'pre-commit\.com' "$p" || return 1
+	done
+}
+
+if ! "$venv_py" -m pre_commit --version >/dev/null 2>&1; then
+	say "Installing pre-commit into .venv"
+	"$venv_py" -m pip install --quiet pre-commit
+fi
+if ! hooks_ok; then
+	say "Installing git hooks"
+	"$venv_py" -m pre_commit install >/dev/null
+fi
+
+# --- sync --------------------------------------------------------------
+say "Syncing skills to ~/.claude/skills"
+"$venv_py" sync_claude_skills.py
+
+say "Done — ~/.claude/skills is up to date with origin/$BRANCH."

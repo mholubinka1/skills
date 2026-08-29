@@ -22,6 +22,24 @@ _Avoid_: detail file, command reference, documentation file
 A file used by orchestrating skills (e.g. `implement`) to define a multi-step workflow executed inline in the current conversation rather than delegated to a sub-agent.
 _Avoid_: process file, workflow definition
 
+### Skill Distribution
+
+**`sync_claude_skills.py`**:
+The standard-library script that walks this repo and copies every directory containing a `SKILL.md` into `~/.claude/skills/`. Invoked by the `sync-claude-skills` hook and by `update-skills`.
+_Avoid_: sync script, copier
+
+**`sync-claude-skills` hook**:
+The `post-commit` pre-commit hook that runs `sync_claude_skills.py` after every commit in this repo. Fires only on the machine that commits — `update-skills` covers the pull-and-sync path for machines that only consume skills.
+_Avoid_: sync hook, post-commit hook
+
+**`update-skills`**:
+A command placed on the user's `PATH` by `install.sh` that fast-forwards the local clone to `origin/main`, bootstraps `.venv` and the pre-commit hooks on first run, then runs `sync_claude_skills.py`. Refuses to run on a dirty working tree; never forces or resets. For machines that consume skills rather than develop them.
+_Avoid_: updater, refresh script, sync command
+
+**`install.sh`**:
+The one-time setup script at the repo root. Adds the repo's `bin/` directory to `PATH` via a marker-delimited block in the user's shell rc file (`~/.zshrc` for zsh, else `~/.bashrc`). Idempotent — re-running drops any existing block(s) and re-appends a single current one.
+_Avoid_: installer, bootstrap script
+
 ### Workflow Execution
 
 **Step**:

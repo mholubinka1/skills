@@ -57,6 +57,7 @@ fi
 # on GitHub, and -F's type auto-detection would otherwise send it as a JSON number, which the
 # $owner/$repo: String! variables below would reject). -F sends $number as an actual number,
 # matching its Int! declaration.
+# shellcheck disable=SC2016  # $owner/$repo/$number are GraphQL variables, not shell — must stay literal
 THREAD_COUNT=$(gh api graphql -f query='
 query($owner: String!, $repo: String!, $number: Int!) {
   repository(owner: $owner, name: $repo) {

@@ -23,12 +23,17 @@ repos:
     hooks:
       - id: codespell
 
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+
   - repo: local
     hooks:
       - id: sync-claude-skills
         name: Sync Claude skills to ~/.claude/skills
         language: system
-        entry: bash -c "if [ -f .venv/Scripts/python ]; then .venv/Scripts/python sync_claude_skills.py; elif [ -f .venv/bin/python ]; then .venv/bin/python sync_claude_skills.py; elif command -v python3 >/dev/null 2>&1; then python3 sync_claude_skills.py; else python sync_claude_skills.py; fi"
+        entry: bash -c "if [ -f .venv/Scripts/python ]; then .venv/Scripts/python sync_claude_skills.py; elif [ -f .venv/Scripts/python.exe ]; then .venv/Scripts/python.exe sync_claude_skills.py; elif [ -f .venv/bin/python ]; then .venv/bin/python sync_claude_skills.py; elif command -v python3 >/dev/null 2>&1; then python3 sync_claude_skills.py; else python sync_claude_skills.py; fi"
         stages: [post-commit]
         always_run: true
         pass_filenames: false
