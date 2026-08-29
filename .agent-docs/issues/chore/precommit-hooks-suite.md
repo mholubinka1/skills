@@ -1,5 +1,7 @@
 # Issues: chore/precommit-hooks-suite
 
+> Work complete — PR ready to merge.
+
 ## 1. Make the repo a `uv` project (`pyproject.toml` + `uv.lock` + generated `requirements.txt`)
 
 **GitHub**: #66
@@ -19,12 +21,12 @@
 
 ### Acceptance criteria
 
-- [ ] `pyproject.toml` has a valid `[project]` table and `[tool.uv] package = false`;
+- [x] `pyproject.toml` has a valid `[project]` table and `[tool.uv] package = false`;
       `[tool.bandit]` unchanged.
-- [ ] `uv lock` succeeds; `uv.lock` is committed.
-- [ ] `requirements.txt` is the `uv export` output, committed; no hand-written prose.
-- [ ] `uv export --frozen` runs clean against the committed lock.
-- [ ] `pre-commit-check` passes on the changed files.
+- [x] `uv lock` succeeds; `uv.lock` is committed.
+- [x] `requirements.txt` is the `uv export` output, committed; no hand-written prose.
+- [x] `uv export --frozen` runs clean against the committed lock.
+- [x] `pre-commit-check` passes on the changed files.
 
 ---
 
@@ -57,15 +59,15 @@
 
 ### Acceptance criteria
 
-- [ ] `pip-audit`, `actionlint`, `validate-pyproject`, `pyproject-fmt`, `uv-export` all
+- [x] `pip-audit`, `actionlint`, `validate-pyproject`, `pyproject-fmt`, `uv-export` all
       present with pinned `rev`s and correct ids/args.
-- [ ] `pre-commit-hooks` appears exactly once, at `rev: v6.0.0`, with both hooks.
-- [ ] One blank line between every repo block, including around the `local` block.
-- [ ] `pyproject.toml` is `pyproject-fmt`-clean and `validate-pyproject`-valid.
-- [ ] `actionlint` runs without error (no workflows present).
-- [ ] `pre-commit run --all-files` passes on both the changed-files and full-repo passes;
+- [x] `pre-commit-hooks` appears exactly once, at `rev: v6.0.0`, with both hooks.
+- [x] One blank line between every repo block, including around the `local` block.
+- [x] `pyproject.toml` is `pyproject-fmt`-clean and `validate-pyproject`-valid.
+- [x] `actionlint` runs without error (no workflows present).
+- [x] `pre-commit run --all-files` passes on both the changed-files and full-repo passes;
       any new-hook finding is fixed, not `# noqa`/skipped.
-- [ ] `shellcheck` and every other pre-existing hook keep their current `rev`; no
+- [x] `shellcheck` and every other pre-existing hook keep their current `rev`; no
       `poetry-export` referenced anywhere.
 
 ---
