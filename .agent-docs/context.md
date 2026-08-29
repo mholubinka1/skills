@@ -85,7 +85,7 @@ _Avoid_: hidden comment, collapsed comment, filtered finding
 ### Agent Docs
 
 **Agent docs**:
-The `.agent-docs/` directory containing agent-facing documentation for a repository: `agent.md`, `context.md`, `specs/`, `issues/`, and `adr/`.
+The `.agent-docs/` directory containing agent-facing documentation for a repository: `agent.md`, `context.md`, `review.md`, `specs/`, `issues/`, and `adr/`.
 _Avoid_: agent documentation, agent directory, .agent-docs folder
 
 **Context** (agent-docs sense):
@@ -103,6 +103,10 @@ _Avoid_: task, ticket, story (except in the GitHub Issues sense)
 **ADR** (Architecture Decision Record):
 A record in `.agent-docs/adr/` documenting a significant design choice and its rationale. Named with a zero-padded numeric prefix (e.g. `0001-decision-name.md`).
 _Avoid_: decision log, design decision
+
+**Review criteria** (`review.md`):
+The `.agent-docs/review.md` file holding review criteria a repository has accumulated from its own Copilot review rounds. `init-agent-docs` bootstraps it from a template; `address-copilot-comments` appends a generalised criterion for each Copilot finding that resulted in a code change (push-backs are never recorded); `code-review` feeds it to its Standards sub-agent as documented repo standards.
+_Avoid_: review notes, lessons file, review log
 
 ### Design and Implementation Process
 

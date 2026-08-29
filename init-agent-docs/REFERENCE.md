@@ -136,15 +136,15 @@ Collect all matches found.
   > Please resolve manually by moving the correct file to `.agent-docs/context.md`, then
   > re-run this skill.
 
-- Skip to Step 7.
+- Skip to Step 6b.
 
 **If exactly one file is found**, move it to `.agent-docs/context.md`:
 
 1. Read the contents of the source file.
 2. Write those contents verbatim to `.agent-docs/context.md`.
-   - If the write fails, report the error clearly and skip to Step 7. Do **not** delete the source file.
+   - If the write fails, report the error clearly and skip to Step 6b. Do **not** delete the source file.
 3. Delete the source file only after the write succeeds.
-   - If the delete fails, report the error clearly and skip to Step 7. The destination file has already been written.
+   - If the delete fails, report the error clearly and skip to Step 6b. The destination file has already been written.
 
 If both steps succeed:
 
@@ -174,7 +174,7 @@ This step has two sub-paths depending on whether a `context.md` was found in Ste
      one- or two-sentence definition and an `_Avoid_` line listing synonyms to reject.
    - Subheadings grouping terms when natural clusters emerge.
 
-   If writing fails for any reason, report the error clearly and skip to Step 7.
+   If writing fails for any reason, report the error clearly and skip to Step 6b.
 
 4. Report: "Created `.agent-docs/context.md` from codebase analysis."
 
@@ -188,11 +188,40 @@ This step has two sub-paths depending on whether a `context.md` was found in Ste
    repos" section — this skill always bootstraps a single-context `context.md`.
 4. If shortcomings are found:
    - Write the improved file to `.agent-docs/context.md`.
-     If writing fails, report the error clearly and skip to Step 7.
+     If writing fails, report the error clearly and skip to Step 6b.
    - Report: "Improved `.agent-docs/context.md` — `<brief summary of changes>`."
 5. If no shortcomings are found:
    - Report: "`.agent-docs/context.md` reviewed — no improvements needed."
-   - Continue to Step 7 without writing.
+   - Continue to Step 6b without writing.
+
+## Step 6b — Bootstrap review.md
+
+`.agent-docs/review.md` holds review criteria this repository has accumulated from its own
+Copilot review rounds. It is written to by the `address-copilot-comments` skill (one
+generalised criterion per Copilot finding that resulted in a code change; push-backs are
+never recorded) and read by the `code-review` skill's Standards sub-agent as documented repo
+standards. This step only ensures the file exists — it never edits an existing one.
+
+Check whether `.agent-docs/review.md` already exists in the current repository.
+
+If it exists:
+
+- Report: "`.agent-docs/review.md` already exists — skipping."
+- Continue to Step 7.
+
+If it does not exist:
+
+1. Create the `.agent-docs/` directory if it does not already exist.
+2. Read the full contents of this skill's `REVIEW-TEMPLATE.md` file (located in the same
+   directory as this `REFERENCE.md`).
+3. Write those contents verbatim to `.agent-docs/review.md`.
+   - If the write fails, report the error clearly and continue to Step 7 — a missing
+     `review.md` does not block the rest of the bootstrap.
+4. Report: "Created `.agent-docs/review.md`."
+
+Unlike `context.md`, there is no search-for-a-file-to-move sub-path and no
+review-and-improve sub-path: the file is machine-maintained, so an existing one is left
+exactly as found.
 
 ## Step 7 — Migrate ADR files
 
@@ -284,6 +313,7 @@ init-agent-docs complete:
   - no agent-docs/ layout to migrate — skipped
   - Created `.agent-docs/agent.md`.
   - Created `.agent-docs/context.md` from codebase analysis.
+  - Created `.agent-docs/review.md`.
   - no ADRs found — skipped
   - Created `CLAUDE.md` with Agent Standards reference.
 ```
@@ -296,6 +326,7 @@ init-agent-docs complete:
   - `.agent-docs/agent.md` already exists — skipping.
   - `.agent-docs/context.md` found — proceeding to review.
   - Improved `.agent-docs/context.md` — tightened 2 definitions, added avoid-lists for 3 terms.
+  - Created `.agent-docs/review.md`.
   - no ADRs found — skipped
   - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
 ```
@@ -307,6 +338,7 @@ init-agent-docs complete (nothing to do):
   - no agent-docs/ layout to migrate — skipped
   - `.agent-docs/agent.md` already exists — skipping.
   - `.agent-docs/context.md` reviewed — no improvements needed.
+  - `.agent-docs/review.md` already exists — skipping.
   - no ADRs found — skipped
   - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
 ```
