@@ -49,8 +49,9 @@ git checkout "$BRANCH"
 
 say "Fast-forwarding to origin/$BRANCH"
 if ! git pull --ff-only origin "$BRANCH"; then
-	echo "update-skills: origin/$BRANCH could not be fast-forwarded (history has diverged)." >&2
-	echo "Resolve it manually — update-skills will not force or reset." >&2
+	echo "update-skills: 'git pull --ff-only origin $BRANCH' failed — see the git output above for the reason." >&2
+	echo "If the histories have diverged, resolve it by hand; update-skills will not force or reset." >&2
+	echo "It could also be a network or auth problem reaching origin." >&2
 	exit 1
 fi
 

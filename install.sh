@@ -79,10 +79,18 @@ fi
 # --- append the block, separated from existing content by exactly one blank line ---
 touch "$rc"
 if [ -s "$rc" ]; then
-	# strip any trailing blank lines first, so the separator below is the only one
-	tmp="$rc.us-tmp.$$"
-	awk 'NF { for (i = 0; i < pending; i++) print ""; pending = 0; print; next }
-	     { pending++ }' "$rc" > "$tmp" && mv "$tmp" "$rc"
+	# strip any trailing blank lines first, so the separator below is the only one.
+	# mktemp (not "$rc.$$") avoids a predictable name / symlink footgun; same dir
+	# keeps the mv atomic.
+	tmp="$(mktemp "$(dirname "$rc")/.update-skills.XXXXXX")"
+	if awk 'NF { for (i = 0; i < pending; i++) print ""; pending = 0; print; next }
+	        { pending++ }' "$rc" > "$tmp"; then
+		mv "$tmp" "$rc"
+	else
+		rm -f "$tmp"
+		echo "install.sh: failed to normalise $rc — left unchanged." >&2
+		exit 1
+	fi
 	printf '\n' >> "$rc"
 fi
 printf '%s\n' "$block" >> "$rc"
