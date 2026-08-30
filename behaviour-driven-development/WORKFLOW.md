@@ -70,7 +70,7 @@ Dispatch **one** `Agent` call, `type: general-purpose`. Everything the subagent 
 - The confirmed interface changes.
 - The path to the failing tracer bullet test file from Step 3, and the test command noted there.
 - The loop rules, verbatim:
-  - Work one scenario at a time, in order. RED: write the next test → it fails. GREEN: write the minimal code to pass it → it passes.
+  - Work one scenario at a time, in order. RED: write the next test → it fails. GREEN: write the minimal code to pass it → it passes. Scenario 1's test already exists from Step 3 — start at GREEN for it.
   - Only enough code to pass the current test. Don't anticipate later scenarios.
   - Test observable behaviour through the public interface, not internals.
   - Never refactor while RED — get to GREEN first.

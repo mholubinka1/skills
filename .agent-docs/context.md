@@ -123,7 +123,7 @@ The red-green-refactor cycle used in the `behaviour-driven-development` skill: w
 _Avoid_: TDD cycle, test loop, test-first loop
 
 **Implementation subagent** (BDD sense):
-The fresh-context `general-purpose` agent the `behaviour-driven-development` skill spawns to run the red-green-refactor loop, after the test-authoring context has agreed the scenarios and written the failing tracer bullet test. Receives the agreed scenario list and interface changes inline in its prompt, then grinds the vertical loop — one scenario → test → minimal implementation → repeat — then refactors. Told not to re-invoke the `bdd` skill, so the loop cannot recurse. On the normal path it writes every line of production code, keeping it out of the design-polluted test-authoring context.
+The fresh-context `general-purpose` agent the `behaviour-driven-development` skill spawns to run the red-green-refactor loop, after the test-authoring context has agreed the scenarios and written the failing tracer bullet test. Receives the agreed scenario list and interface changes inline in its prompt, then grinds the vertical loop — one scenario → test → minimal implementation → repeat — then refactors. Told not to re-invoke the `bdd` skill, so the loop does not recurse. On the normal path it writes every line of production code.
 _Avoid_: impl agent, worker agent, coding subagent
 
 **Pre-commit check**:
