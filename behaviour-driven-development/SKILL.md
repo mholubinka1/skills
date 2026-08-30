@@ -53,7 +53,7 @@ This produces **crap tests**:
 - Tests become insensitive to real changes - they pass when behavior breaks, fail when behavior is fine
 - You outrun your headlights, committing to test structure before understanding the implementation
 
-**Correct approach**: Vertical slices via a tracer bullet, then one test → one implementation → repeat. Each test responds to what you learned from the previous cycle. Because each test and the code that passes it are written in the same pass, you know exactly what behavior matters and how to verify it.
+**Correct approach**: Vertical slices via tracer bullets. One test → one implementation → repeat. Each test responds to what you learned from the previous cycle. Because you just wrote the code, you know exactly what behavior matters and how to verify it.
 
 ```text
 WRONG (horizontal):

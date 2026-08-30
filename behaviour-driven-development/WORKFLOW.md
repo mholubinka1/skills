@@ -74,7 +74,7 @@ Dispatch **one** `Agent` call, `type: general-purpose`. Everything the subagent 
   - Only enough code to pass the current test. Don't anticipate later scenarios.
   - Test observable behaviour through the public interface, not internals.
   - Never refactor while RED — get to GREEN first.
-  - After every scenario is green, refactor (checklist below), running the full suite after each step.
+  - Refactor only after the whole scenario list is green — one refactor pass at the end, not after each scenario — running the full suite after each refactor step.
 - The per-cycle checklist, for the subagent to apply to every scenario:
   - Test name uses domain vocabulary, not implementation terms
   - Test maps to a Given-When-Then scenario or acceptance criterion
@@ -83,7 +83,7 @@ Dispatch **one** `Agent` call, `type: general-purpose`. Everything the subagent 
   - Test would survive an internal refactor
   - Code is minimal for this test
   - No speculative features added
-- The refactor checklist, to apply once green (see `refactoring.md`):
+- The refactor checklist, for that final pass once the whole list is green (see `refactoring.md`):
   - Extract duplication
   - Deepen modules (move complexity behind simple interfaces)
   - Apply SOLID principles where natural
