@@ -55,6 +55,8 @@ RED: Write the test for the first behaviour → run it → it fails
 
 Confirm it fails *for the right reason* — an assertion failure, or a missing function / endpoint / module — not an import error, a syntax error, or a test-collection failure. A test that errors before it runs has proven nothing about the path.
 
+Note the exact command that runs the suite (or this test alone); Step 4 passes it to the subagent verbatim.
+
 This is your tracer bullet: it proves the first scenario is expressible as a failing test in this codebase's test setup, which de-risks the handoff that follows.
 
 ## Step 4 — Hand off to the implementation subagent (clean context)
@@ -66,7 +68,7 @@ Dispatch **one** `Agent` call, `type: general-purpose`. Everything the subagent 
 - The agreed user stories.
 - The full Given-When-Then scenario list from Step 1, in order.
 - The confirmed interface changes.
-- The path(s) to the failing tracer bullet test file(s) from Step 3, and the command that runs the test suite.
+- The path to the failing tracer bullet test file from Step 3, and the test command noted there.
 - The loop rules, verbatim:
   - Work one scenario at a time, in order. RED: write the next test → it fails. GREEN: write the minimal code to pass it → it passes.
   - Only enough code to pass the current test. Don't anticipate later scenarios.
@@ -97,10 +99,9 @@ If the subagent reports a scenario it could not satisfy, it stops there. The mai
 Back in the main context, check the subagent's report:
 
 - [ ] Every scenario from Step 1 has a corresponding test, and the full suite is green
-- [ ] Each test uses domain vocabulary and maps to a Given-When-Then scenario
-- [ ] Tests exercise observable behaviour through the public interface — they would survive an internal refactor
-- [ ] No speculative features beyond the agreed scenarios
+- [ ] Every item of the Step 4 per-cycle checklist holds for the tests the subagent wrote
 - [ ] The refactors applied are sound and the suite is still green after them
+- [ ] No speculative features beyond the agreed scenarios
 
 If anything fails the check, address it in the main context or re-dispatch a subagent.
 

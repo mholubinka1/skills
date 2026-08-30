@@ -73,11 +73,12 @@ kept verbatim and clarified with an additive paragraph and a diagram tweak.
     not write production code.
   - **Step 4 — Dispatch the implementation subagent**: one `Agent` call, `type:
     general-purpose`. Prompt contains, inline: the agreed user stories, the full
-    Given-When-Then scenario list, the confirmed interface changes, the path(s) to the
-    failing tracer test file(s), the core loop rules (red-green vertical, one scenario at a
-    time, minimal code to pass, never refactor while red, test observable behaviour only,
-    refactor once green), and pointers to `tests.md` / `mocking.md` / `refactoring.md` for
-    depth. Explicit instruction: do not re-invoke the `bdd` skill. The subagent returns a
+    Given-When-Then scenario list, the confirmed interface changes, the path to the
+    failing tracer test file and the command that runs it (captured in Step 3), the core
+    loop rules (red-green vertical, one scenario at a time, minimal code to pass, never
+    refactor while red, test observable behaviour only, refactor once green), the per-cycle
+    and refactor checklists, and pointers to `tests.md` / `mocking.md` / `refactoring.md`
+    for depth. Explicit instruction: do not re-invoke the `bdd` skill. The subagent returns a
     per-scenario status (green / not satisfied + why), the refactors applied, and the final
     test-run output.
   - **Step 5 — Verify and refactor review**: main context runs the per-cycle checklist
