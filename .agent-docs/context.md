@@ -137,3 +137,13 @@ _Avoid_: dependency bump, package update, dependency refresh
 **Ecosystem** (dependency update sense):
 A language/package-manager combination detected in a target repo via marker files (e.g. `pyproject.toml` → Poetry, `package.json` + lockfile → npm/yarn/pnpm, `*.csproj`/`*.sln` → dotnet/NuGet). A single repo may have more than one.
 _Avoid_: stack, toolchain, language target
+
+### Diff Examination
+
+**In-scope diff**:
+The portion of a PR's diff the `quiz-the-diff` skill draws questions from — everything left after removing documentation, classified by the purpose of each change rather than by file extension. Out: content that explains the project to a human (`README*`, `CHANGELOG*`, `docs/**`, `.agent-docs/**`, `LICENSE`, `*.rst`, `*.txt`, narrative `.md`) and comment/docstring/prose-only hunks. In: code, config, CI, build scripts, tests, lockfiles, schema, and step-logic edits to agent-instruction files (`SKILL.md`, `REFERENCE.md`, `WORKFLOW.md`, `AGENTS.md`, `CLAUDE.md`, prompt templates). Shares the content-not-extension principle with **Review-required diff**.
+_Avoid_: quizzable diff, non-doc diff, testable changes
+
+**Exam loop**:
+The `quiz-the-diff` cycle of asking one multiple-choice question, grading it, and — on a wrong answer — re-teaching the missed concept before asking about a different part of the diff. Runs until the reader has ten correct answers, with no attempt cap.
+_Avoid_: quiz loop, question loop, test cycle

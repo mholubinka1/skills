@@ -21,3 +21,7 @@ from — for example:
   defined canonically elsewhere (a rule, a constraint, an enumeration), it must carry the
   same qualifiers as the canonical version — a summary that silently drops a caveat reads as
   a contradiction between the two places. (PR #64)
+- **Executable placeholder in an instruction file**: flag a command in a step-logic file
+  (`SKILL.md`/`REFERENCE.md`/`WORKFLOW.md`) that carries a literal example value or a
+  placeholder token the step never derives — an agent runs these verbatim. Prefer a command
+  form that needs no substitution. (PR #70)
