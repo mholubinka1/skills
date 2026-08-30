@@ -81,11 +81,12 @@ explanation as Background → Intuition → Code, and defend the quiz against ga
   "quiz me on this PR", "test my understanding of the diff", "examine me on this branch" —
   and not on a bare request to explain a change.
 - **Diff resolution** (documented in `REFERENCE.md`):
-  - Explicit argument — a PR number or URL — is used directly.
+  - Explicit argument — a PR number or URL, passed verbatim as `<ref>` to `gh pr diff
+    <ref>` for the patch and `gh pr view <ref> --json number,title,body,files` for the
+    title/description teaching context. Never a literal example number.
   - No argument: resolve the current branch's open PR with
-    `gh pr view --json number,title,body,files`.
-  - With a PR reference: `gh pr diff <n>` for the patch, plus the JSON above for the PR
-    title and description used as teaching context.
+    `gh pr view --json number,title,body,files`, then `gh pr diff <that number>` for the
+    patch.
   - No PR found, or `gh` is unavailable or unauthenticated: read the base ref from
     `git symbolic-ref refs/remotes/origin/HEAD --short` (already `origin/`-qualified, e.g.
     `origin/main`; `git remote show origin` then `origin/main` as fallbacks if it is

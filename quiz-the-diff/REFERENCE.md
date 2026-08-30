@@ -8,7 +8,7 @@ and Geoffrey Litt's "explain diff" technique — see [Pedagogy notes](#pedagogy-
 
 | Situation | What to run |
 |---|---|
-| Argument is a PR number (`123`) or URL | `gh pr diff 123`; `gh pr view 123 --json number,title,body,files` |
+| Argument is a PR number or URL (call it `<ref>`) | `gh pr diff <ref>`; `gh pr view <ref> --json number,title,body,files` |
 | No argument, branch has an open PR | `gh pr view --json number,title,body,files`, then `gh pr diff <number>` |
 | No PR, or `gh` missing / unauthenticated | `git fetch` (proceed if it fails), then `git diff --merge-base <base-ref> HEAD` |
 
