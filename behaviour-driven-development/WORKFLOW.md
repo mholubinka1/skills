@@ -45,53 +45,63 @@ Determine `change_type` from the Three Amigos output:
 
 Pass this to branch-hygiene so it can accurately validate the branch prefix and suggest a correctly-named branch if needed. If Step 0 already moved the user to a `wip/` placeholder, branch-hygiene will detect this as a mismatch and prompt for a proper name. **Do not push or commit to any new branch.**
 
-## Step 3 — Tracer Bullet
+## Step 3 — Tracer Bullet Test (authoring phase)
 
-Write ONE test that confirms ONE thing about the system:
-
-```text
-RED:   Write test for first behavior → test fails
-GREEN: Write minimal code to pass → test passes
-```
-
-This is your tracer bullet - proves the path works end-to-end.
-
-## Step 4 — Incremental Loop
-
-For each remaining behavior:
+Still in the main context, write ONE test for the **first scenario** — and stop there. **Do not write any production code in this phase.**
 
 ```text
-RED:   Write next test → fails
-GREEN: Minimal code to pass → passes
+RED: Write the test for the first behaviour → run it → it fails
 ```
 
-Rules:
+Confirm it fails *for the right reason* — an assertion failure, or a missing function / endpoint / module — not an import error, a syntax error, or a test-collection failure. A test that errors before it runs has proven nothing about the path.
 
-- One test at a time
-- Only enough code to pass current test
-- Don't anticipate future tests
-- Keep tests focused on observable behavior
+This is your tracer bullet: it proves the first scenario is expressible as a failing test in this codebase's test setup, which de-risks the handoff that follows.
 
-## Step 5 — Refactor
+## Step 4 — Hand off to the implementation subagent (clean context)
 
-After all tests pass, look for refactor candidates (see `refactoring.md`):
+The main context is now saturated with planning, the Three Amigos discussion, interface debate, and false starts. Production code written here would be biased toward the shape that discussion imagined rather than what the tests specify. So the implementation loop runs in a **fresh subagent** that treats the agreed scenarios as its specification.
 
-- [ ] Extract duplication
-- [ ] Deepen modules (move complexity behind simple interfaces)
-- [ ] Apply SOLID principles where natural
-- [ ] Consider what new code reveals about existing code
-- [ ] Run tests after each refactor step
+Dispatch **one** `Agent` call, `type: general-purpose`. Everything the subagent needs goes **inline in the prompt** — nothing new is written to disk:
 
-**Never refactor while RED.** Get to GREEN first.
+- The agreed user stories.
+- The full Given-When-Then scenario list from Step 1, in order.
+- The confirmed interface changes.
+- The path(s) to the failing tracer bullet test file(s) from Step 3, and the command that runs the test suite.
+- The loop rules, verbatim:
+  - Work one scenario at a time, in order. RED: write the next test → it fails. GREEN: write the minimal code to pass it → it passes.
+  - Only enough code to pass the current test. Don't anticipate later scenarios.
+  - Test observable behaviour through the public interface, not internals.
+  - Never refactor while RED — get to GREEN first.
+  - After every scenario is green, refactor (checklist below), running the full suite after each step.
+- The per-cycle checklist, for the subagent to apply to every scenario:
+  - Test name uses domain vocabulary, not implementation terms
+  - Test maps to a Given-When-Then scenario or acceptance criterion
+  - Test describes behaviour, not implementation
+  - Test uses the public interface only
+  - Test would survive an internal refactor
+  - Code is minimal for this test
+  - No speculative features added
+- The refactor checklist, to apply once green (see `refactoring.md`):
+  - Extract duplication
+  - Deepen modules (move complexity behind simple interfaces)
+  - Apply SOLID principles where natural
+  - Consider what new code reveals about existing code
+- Pointers, by path, for depth: `tests.md`, `mocking.md`, `refactoring.md` in the skill directory.
+- An explicit instruction: **do not re-invoke the `bdd` skill** — it would recurse.
+- A request to report back: for each scenario, whether it is green or could not be satisfied (and why); the refactors applied; and the final full test-run output.
 
-## Checklist Per Cycle
+If the subagent reports a scenario it could not satisfy, it stops there. The main context decides what to do next — fix it inline, or re-dispatch a fresh subagent with a narrower brief. There is no automatic retry loop.
 
-```text
-[ ] Test name uses domain vocabulary, not implementation terms
-[ ] Test maps to a Given-When-Then scenario or acceptance criterion
-[ ] Test describes behavior, not implementation
-[ ] Test uses public interface only
-[ ] Test would survive internal refactor
-[ ] Code is minimal for this test
-[ ] No speculative features added
-```
+## Step 5 — Verify the returned work
+
+Back in the main context, check the subagent's report:
+
+- [ ] Every scenario from Step 1 has a corresponding test, and the full suite is green
+- [ ] Each test uses domain vocabulary and maps to a Given-When-Then scenario
+- [ ] Tests exercise observable behaviour through the public interface — they would survive an internal refactor
+- [ ] No speculative features beyond the agreed scenarios
+- [ ] The refactors applied are sound and the suite is still green after them
+
+If anything fails the check, address it in the main context or re-dispatch a subagent.
+
+`pre-commit-check` and the commit are the caller's responsibility — under `/implement` they are Step 6's next actions, run once this skill returns.

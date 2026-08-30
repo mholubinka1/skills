@@ -61,12 +61,19 @@ WRONG (horizontal):
   GREEN: impl1, impl2, impl3, impl4, impl5
 
 RIGHT (vertical):
-  RED→GREEN: test1→impl1
-  RED→GREEN: test2→impl2
-  RED→GREEN: test3→impl3
-  ...
+  authoring context ──▸ write test1 (RED)
+  ─────────────── clean-context handoff ───────────────
+  implementation subagent:
+    RED→GREEN: test1→impl1
+    RED→GREEN: test2→impl2
+    RED→GREEN: test3→impl3
+    ...
 ```
+
+### The clean-context handoff is not horizontal slicing
+
+The implementation phase runs in a fresh subagent (see [WORKFLOW.md](WORKFLOW.md) Steps 3–5). Exactly **one** failing test crosses that boundary — the tracer bullet. The subagent then writes every remaining test one at a time, each responding to what the previous cycle taught, exactly as in the vertical model above. Batching all tests upfront stays forbidden — in the test-authoring context and inside the subagent alike. What moves across the boundary is the design noise — the Three Amigos discussion, interface debate, false starts — not a pile of tests.
 
 ## Workflow
 
-See [WORKFLOW.md](WORKFLOW.md) for the full step-by-step cycle: branch check → planning → tracer bullet → incremental loop → refactor → checklist.
+See [WORKFLOW.md](WORKFLOW.md) for the full step-by-step cycle: branch check → planning → tracer bullet test → clean-context handoff → implementation subagent (incremental loop + refactor) → verification.
