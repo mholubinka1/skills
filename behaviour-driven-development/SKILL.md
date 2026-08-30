@@ -72,7 +72,7 @@ RIGHT (vertical):
 
 ### The clean-context handoff is not horizontal slicing
 
-The implementation phase runs in a fresh subagent (see [WORKFLOW.md](WORKFLOW.md) Steps 3–5). Exactly **one** failing test crosses that boundary — the tracer bullet. The subagent then writes every remaining test one at a time, each responding to what the previous cycle taught, exactly as in the vertical model above. Batching all tests upfront stays forbidden — in the test-authoring context and inside the subagent alike. What moves across the boundary is the design noise — the Three Amigos discussion, interface debate, false starts — not a pile of tests.
+The implementation phase runs in a fresh subagent (see [WORKFLOW.md](WORKFLOW.md) Step 4). The first handoff carries exactly **one** failing test — the tracer bullet. The subagent then writes every remaining test one at a time, each responding to what the previous cycle taught, exactly as in the vertical model above. Batching all tests upfront stays forbidden — in the test-authoring context and inside the subagent alike. What moves across the boundary is the design noise — the Three Amigos discussion, interface debate, false starts — not a pile of tests.
 
 ## Workflow
 

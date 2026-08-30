@@ -63,7 +63,7 @@ This is your tracer bullet: it proves the first scenario is expressible as a fai
 
 The main context is now saturated with planning, the Three Amigos discussion, interface debate, and false starts. Production code written here would be biased toward the shape that discussion imagined rather than what the tests specify. So the implementation loop runs in a **fresh subagent** that treats the agreed scenarios as its specification.
 
-Dispatch **one** `Agent` call, `type: general-purpose`. Everything the subagent needs goes **inline in the prompt** — nothing new is written to disk:
+Dispatch **one** `Agent` call, `type: general-purpose`. Everything the subagent needs goes **inline in the prompt** — no handoff file is written to disk:
 
 - The agreed user stories.
 - The full Given-When-Then scenario list from Step 1, in order.
