@@ -1,5 +1,7 @@
 # Issues: chore/bdd-clean-context-impl
 
+> Work complete — PR ready to merge.
+
 ## Split BDD workflow into test-authoring phase + clean-context implementation subagent
 
 **GitHub**: #71
@@ -21,17 +23,17 @@ kept intact with only an additive clarification and a diagram tweak. Only `SKILL
 
 ### Acceptance criteria
 
-- [ ] `SKILL.md` "Anti-Pattern: Horizontal Slices" prohibition text is unchanged; one added
+- [x] `SKILL.md` "Anti-Pattern: Horizontal Slices" prohibition text is unchanged; one added
       paragraph states the handoff crosses the boundary with exactly one failing test (the
       tracer bullet), the subagent writes every remaining test one at a time, and batching
       all tests upfront stays forbidden in both contexts.
-- [ ] `SKILL.md` `WRONG`/`RIGHT` diagram gains a context-boundary line: the boundary sits
+- [x] `SKILL.md` `WRONG`/`RIGHT` diagram gains a context-boundary line: the boundary sits
       between the tracer test and the loop; the loop stays `test1→impl1, test2→impl2, …`
       inside the subagent.
-- [ ] `SKILL.md` closing "See WORKFLOW.md" pointer line names the phase split.
-- [ ] `WORKFLOW.md` Step 3 is the tracer bullet test only (RED): confirm it fails for the
+- [x] `SKILL.md` closing "See WORKFLOW.md" pointer line names the phase split.
+- [x] `WORKFLOW.md` Step 3 is the tracer bullet test only (RED): confirm it fails for the
       right reason (not an import/collection error); no production code written.
-- [ ] `WORKFLOW.md` Step 4 dispatches one `Agent` call (`type: general-purpose`) whose
+- [x] `WORKFLOW.md` Step 4 dispatches one `Agent` call (`type: general-purpose`) whose
       prompt carries inline: the user stories, the full Given-When-Then scenario list, the
       confirmed interface changes, path(s) to the failing tracer test file(s), the core
       loop rules (red-green vertical, one scenario at a time, minimal code to pass, never
@@ -39,15 +41,15 @@ kept intact with only an additive clarification and a diagram tweak. Only `SKILL
       `tests.md` / `mocking.md` / `refactoring.md`, and an explicit "do not re-invoke the
       `bdd` skill" instruction. The subagent returns per-scenario status (green / not
       satisfied + why), refactors applied, and the final test-run output.
-- [ ] `WORKFLOW.md` Step 5 has the main context verify the returned result against the
+- [x] `WORKFLOW.md` Step 5 has the main context verify the returned result against the
       per-cycle checklist, confirm every scenario is covered and green, and review the
       subagent's refactors. `pre-commit-check` and commit remain the caller's
       responsibility. A scenario the subagent cannot satisfy: it stops and reports; the
       main context decides (fix inline or re-dispatch a narrower subagent); no automatic
       retry loop in the skill.
-- [ ] Behaviour is identical whether `bdd` is invoked standalone or as `/implement` Step 6.
-- [ ] Only `behaviour-driven-development/SKILL.md` and
+- [x] Behaviour is identical whether `bdd` is invoked standalone or as `/implement` Step 6.
+- [x] Only `behaviour-driven-development/SKILL.md` and
       `behaviour-driven-development/WORKFLOW.md` are modified in the skill.
-- [ ] `pre-commit-check` passes on all changed files.
+- [x] `pre-commit-check` passes on all changed files.
 
 ---
