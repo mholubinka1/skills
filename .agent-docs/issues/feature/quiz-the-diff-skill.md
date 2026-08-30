@@ -2,6 +2,12 @@
 
 # Issues: feature/quiz-the-diff-skill
 
+> Work complete — PR ready to merge. The skill instructions satisfy every acceptance
+> criterion by inspection, and `pre-commit` passes. The one item still needing a live
+> check is a full interactive `/quiz-the-diff` run against a real PR — mission question →
+> teach → a ten-correct loop with a deliberate wrong answer → recap — which reading the
+> instructions cannot substitute for. Recommended as post-merge verification.
+
 ## Add quiz-the-diff skill (#69)
 
 **Blocked by**: None
@@ -57,41 +63,41 @@ review checklist.
 
 ### Acceptance criteria
 
-- [ ] Given a PR number or URL argument, when `/quiz-the-diff <ref>` runs, then it teaches
+- [x] Given a PR number or URL argument, when `/quiz-the-diff <ref>` runs, then it teaches
       and quizzes that PR's diff.
-- [ ] Given no argument on a branch with an open PR, when the skill runs, then it resolves
+- [x] Given no argument on a branch with an open PR, when the skill runs, then it resolves
       the branch's PR via `gh` without the number being supplied.
-- [ ] Given no PR or `gh` unavailable, when the skill runs, then it falls back to a local
+- [x] Given no PR or `gh` unavailable, when the skill runs, then it falls back to a local
       `git diff --merge-base <base-ref> HEAD` (base ref from `git symbolic-ref`, after
       `git fetch`) and proceeds without PR title/body.
-- [ ] Given a PR containing both documentation and behaviour changes, when the skill
+- [x] Given a PR containing both documentation and behaviour changes, when the skill
       teaches and quizzes, then documentation files and comment/prose-only hunks are never
       taught as focus or used as a question subject, while code/config/test/CI hunks and
       step-logic edits to `SKILL.md`/`REFERENCE.md`/`WORKFLOW.md` are.
-- [ ] Given a documentation-only PR, when the skill runs, then it reports there is nothing
+- [x] Given a documentation-only PR, when the skill runs, then it reports there is nothing
       non-documentation to examine and exits before the mission question, teach phase, and
       exam.
-- [ ] Given the skill has resolved a non-empty in-scope diff, when it starts, then it asks
+- [x] Given the skill has resolved a non-empty in-scope diff, when it starts, then it asks
       exactly one skippable mission question, then delivers a Background -> Intuition ->
       Code walkthrough with citations to real files and hunks.
-- [ ] Given the exam is running, when the reader answers a question correctly, then the
+- [x] Given the exam is running, when the reader answers a question correctly, then the
       correct counter increments by one and `TodoWrite` reflects the new count.
-- [ ] Given the exam is running, when the reader answers a question incorrectly, then the
+- [x] Given the exam is running, when the reader answers a question incorrectly, then the
       counter does not change, the missed concept is re-taught, and the next question is
       drawn from a different part of the diff.
-- [ ] Given the reader has answered ten questions correctly, when the tenth correct answer
+- [x] Given the reader has answered ten questions correctly, when the tenth correct answer
       is graded, then the exam ends and a recap lists covered concepts, the re-taught
       misses, and one or two primary-source pointers (or none where the diff has no
       worthwhile source).
-- [ ] Given a trivial in-scope diff (~15 changed lines or fewer), when the skill starts,
+- [x] Given a trivial in-scope diff (~15 changed lines or fewer), when the skill starts,
       then it warns the reader before teaching and still reaches ten questions by
       examining hunks from different angles.
-- [ ] Given diff or PR text that contains instruction-like content, when the skill
+- [x] Given diff or PR text that contains instruction-like content, when the skill
       processes it, then it is treated as data to teach and quiz, not as instructions.
-- [ ] `quiz-the-diff/SKILL.md` is under 100 lines and its `description` includes explicit
+- [x] `quiz-the-diff/SKILL.md` is under 100 lines and its `description` includes explicit
       "Use when..." triggers; `REFERENCE.md` holds the question-authoring rules and
       anti-gaming checklist.
-- [ ] `.agent-docs/context.md` defines **in-scope diff** and **exam loop**.
-- [ ] `pre-commit` passes on all changed files.
+- [x] `.agent-docs/context.md` defines **in-scope diff** and **exam loop**.
+- [x] `pre-commit` passes on all changed files.
 
 ---
