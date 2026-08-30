@@ -29,8 +29,8 @@ Teach a reader a PR's diff, then examine them on it until they have ten correct 
 
 - **Argument given** (PR number or URL) — call it `<ref>`: `gh pr diff <ref>` for the
   patch, `gh pr view <ref> --json number,title,body,files` for teaching context.
-- **No argument**: resolve the current branch's open PR with
-  `gh pr view --json number,title,body,files`, then `gh pr diff <that number>` for the patch.
+- **No argument**: `gh pr view --json number,title,body,files` and `gh pr diff` — both
+  default to the current branch's open PR, so no number is extracted or substituted.
 - **No PR found, or `gh` missing / unauthenticated**: read the base ref from
   `git symbolic-ref refs/remotes/origin/HEAD --short` (it comes back already
   `origin/`-qualified, e.g. `origin/main`; if unset, try `git remote show origin`, else

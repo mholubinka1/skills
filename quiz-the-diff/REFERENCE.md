@@ -9,7 +9,7 @@ and Geoffrey Litt's "explain diff" technique — see [Pedagogy notes](#pedagogy-
 | Situation | What to run |
 |---|---|
 | Argument is a PR number or URL (call it `<ref>`) | `gh pr diff <ref>`; `gh pr view <ref> --json number,title,body,files` |
-| No argument, branch has an open PR | `gh pr view --json number,title,body,files`, then `gh pr diff <number>` |
+| No argument, branch has an open PR | `gh pr view --json number,title,body,files`; `gh pr diff` (both default to the branch's PR) |
 | No PR, or `gh` missing / unauthenticated | `git fetch` (proceed if it fails), then `git diff --merge-base <base-ref> HEAD` |
 
 `<base-ref>` is the remote-tracking ref for the default branch. Read it from
