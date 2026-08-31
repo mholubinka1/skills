@@ -25,3 +25,10 @@ from — for example:
   (`SKILL.md`/`REFERENCE.md`/`WORKFLOW.md`) that carries a literal example value or a
   placeholder token the step never derives — an agent runs these verbatim. Prefer a command
   form that needs no substitution. (PR #70)
+- **Edit outside a declared no-change boundary**: when the issue or spec fences an existing
+  section as "kept verbatim / additive clarification only", flag any reword of that
+  section's existing sentences — even an accuracy fix belongs in the added material, not the
+  frozen text. (PR #72)
+- **Ambiguous cadence in an instruction step**: flag a directive to act "after every X" or
+  "once Y" that does not say whether it runs each iteration or a single time at the end — an
+  agent following it can pick the wrong cadence. (PR #72)
