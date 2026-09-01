@@ -6,6 +6,7 @@ Detection rules, per-ecosystem commands, and validation commands. Workflow steps
 
 | Ecosystem | Marker file(s) | Manager selected by |
 |---|---|---|
+| Python (uv) | `uv.lock`, or `pyproject.toml` with `[tool.uv]` | — |
 | Python (Poetry) | `pyproject.toml` with `[tool.poetry]` | — |
 | Python (PDM) | `pyproject.toml` with `[tool.pdm]` | — |
 | Python (Pipenv) | `Pipfile` | — |
@@ -15,7 +16,19 @@ Detection rules, per-ecosystem commands, and validation commands. Workflow steps
 
 Check the repo root first. For monorepos, also check one level of subdirectories (e.g. `packages/*`, `services/*`) and run each ecosystem's flow per matching directory.
 
+**Python manager precedence:** if `uv.lock` is present, use the uv flow for that directory and skip the other Python flows there, even when `pyproject.toml` also has `[tool.poetry]` or `[tool.pdm]`. With no `uv.lock`, match in table order: `[tool.poetry]` → `[tool.pdm]` → `[tool.uv]` → `Pipfile` → `requirements.txt`.
+
 ## Python
+
+**uv** (`uv.lock` present, or `pyproject.toml` has `[tool.uv]`):
+
+```bash
+uv lock --upgrade
+uv sync
+uv tree --outdated   # falls back to `uv pip list --outdated` on older uv without the flag
+```
+
+`uv lock --upgrade` moves every dependency to the newest version allowed by the constraints in `pyproject.toml`, rewriting `uv.lock`; `uv sync` reconciles the environment. With normal constraints (`>=x,<y`, `~=x.y`) this is patch/minor only. Anything `uv tree --outdated` still shows behind is held below latest by a `pyproject.toml` constraint — report it as a major bump candidate; do not widen the constraint. If `uv sync` fails on a resolution conflict from the upgrade, record it in the report and carry on — do not revert or block the commit.
 
 **Poetry** (`pyproject.toml` has `[tool.poetry]`):
 
@@ -124,7 +137,7 @@ Run if detectable; record pass/fail only — never block or revert on failure.
 
 | Ecosystem | Command |
 |---|---|
-| Python | `pytest` if a `tests/` dir or a `pytest` dependency is present, else skip |
+| Python | `pytest` (for a uv project, `uv run pytest`) if a `tests/` dir or a `pytest` dependency is present, else skip |
 | .NET | `dotnet build`, then `dotnet test` if a test project (e.g. `*.Tests.csproj`) exists |
 | Node | `npm test` / `yarn test` / `pnpm test` if a `test` script exists in `package.json`; else `npm run build` / equivalent if a `build` script exists |
 

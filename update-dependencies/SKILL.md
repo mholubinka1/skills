@@ -28,7 +28,7 @@ If nothing matches, report that no known ecosystem was detected and give brief g
 
 For each detected ecosystem, follow its command sequence in [REFERENCE.md](REFERENCE.md):
 
-- **Python** — Poetry, PDM, Pipenv, or pip, selected by marker file.
+- **Python** — uv, Poetry, PDM, Pipenv, or pip, selected by marker file.
 - **.NET / C#** — `dotnet` CLI (covers any `.csproj`/`.sln`).
 - **Node / TypeScript / React** — npm, yarn, or pnpm, selected by lockfile.
 
@@ -49,7 +49,7 @@ For each ecosystem updated, run its standard build/test command if one is detect
 
 ## Step 6: Commit
 
-Stage only the files this run actually touched — dependency manifests, lockfiles, and `.pre-commit-config.yaml` (e.g. `package.json`, `package-lock.json`, `requirements.txt`, `poetry.lock`, `pyproject.toml`, `*.csproj`, `.pre-commit-config.yaml`). Never `git add -A` or `git add .`: a stash popped back in Step 1 may contain unrelated in-progress work that must not be bundled into this commit.
+Stage only the files this run actually touched — dependency manifests, lockfiles, and `.pre-commit-config.yaml` (e.g. `package.json`, `package-lock.json`, `requirements.txt`, `poetry.lock`, `uv.lock`, `pyproject.toml`, `*.csproj`, `.pre-commit-config.yaml`). Never `git add -A` or `git add .`: a stash popped back in Step 1 may contain unrelated in-progress work that must not be bundled into this commit.
 
 Commit with a clear, descriptive message summarizing what was updated per ecosystem, e.g.:
 
