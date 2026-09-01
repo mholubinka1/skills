@@ -61,9 +61,14 @@ fi
 # two system candidates are only ever used to *create* the venv, never to run
 # pip or the sync — every install and the sync itself run against the venv, so
 # `pip install` can't leak into system/user site-packages.
+
+# runs_ok <interpreter> — true if it executes at all
+runs_ok() { [ -n "$1" ] && "$1" -c '' >/dev/null 2>&1; }
+
 sys_py=""
+# Probe by running, not `command -v` — the Windows Store `python3` alias is on PATH but exits non-zero. Same rationale in .pre-commit-config.yaml.
 for candidate in python3 python; do
-	if command -v "$candidate" >/dev/null 2>&1; then
+	if runs_ok "$candidate"; then
 		sys_py="$candidate"
 		break
 	fi
@@ -80,15 +85,12 @@ pick_venv_py() {
 }
 
 # --- first-run bootstrap: .venv + pre-commit hooks ----------------------
-# runs_ok <interpreter> — true if it executes at all
-runs_ok() { [ -n "$1" ] && "$1" -c '' >/dev/null 2>&1; }
-
 venv_py="$(pick_venv_py)"
 if [ -n "$venv_py" ] && ! runs_ok "$venv_py"; then
 	die ".venv exists but its interpreter ($venv_py) won't run — delete .venv and re-run."
 fi
 if [ -z "$venv_py" ]; then
-	[ -n "$sys_py" ] || die "no python3 or python on PATH; cannot create .venv."
+	[ -n "$sys_py" ] || die "no working python3 or python found; cannot create .venv."
 	say "Creating .venv"
 	"$sys_py" -m venv .venv
 	venv_py="$(pick_venv_py)"
