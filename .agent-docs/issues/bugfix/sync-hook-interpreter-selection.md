@@ -1,5 +1,7 @@
 # Issues: bugfix/sync-hook-interpreter-selection
 
+> Work complete — PR ready to merge.
+
 ## Select the sync interpreter by execution, not `command -v` (#75)
 
 **Blocked by**: None
@@ -32,19 +34,19 @@ No change to candidate precedence, the pre-commit/post-commit split, `pick_venv_
 
 ### Acceptance criteria
 
-- [ ] `.pre-commit-config.yaml` `sync-claude-skills` `entry` selects the interpreter with
+- [x] `.pre-commit-config.yaml` `sync-claude-skills` `entry` selects the interpreter with
       `"$py" -c "" >/dev/null 2>&1`, not `command -v` / `[ -f ]`; candidate order unchanged;
       `exec`s the chosen interpreter.
-- [ ] When no candidate runs, the hook prints `sync-claude-skills: no working python
+- [x] When no candidate runs, the hook prints `sync-claude-skills: no working python
       interpreter found` (or equivalent one-liner) to stderr and exits non-zero.
-- [ ] On this machine (Store `python3` stub, no `.venv`): a real `git commit` on the branch
+- [x] On this machine (Store `python3` stub, no `.venv`): a real `git commit` on the branch
       triggers the `post-commit` hook, it runs the sync via `python`, exits 0 with no stub
       error, and `~/.claude/skills` is updated.
-- [ ] `bin/update-skills` `sys_py` loop uses `runs_ok`; the "cannot create .venv" `die`
+- [x] `bin/update-skills` `sys_py` loop uses `runs_ok`; the "cannot create .venv" `die`
       message names *working* Python.
-- [ ] A one-line rationale comment is present at both call sites.
-- [ ] `pre-commit run --all-files` passes; `shellcheck` is clean on `bin/update-skills`.
-- [ ] No behavioural change when a real `.venv` or a working `python3` is present (earlier
+- [x] A one-line rationale comment is present at both call sites.
+- [x] `pre-commit run --all-files` passes; `shellcheck` is clean on `bin/update-skills`.
+- [x] No behavioural change when a real `.venv` or a working `python3` is present (earlier
       candidate still wins).
 
 ---
