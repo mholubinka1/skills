@@ -1,5 +1,7 @@
 # Issues: chore/uv-support-update-dependencies
 
+> Work complete — PR ready to merge.
+
 ## Add uv as a recognised Python manager in update-dependencies (#73)
 
 **Blocked by**: None
@@ -31,17 +33,17 @@ No control-flow change to any existing step; no change to the Poetry/PDM/Pipenv/
 
 ### Acceptance criteria
 
-- [ ] Detection Table has a `Python (uv)` row with the correct marker files.
-- [ ] Precedence note states uv.lock wins, and gives the full fallback order
+- [x] Detection Table has a `Python (uv)` row with the correct marker files.
+- [x] Precedence note states uv.lock wins, and gives the full fallback order
       (poetry → pdm → tool.uv → Pipfile → requirements.txt).
-- [ ] `uv` command subsection appears first in `## Python`, before Poetry, with the
+- [x] `uv` command subsection appears first in `## Python`, before Poetry, with the
       `uv lock --upgrade` / `uv sync` / `uv tree --outdated` sequence and the `uv sync`
       failure-handling line.
-- [ ] Validation Commands table's Python row mentions `uv run pytest`.
-- [ ] SKILL.md Step 3 Python bullet and Step 6 staging example list both mention uv/`uv.lock`.
-- [ ] `.agent-docs/context.md` Ecosystem entry mentions uv markers.
-- [ ] `pre-commit run --all-files` passes on the changed files.
-- [ ] No wording or command changes to the existing Poetry/PDM/Pipenv/pip/.NET/Node
+- [x] Validation Commands table's Python row mentions `uv run pytest`.
+- [x] SKILL.md Step 3 Python bullet and Step 6 staging example list both mention uv/`uv.lock`.
+- [x] `.agent-docs/context.md` Ecosystem entry mentions uv markers.
+- [x] `pre-commit run --all-files` passes on the changed files.
+- [x] No wording or command changes to the existing Poetry/PDM/Pipenv/pip/.NET/Node
       sections.
 
 ---
