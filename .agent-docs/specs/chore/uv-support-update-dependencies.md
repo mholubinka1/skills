@@ -69,10 +69,12 @@ non-uv repo.
   dependency that isn't held at an exact version to the newest version the `pyproject.toml`
   constraints allow and rewrites `uv.lock`; `uv sync` reconciles the environment; with
   normal constraints this is patch/minor only; anything `uv tree --outdated` still shows
-  behind is constraint-bound — report as a major bump candidate, do not widen the
-  constraint. Adds one skill-specific line: if `uv sync` fails on a resolution conflict from
-  the upgrade, record it in the report and carry on — do not revert or block the commit
-  (consistent with the skill's best-effort, non-blocking posture).
+  behind is constraint-bound (a direct `pyproject.toml` constraint or a transitive
+  requirement) — report as a major bump candidate, don't widen a `pyproject.toml`
+  constraint to chase it. Adds one skill-specific line: if `uv lock --upgrade` or `uv sync`
+  fails (resolution conflict, no network, unsatisfiable constraint), record it in the report
+  and carry on — do not revert or block the commit (consistent with the skill's best-effort,
+  non-blocking posture).
 - **Validation Commands table** (`REFERENCE.md`) — the Python row gains a parenthetical:
   `pytest` (for a uv project, `uv run pytest`) if a `tests/` dir or a `pytest` dependency is
   present, else skip.
@@ -81,10 +83,10 @@ non-uv repo.
 - **SKILL.md Step 6** — the staging-example parenthetical gains `uv.lock` alongside
   `poetry.lock`.
 - **`.agent-docs/context.md`** — the **Ecosystem** entry's marker examples gain
-  "`uv.lock` (or `pyproject.toml` `[tool.uv]`) → uv", inserted after the existing
-  `pyproject.toml` → Poetry example so the glossary order doesn't imply uv wins over Poetry
-  (the no-lockfile fallback in REFERENCE.md puts `[tool.poetry]` first). Done inline during
-  the grill session.
+  "`uv.lock` → uv", inserted after the existing `pyproject.toml` → Poetry example. Only the
+  unambiguous `uv.lock` marker is listed in the glossary; the `[tool.uv]`-without-lockfile
+  case is left to the precedence note in REFERENCE.md, which is the canonical place for
+  resolution order. Done inline during the grill session.
 - No change to any step's control flow beyond naming uv as a detected manager. The existing
   Step 3 rule "if a required package manager binary isn't installed for a detected
   ecosystem, report and skip" already covers a missing `uv` on `PATH` with no new text.

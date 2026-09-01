@@ -139,7 +139,7 @@ The process of syncing a target repo with `main`/`master` (to absorb changes Dep
 _Avoid_: dependency bump, package update, dependency refresh
 
 **Ecosystem** (dependency update sense):
-A language/package-manager combination detected in a target repo via marker files (e.g. `pyproject.toml` → Poetry, `uv.lock` (or `pyproject.toml` `[tool.uv]`) → uv, `package.json` + lockfile → npm/yarn/pnpm, `*.csproj`/`*.sln` → dotnet/NuGet). A single repo may have more than one.
+A language/package-manager combination detected in a target repo via marker files (e.g. `pyproject.toml` → Poetry, `uv.lock` → uv, `package.json` + lockfile → npm/yarn/pnpm, `*.csproj`/`*.sln` → dotnet/NuGet). A single repo may have more than one.
 _Avoid_: stack, toolchain, language target
 
 ### Diff Examination
