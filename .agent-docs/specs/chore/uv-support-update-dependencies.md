@@ -62,7 +62,11 @@ non-uv repo.
   `Pipfile` → `requirements.txt`. This makes the previously-implicit ordering explicit as a
   side benefit.
 - **`uv` command subsection** (`REFERENCE.md` `## Python`) — placed **first**, before the
-  Poetry entry, mirroring the Detection Table row order. Command sequence:
+  Poetry entry, mirroring the Detection Table row order. Its header condition ends
+  "— subject to the precedence note above" so the bare `[tool.uv]` marker can't be read as
+  "uv wins whenever `[tool.uv]` exists"; it points at the note rather than restating its
+  fallback order, keeping symmetry with the bare Poetry/PDM/Pipenv headers. Command
+  sequence:
   `uv lock --upgrade` → `uv sync` → `uv tree --outdated` (with a concrete fallback: if
   `uv tree --outdated` exits non-zero on an older uv without the flag, use
   `uv pip list --outdated`). Prose mirrors the Poetry entry: `uv lock --upgrade` moves each

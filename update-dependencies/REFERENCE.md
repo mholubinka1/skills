@@ -20,7 +20,7 @@ Check the repo root first. For monorepos, also check one level of subdirectories
 
 ## Python
 
-**uv** (`uv.lock` present, or `pyproject.toml` has `[tool.uv]`):
+**uv** (`uv.lock` present, or `pyproject.toml` has `[tool.uv]` — subject to the precedence note above):
 
 ```bash
 uv lock --upgrade
