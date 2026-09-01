@@ -58,9 +58,9 @@ non-uv repo.
   "check one level of subdirectories" paragraph under the Detection Table. States: if
   `uv.lock` is present, use the uv flow for that directory and skip the other Python flows
   there, even when `pyproject.toml` also has `[tool.poetry]` or `[tool.pdm]`; with no
-  `uv.lock`, match in table order `[tool.poetry]` → `[tool.pdm]` → `[tool.uv]` → `Pipfile`
-  → `requirements.txt`. This makes the previously-implicit ordering explicit as a side
-  benefit.
+  `uv.lock`, fall back in this order: `[tool.poetry]` → `[tool.pdm]` → `[tool.uv]` →
+  `Pipfile` → `requirements.txt`. This makes the previously-implicit ordering explicit as a
+  side benefit.
 - **`uv` command subsection** (`REFERENCE.md` `## Python`) — placed **first**, before the
   Poetry entry, mirroring the Detection Table row order. Command sequence:
   `uv lock --upgrade` → `uv sync` → `uv tree --outdated` (with a noted fallback to
