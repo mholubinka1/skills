@@ -63,9 +63,10 @@ non-uv repo.
   side benefit.
 - **`uv` command subsection** (`REFERENCE.md` `## Python`) — placed **first**, before the
   Poetry entry, mirroring the Detection Table row order. Command sequence:
-  `uv lock --upgrade` → `uv sync` → `uv tree --outdated` (with a noted fallback to
-  `uv pip list --outdated` on older uv without the flag). Prose mirrors the Poetry entry:
-  `uv lock --upgrade` moves each dependency to the newest version the `pyproject.toml`
+  `uv lock --upgrade` → `uv sync` → `uv tree --outdated` (with a concrete fallback: if
+  `uv tree --outdated` exits non-zero on an older uv without the flag, use
+  `uv pip list --outdated`). Prose mirrors the Poetry entry: `uv lock --upgrade` moves each
+  dependency that isn't held at an exact version to the newest version the `pyproject.toml`
   constraints allow and rewrites `uv.lock`; `uv sync` reconciles the environment; with
   normal constraints this is patch/minor only; anything `uv tree --outdated` still shows
   behind is constraint-bound — report as a major bump candidate, do not widen the
@@ -80,7 +81,10 @@ non-uv repo.
 - **SKILL.md Step 6** — the staging-example parenthetical gains `uv.lock` alongside
   `poetry.lock`.
 - **`.agent-docs/context.md`** — the **Ecosystem** entry's marker examples gain
-  "`uv.lock` or `pyproject.toml` `[tool.uv]` → uv" (done inline during the grill session).
+  "`uv.lock` (or `pyproject.toml` `[tool.uv]`) → uv", inserted after the existing
+  `pyproject.toml` → Poetry example so the glossary order doesn't imply uv wins over Poetry
+  (the no-lockfile fallback in REFERENCE.md puts `[tool.poetry]` first). Done inline during
+  the grill session.
 - No change to any step's control flow beyond naming uv as a detected manager. The existing
   Step 3 rule "if a required package manager binary isn't installed for a detected
   ecosystem, report and skip" already covers a missing `uv` on `PATH` with no new text.

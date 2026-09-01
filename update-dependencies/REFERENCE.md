@@ -25,10 +25,10 @@ Check the repo root first. For monorepos, also check one level of subdirectories
 ```bash
 uv lock --upgrade
 uv sync
-uv tree --outdated   # falls back to `uv pip list --outdated` on older uv without the flag
+uv tree --outdated   # if this exits non-zero (older uv without the flag), use `uv pip list --outdated`
 ```
 
-`uv lock --upgrade` moves every dependency to the newest version allowed by the constraints in `pyproject.toml`, rewriting `uv.lock`; `uv sync` reconciles the environment. With normal constraints (`>=x,<y`, `~=x.y`) this is patch/minor only. Anything `uv tree --outdated` still shows behind is held below latest by a `pyproject.toml` constraint — report it as a major bump candidate; do not widen the constraint. If `uv sync` fails on a resolution conflict from the upgrade, record it in the report and carry on — do not revert or block the commit.
+`uv lock --upgrade` moves each dependency that isn't held at an exact version to the newest version allowed by the constraints in `pyproject.toml`, rewriting `uv.lock`; `uv sync` reconciles the environment. With normal constraints (`>=x,<y`, `~=x.y`) this is patch/minor only. Anything `uv tree --outdated` still shows behind is held below latest by a `pyproject.toml` constraint — report it as a major bump candidate; do not widen the constraint. If `uv sync` fails on a resolution conflict from the upgrade, record it in the report and carry on — do not revert or block the commit.
 
 **Poetry** (`pyproject.toml` has `[tool.poetry]`):
 
