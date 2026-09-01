@@ -59,7 +59,8 @@ non-uv repo.
   `uv.lock` is present, use the uv flow for that directory and skip the other Python flows
   there, even when `pyproject.toml` also has `[tool.poetry]` or `[tool.pdm]`; with no
   `uv.lock`, fall back in this order: `[tool.poetry]` → `[tool.pdm]` → `[tool.uv]` →
-  `Pipfile` → `requirements.txt`. This makes the previously-implicit ordering explicit as a
+  `Pipfile` → `requirements.txt` (with `requirements.in` present selecting the pip-tools
+  flow, per the Detection Table). This makes the previously-implicit ordering explicit as a
   side benefit.
 - **`uv` command subsection** (`REFERENCE.md` `## Python`) — placed **first**, before the
   Poetry entry, mirroring the Detection Table row order. Its header condition ends

@@ -16,7 +16,7 @@ Detection rules, per-ecosystem commands, and validation commands. Workflow steps
 
 Check the repo root first. For monorepos, also check one level of subdirectories (e.g. `packages/*`, `services/*`) and run each ecosystem's flow per matching directory.
 
-**Python manager precedence:** if `uv.lock` is present, use the uv flow for that directory and skip the other Python flows there, even when `pyproject.toml` also has `[tool.poetry]` or `[tool.pdm]`. With no `uv.lock`, fall back in this order: `[tool.poetry]` → `[tool.pdm]` → `[tool.uv]` → `Pipfile` → `requirements.txt`.
+**Python manager precedence:** if `uv.lock` is present, use the uv flow for that directory and skip the other Python flows there, even when `pyproject.toml` also has `[tool.poetry]` or `[tool.pdm]`. With no `uv.lock`, fall back in this order: `[tool.poetry]` → `[tool.pdm]` → `[tool.uv]` → `Pipfile` → `requirements.txt` (with `requirements.in` present selecting the pip-tools flow, per the Detection Table).
 
 ## Python
 
