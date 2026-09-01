@@ -51,10 +51,13 @@ repos:
 
   - repo: local
     hooks:
+      # Pick the first candidate that actually RUNS, not the first on PATH: the Windows
+      # Store `python3` alias is on PATH but exits non-zero. Keep the candidate order in
+      # step with bin/update-skills. `exec` so the script's exit status is the hook's.
       - id: sync-claude-skills
         name: Sync Claude skills to ~/.claude/skills
         language: system
-        entry: bash -c "if [ -f .venv/Scripts/python ]; then .venv/Scripts/python sync_claude_skills.py; elif [ -f .venv/Scripts/python.exe ]; then .venv/Scripts/python.exe sync_claude_skills.py; elif [ -f .venv/bin/python ]; then .venv/bin/python sync_claude_skills.py; elif command -v python3 >/dev/null 2>&1; then python3 sync_claude_skills.py; else python sync_claude_skills.py; fi"
+        entry: bash -c 'for py in .venv/Scripts/python .venv/Scripts/python.exe .venv/bin/python python3 python; do "$py" -c "" >/dev/null 2>&1 && exec "$py" sync_claude_skills.py; done; echo "sync-claude-skills - no working python interpreter found" >&2; exit 1'
         stages: [post-commit]
         always_run: true
         pass_filenames: false
