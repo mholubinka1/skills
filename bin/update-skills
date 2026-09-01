@@ -62,12 +62,11 @@ fi
 # pip or the sync — every install and the sync itself run against the venv, so
 # `pip install` can't leak into system/user site-packages.
 
-# runs_ok <interpreter> — true if it executes at all. Selection is by execution,
-# not `command -v`: the Windows Store `python3` alias is on PATH but exits
-# non-zero, so `command -v` would pick an interpreter that can't run.
+# runs_ok <interpreter> — true if it executes at all
 runs_ok() { [ -n "$1" ] && "$1" -c '' >/dev/null 2>&1; }
 
 sys_py=""
+# Probe by running, not `command -v` — the Windows Store `python3` alias is on PATH but exits non-zero. Same rationale in .pre-commit-config.yaml.
 for candidate in python3 python; do
 	if runs_ok "$candidate"; then
 		sys_py="$candidate"

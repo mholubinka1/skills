@@ -51,9 +51,7 @@ repos:
 
   - repo: local
     hooks:
-      # Pick the first candidate that actually RUNS, not the first on PATH: the Windows
-      # Store `python3` alias is on PATH but exits non-zero. Keep the candidate order in
-      # step with bin/update-skills. `exec` so the script's exit status is the hook's.
+      # Probe each candidate by running it, not `command -v` — the Windows Store `python3` alias is on PATH but exits non-zero. `exec` propagates the script's exit status. Same rationale in bin/update-skills.
       - id: sync-claude-skills
         name: Sync Claude skills to ~/.claude/skills
         language: system
