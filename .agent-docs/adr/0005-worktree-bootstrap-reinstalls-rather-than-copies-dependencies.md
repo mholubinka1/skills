@@ -9,9 +9,9 @@ worktree, `create-worktrees` detects the repo's dependency ecosystems (reusing
 on a prompt — default no, and skipped when there is no interactive user — runs each detected
 ecosystem's lockfile-respecting install (`poetry install`, `npm ci`, `dotnet restore`,
 `uv sync`, etc.) inside it, rather than copying or symlinking the equivalent artifacts from
-the main checkout. The install is opt-in
-because the common task edits only docs or skills and never runs the code, so an automatic
-install would just add minutes and a network dependency to every worktree.
+the main checkout. The install is opt-in because the common task edits only docs or skills
+and never runs the code, so an automatic install would just add minutes and a network
+dependency to every worktree.
 
 ## Considered Options
 
