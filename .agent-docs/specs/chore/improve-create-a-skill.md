@@ -96,9 +96,9 @@ branch test, not the line count, is the real driver.
     caveats under one heading; distinct from duplication and scattering); **completion
     criteria** (every step ends on one — checkable and exhaustive; a fuzzy bound invites
     premature completion; sharpen the bound first, split the sequence only if the rush
-    persists and only across a real context boundary); **when to split** (by sequence — later
-    steps tempt a rush; by invocation — a distinct leading word triggers it, or another
-    skill must reach it); **leading words** (a compact pretrained concept repeated as a
+    persists and only across a real context boundary); **when to split** (by sequence — the **sequence test**, coined
+    there as a token mirroring the branch test — when later steps tempt a rush; by
+    invocation — a distinct leading word triggers it, or another skill must reach it); **leading words** (a compact pretrained concept repeated as a
     token, never a sentence; prefer an existing word — coining costs definition tokens);
     **steer positive** (state the target behaviour; a prohibition drags the banned behaviour
     into context — reserve it for a hard guardrail paired with the positive); **pruning**
