@@ -1,6 +1,6 @@
 ---
 name: grill
-description: Entrypoint for the two-axis design session. Use whenever a user wants to make any change to the repository — code, technical documents, skills, or configuration. Triggers the design skill.
+description: Entry point for the two-axis design session — runs the design skill. Use whenever a user wants to make any change to the repository: code, technical documents, skills, or configuration.
 ---
 
 # Grill
