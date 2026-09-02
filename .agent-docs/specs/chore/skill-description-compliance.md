@@ -136,16 +136,19 @@ or behaviour change.
   entry point that runs `design`; both should fire on "any repository change".
 - **C mechanism**: `REFERENCE.md`'s "Distil review criteria (Step 7b)" already contains
   "What generalising looks like", "Dedupe", and "Writing the file". `SKILL.md` Step 7b keeps
-  its **Guard** paragraph and **Collect** paragraph verbatim (they are step-flow gating, not
-  technique), replaces the **Generalise** / **Dedupe** / **Write and commit** paragraphs with
-  a two-line summary + "see the Distil Review Criteria section in REFERENCE.md", and keeps
-  the `git add .agent-docs/review.md … commit … push` block. Net ≈ −16 lines. Target:
-  `SKILL.md` ≤ 150. That alone landed at ~161, so the remaining ~11 came from merging
-  wrapped paragraphs (no wording lost — the `gh` prereq line, Steps 1, 2b, 3, 4b, 4c, 4d)
-  and compacting the "Loop at a glance" Step 3 block from six rows to four while keeping
-  every fork (threads/suppressed → 4, clean → 7b, exhausted → one final check → 4 or 7b).
-  No command, condition, threshold, guard, or mutation changed — the Step 3 / 4b / 7b prose
-  below the map stays authoritative and its logic is untouched. Final: 149 lines.
+  its **Guard** and **Collect** paragraphs in substance (condensed — the guard conditions
+  and the collect set are unchanged, only rationale asides were dropped) and replaces the
+  **Generalise** / **Dedupe** / **Write and commit** paragraphs with a short summary that
+  still carries the candidate-merge rule ("two findings that generalise to the same rule
+  become one entry") and points at the Distil Review Criteria section in `REFERENCE.md` for
+  the technique and append/header details, keeping the `git add .agent-docs/review.md …
+  commit … push` block. Net ≈ −16 lines. Target: `SKILL.md` ≤ 150. That alone landed at
+  ~161, so the remaining ~11 came from merging wrapped paragraphs (no instruction lost —
+  the `gh` prereq line and Steps 1, 2b, 3, 4b, 4c, 4d) and compacting the "Loop at a glance"
+  Step 3 block from six rows to four while keeping every fork (threads/suppressed → 4,
+  clean → 7b, exhausted → one final check → 4 or 7b). No command, condition, threshold,
+  guard, or mutation changed — the Step 3 / 4b / 7b prose below the map stays authoritative
+  and its logic is untouched. Final: 149 lines.
 - **D — `init-agent-docs` renumber**: apply high-to-low to avoid collisions —
   `Step 10→11`, `9→10`, `8→9`, `7→8`, `6b→7` — in `SKILL.md` (the `## Steps` list plus the
   jumps "skip to Step 10", "skip to Step 6b", "go to Step 6") and `REFERENCE.md` (the

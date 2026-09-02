@@ -125,11 +125,7 @@ Step 4 decision across the whole invocation was **Fix**. Otherwise skip to Step 
 with "Fixed." and suppressed entries recorded "Fixed." in a Step 4d comment. Exclude every
 push-back: `.agent-docs/review.md` records only criteria accepted by changing code.
 
-**Generalise, dedupe, write.** For each fixed finding write one generalised
-bold-label + imperative criterion ending `(PR #<number>)`, drop any that a current
-`.agent-docs/review.md` entry already covers, and append the survivors — see the Distil
-Review Criteria section in [REFERENCE.md](REFERENCE.md) for the generalising technique, the
-dedupe rule, and the append/header details. Then commit that file alone:
+**Generalise, dedupe, write.** For each fixed finding write one generalised bold-label + imperative criterion ending `(PR #<number>)`; two findings that generalise to the same rule become one entry. Drop any that a current `.agent-docs/review.md` entry already covers, and append the survivors — see the Distil Review Criteria section in [REFERENCE.md](REFERENCE.md) for the generalising technique and the append/header details. Then commit that file alone:
 
 ```bash
 git add .agent-docs/review.md
