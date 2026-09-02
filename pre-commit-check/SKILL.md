@@ -1,6 +1,6 @@
 ---
 name: pre-commit-check
-description: Run pre-commit hooks after writing or modifying any code. Use whenever code has been written, edited, or generated, or when the user asks to lint, format, or validate code quality.
+description: Runs pre-commit hooks after code is written or changed. Use whenever code has just been written or edited, or the user asks to lint or format it.
 allowed-tools: Bash, Read, Write
 ---
 
