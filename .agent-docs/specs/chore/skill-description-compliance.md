@@ -128,8 +128,9 @@ or behaviour change.
     diff, or says "quiz me on this PR" or "test my understanding of the diff".*
   - `update-dependencies`: *Syncs the current repo with main/master, then updates
     dependencies to their latest patch/minor versions across detected ecosystems (Python,
-    .NET/C#, Node/TypeScript/React) and pre-commit hooks, committing the result locally. Use
-    when the user asks to update dependencies or refresh pre-commit hooks.*
+    .NET/C#, Node/TypeScript/React) and bumps pre-commit hook versions, committing the
+    result locally. Use when the user asks to update dependencies or refresh pre-commit
+    hooks.*
   All are third person, ≤ 1024 chars, exactly two sentences, front-loaded trigger word in
   sentence 2.
 - **`grill` and `design` descriptions stay near-identical on purpose** — `grill` is the

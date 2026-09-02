@@ -137,8 +137,10 @@ range). Apply high-to-low. Steps 1–6 untouched.
 - [ ] `grep -nE "Step [0-9]+b?" init-agent-docs/SKILL.md init-agent-docs/REFERENCE.md`: no
       `6b`; heading sequence is `1..11`; every "Step N" jump resolves to an existing heading.
 - [ ] The *content* of every step is unchanged — only its number and inbound jump references.
-- [ ] No file outside `init-agent-docs/` references an `init-agent-docs` step by number
-      (verified — `implement/WORKFLOW.md` names the skill only).
+- [ ] No skill or workflow doc outside `init-agent-docs/` references an `init-agent-docs`
+      step by number (`implement/WORKFLOW.md` names the skill only). Historical
+      `.agent-docs/specs` and `issues` entries that mention the former `6b` are
+      history-of-record and out of scope.
 - [ ] `pre-commit run --all-files` passes.
 
 ---
