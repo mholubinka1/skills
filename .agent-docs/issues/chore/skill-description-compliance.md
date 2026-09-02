@@ -1,5 +1,7 @@
 # Issues: chore/skill-description-compliance
 
+> Work complete — PR ready to merge.
+
 One issue per skill. All independent — no blockers. Behaviour (steps, commands, control
 flow, output) is unchanged in every case. Final description wording is in
 `.agent-docs/specs/chore/skill-description-compliance.md` → Implementation Decisions.
@@ -19,14 +21,14 @@ when …", per the spec's proposed wording. Change the six `## Step N:` headings
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
       "Use "; no sentence restates a body section ("Checks autoSetupRemote …", "Accepts an
       optional change_type …" are gone).
-- [ ] Every genuine trigger from the old description is still present (start of a work
+- [x] Every genuine trigger from the old description is still present (start of a work
       session; invoked from another skill with a known change_type).
-- [ ] All six step headings read `## Step N — <title>`; no `## Step N:` remains.
-- [ ] `branch-hygiene/REFERENCE.md` and step *bodies* are unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] All six step headings read `## Step N — <title>`; no `## Step N:` remains.
+- [x] `branch-hygiene/REFERENCE.md` and step *bodies* are unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -42,12 +44,12 @@ no-op/resume/create/bootstrap algorithm) to exactly two, per the spec's proposed
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
       "Use "; the algorithm-restating middle sentence is gone but "creating one / resuming an
       existing one / optional dependency bootstrap" survives as a compact clause.
-- [ ] Triggers preserved: starting isolated implementation work; first step of /implement.
-- [ ] SKILL.md body and REFERENCE.md unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] Triggers preserved: starting isolated implementation work; first step of /implement.
+- [x] SKILL.md body and REFERENCE.md unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -63,12 +65,12 @@ Fold the trailing "Triggers the design skill." into sentence 1 as an em-dash cla
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person; sentence 2 starts "Use ".
-- [ ] It still says grill runs/triggers the `design` skill.
-- [ ] It still fires on "any change to the repository — code, technical documents, skills,
+- [x] `description` is exactly two sentences, third person; sentence 2 starts "Use ".
+- [x] It still says grill runs/triggers the `design` skill.
+- [x] It still fires on "any change to the repository — code, technical documents, skills,
       or configuration".
-- [ ] SKILL.md body unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] SKILL.md body unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -85,12 +87,12 @@ worktree" sentence, per the spec's proposed wording.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
       "Use ".
-- [ ] Sentence 1 still lists the workflow stages (worktree … code review … merge).
-- [ ] Triggers preserved: implement a feature, fix a bug, or make any repository change.
-- [ ] SKILL.md body and `implement/WORKFLOW.md` unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] Sentence 1 still lists the workflow stages (worktree … code review … merge).
+- [x] Triggers preserved: implement a feature, fix a bug, or make any repository change.
+- [x] SKILL.md body and `implement/WORKFLOW.md` unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -106,12 +108,12 @@ Fold "No interview — synthesis only." into sentence 1 as an em-dash clause so 
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person; sentence 2 starts "Use ".
-- [ ] It still says "no interview / synthesis only" and names the output path
+- [x] `description` is exactly two sentences, third person; sentence 2 starts "Use ".
+- [x] It still says "no interview / synthesis only" and names the output path
       `.agent-docs/specs/<branch-name>.md`.
-- [ ] Trigger preserved: after a /grill session when the design is agreed.
-- [ ] SKILL.md body unchanged; `attribution:` frontmatter key untouched.
-- [ ] `pre-commit run --all-files` passes.
+- [x] Trigger preserved: after a /grill session when the design is agreed.
+- [x] SKILL.md body unchanged; `attribution:` frontmatter key untouched.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -131,17 +133,17 @@ range). Apply high-to-low. Steps 1–6 untouched.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
       "Use "; "idempotent" survives as a clause, the standalone enumeration sentence and the
       "Idempotent — reports …" sentence are gone.
-- [ ] `grep -nE "Step [0-9]+b?" init-agent-docs/SKILL.md init-agent-docs/REFERENCE.md`: no
+- [x] `grep -nE "Step [0-9]+b?" init-agent-docs/SKILL.md init-agent-docs/REFERENCE.md`: no
       `6b`; heading sequence is `1..11`; every "Step N" jump resolves to an existing heading.
-- [ ] The *content* of every step is unchanged — only its number and inbound jump references.
-- [ ] No skill or workflow doc outside `init-agent-docs/` references an `init-agent-docs`
+- [x] The *content* of every step is unchanged — only its number and inbound jump references.
+- [x] No skill or workflow doc outside `init-agent-docs/` references an `init-agent-docs`
       step by number (`implement/WORKFLOW.md` names the skill only). Historical
       `.agent-docs/specs` and `issues` entries that mention the former `6b` are
       history-of-record and out of scope.
-- [ ] `pre-commit run --all-files` passes.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -164,18 +166,18 @@ keeping every fork; the map stays.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; one phrasing per
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; one phrasing per
       branch; at most two quoted user utterances.
-- [ ] `wc -l address-copilot-comments/SKILL.md` ≤ ~150.
-- [ ] Step 7b still states its run-guard (review_round set AND ≥ 1 Fix) and what to collect
+- [x] `wc -l address-copilot-comments/SKILL.md` ≤ ~150.
+- [x] Step 7b still states its run-guard (review_round set AND ≥ 1 Fix) and what to collect
       (every Fix; exclude push-backs), and still shows the `git add .agent-docs/review.md …
       commit … push` block.
-- [ ] `address-copilot-comments/REFERENCE.md` is unchanged; no step *logic* — command,
+- [x] `address-copilot-comments/REFERENCE.md` is unchanged; no step *logic* — command,
       branch condition, threshold, guard, or mutation — changed in `SKILL.md`, only prose
       density and the Step 7b technique text. The non-normative "Loop at a glance" map's
       Step 3 rows are compacted (six → four) but keep every fork; the authoritative Step 3
       prose below it is untouched.
-- [ ] `pre-commit run --all-files` passes.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -191,11 +193,11 @@ development" to one phrasing per branch, per the spec's proposed wording.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person; one phrasing per branch.
-- [ ] Triggers preserved: writing/changing code; says "red-green-refactor"; asks for
+- [x] `description` is exactly two sentences, third person; one phrasing per branch.
+- [x] Triggers preserved: writing/changing code; says "red-green-refactor"; asks for
       test-first development or integration/acceptance tests.
-- [ ] SKILL.md body and the sibling `.md` files unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] SKILL.md body and the sibling `.md` files unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -211,12 +213,12 @@ quoted tail to two, per the spec's proposed wording.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; one phrasing per
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; one phrasing per
       branch; at most two quoted utterances.
-- [ ] Sentence 1 still lists the workflow stages (branch hygiene … Copilot review …
+- [x] Sentence 1 still lists the workflow stages (branch hygiene … Copilot review …
       cleanup).
-- [ ] SKILL.md body and `REVIEW-CRITERIA.md` unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] SKILL.md body and `REVIEW-CRITERIA.md` unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -233,13 +235,13 @@ to `grill`'s description on purpose.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; sentence 2 starts
       "Use ".
-- [ ] It still fires on "change the codebase, technical documents, skills, or
+- [x] It still fires on "change the codebase, technical documents, skills, or
       configuration".
-- [ ] SKILL.md body, `ADR-FORMAT.md`, `CONTEXT-FORMAT.md`, and the `attribution:` key
+- [x] SKILL.md body, `ADR-FORMAT.md`, `CONTEXT-FORMAT.md`, and the `attribution:` key
       unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -255,10 +257,10 @@ phrasing each, per the spec's proposed wording.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person; one phrasing per branch.
-- [ ] Triggers preserved: code just written or edited; user asks to lint or format.
-- [ ] SKILL.md body and the `allowed-tools:` frontmatter key unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] `description` is exactly two sentences, third person; one phrasing per branch.
+- [x] Triggers preserved: code just written or edited; user asks to lint or format.
+- [x] SKILL.md body and the `allowed-tools:` frontmatter key unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -274,11 +276,11 @@ tail to two, per the spec's proposed wording.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; one phrasing per
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; one phrasing per
       branch; at most two quoted utterances.
-- [ ] Sentence 1 still describes the teach-then-quiz loop and the "ten correct" bound.
-- [ ] SKILL.md body and `REFERENCE.md` unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] Sentence 1 still describes the teach-then-quiz loop and the "ten correct" bound.
+- [x] SKILL.md body and `REFERENCE.md` unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -295,11 +297,11 @@ wording.
 
 ### Acceptance criteria
 
-- [ ] `description` is exactly two sentences, third person, ≤ 1024 chars; one phrasing per
+- [x] `description` is exactly two sentences, third person, ≤ 1024 chars; one phrasing per
       branch.
-- [ ] Sentence 1 still names the ecosystems (Python, .NET/C#, Node/TypeScript/React), the
+- [x] Sentence 1 still names the ecosystems (Python, .NET/C#, Node/TypeScript/React), the
       pre-commit-hook bump, the main/master sync, and "commits locally".
-- [ ] SKILL.md body and `REFERENCE.md` unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] SKILL.md body and `REFERENCE.md` unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
