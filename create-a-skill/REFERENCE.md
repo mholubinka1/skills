@@ -4,7 +4,7 @@ The writing levers, the description rules, and the Review Checklist. The process
 
 ## Description requirements
 
-The `description` is the agent's main signal when choosing which skill to load — the skill's top-level **context pointer**. It must let the agent know *what capability this is* and *when to trigger it*.
+The `description` is the agent's main signal when choosing which skill to load — the skill's top-level **context pointer**. It must let the agent know *what capability this is* and *when to trigger it*. These rules govern a **model-invoked** skill's description; a user-invoked skill drops the trigger list and keeps a human-facing one-liner (see *Model- vs user-invoked*).
 
 - Third person; max 1024 chars.
 - First sentence: what the skill does. Second sentence: "Use when [triggers]".
@@ -12,7 +12,7 @@ The `description` is the agent's main signal when choosing which skill to load �
 - One trigger per branch. Synonyms that rename a single branch ("create, write, or build a skill") are one branch written three times; keep only genuinely distinct cases.
 - Cut identity the body already carries — every word costs on every turn.
 
-Good: `Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.`
+Good: `Extracts text and tables from PDF files, fills forms, merges documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.`
 
 Bad: `Helps with documents.` — nothing distinguishes it from other document skills.
 
@@ -20,25 +20,45 @@ Bad: `Helps with documents.` — nothing distinguishes it from other document sk
 
 Each lever ends on a check the draft has to pass.
 
-**Context pointer.** A reference that names out-of-context material plus the branches that trigger reaching it; its wording, not its target, sets how reliably it fires. *Check: from the pointer alone, can a reader name the exact cases that should load the material?*
+**Context pointer.** A reference that names out-of-context material plus the branches that trigger reaching it; its wording, not its target, sets how reliably it fires.
 
-**The two loads.** A pointer or always-loaded line spends *context load* (tokens every turn); an unpointered doc spends *cognitive load* (the human remembering it exists). *Check: does each line earn the load it spends?*
+*Check: from the pointer alone, can a reader name the exact cases that should load the material?*
 
-**Information hierarchy.** Rank material by how soon the agent needs it: in-file step, then in-file reference, then disclosed reference behind a pointer. *Check: is anything a run always needs behind a pointer it might skip, or any branch-only detail bloating the top?*
+**The two loads.** A pointer or always-loaded line spends *context load* (tokens every turn); an unpointered doc spends *cognitive load* (the human remembering it exists).
 
-**Progressive disclosure.** Move branch-only material out of `SKILL.md` behind a pointer; keep what every branch needs inline — the **branch test**. *Check: for each disclosed section, do only some branches reach it?*
+*Check: does each line earn the load it spends?*
 
-**Co-location.** A concept's definition, rules, and caveats sit under one heading. *Check: does reading one part of a concept bring its caveats with it?*
+**Information hierarchy.** Rank material by how soon the agent needs it: in-file step, then in-file reference, then disclosed reference behind a pointer.
 
-**Completion criteria.** Every step ends on a condition that is *checkable* (done vs not-done) and *exhaustive* ("every X accounted for", not "produce a list"). A fuzzy bound invites premature completion — the step stops early as attention slips to *being done*; sharpen the bound before hiding later steps, and hiding works only across a real context boundary (a hand-off or subagent, not an inline call). *Check: can the agent tell done from not-done, and does the bound force the whole job?*
+*Check: is anything a run always needs behind a pointer it might skip, or any branch-only detail bloating the top?*
 
-**When to split.** Split by sequence — the **sequence test** — when later steps tempt a rush of the current one; split by invocation when a distinct leading word should trigger a part on its own, or another skill must reach it. *Check: does the cut buy more legwork or independent reach than the load it spends?*
+**Progressive disclosure.** Move branch-only material out of `SKILL.md` behind a pointer; keep what every branch needs inline — the **branch test**.
 
-**Leading words.** A compact concept already in the model's pretraining (`tracer bullet`, `red`, `fog of war`), repeated as a token and never spelled out; prefer an existing word — a coined one costs the definition tokens a pretrained word gives free. *Check: is any triad or gesturing sentence begging to collapse into one word — "fast, deterministic, low-overhead" → *tight*?*
+*Check: for each disclosed section, do only some branches reach it?*
 
-**Steer positive.** State the target behaviour; a prohibition drags the banned thing into context and makes it *more* available. Reserve "don't" for a hard guardrail, paired with the positive target. *Check: does every instruction name what to do rather than what to avoid?*
+**Co-location.** A concept's definition, rules, and caveats sit under one heading.
 
-**Pruning.** One source of truth per meaning — changing behaviour is a one-place edit. The environment (`package.json` scripts, config, `--help`) is a source of truth too: restate it only when the lookup is expensive. *Check: run the document — did any line change behaviour versus the model's default? Would changing any rule take more than a one-place edit?*
+*Check: does reading one part of a concept bring its caveats with it?*
+
+**Completion criteria.** Every step ends on a condition that is *checkable* (done vs not-done) and *exhaustive* ("every X accounted for", not "produce a list"). A fuzzy bound invites premature completion — the step stops early as attention slips to *being done*; sharpen the bound before hiding later steps, and hiding works only across a real context boundary (a hand-off or subagent, not an inline call).
+
+*Check: can the agent tell done from not-done, and does the bound force the whole job?*
+
+**When to split.** Split by sequence — the **sequence test** — when later steps tempt a rush of the current one; split by invocation when a distinct leading word should trigger a part on its own, or another skill must reach it.
+
+*Check: does the cut buy more legwork or independent reach than the load it spends?*
+
+**Leading words.** A compact concept already in the model's pretraining (`tracer bullet`, `red`, `fog of war`), repeated as a token and never spelled out; prefer an existing word — a coined one costs the definition tokens a pretrained word gives free.
+
+*Check: is any triad or gesturing sentence begging to collapse into one word — "fast, deterministic, low-overhead" → *tight*?*
+
+**Steer positive.** State the target behaviour; a prohibition drags the banned thing into context and makes it *more* available. Reserve "don't" for a hard guardrail, paired with the positive target.
+
+*Check: does every instruction name what to do rather than what to avoid?*
+
+**Pruning.** One source of truth per meaning — changing behaviour is a one-place edit. The environment (`package.json` scripts, config, `--help`) is a source of truth too: restate it only when the lookup is expensive.
+
+*Check: run the document — did any line change behaviour versus the model's default? Would changing any rule take more than a one-place edit?*
 
 ## Model- vs user-invoked
 

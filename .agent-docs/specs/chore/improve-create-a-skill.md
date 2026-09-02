@@ -151,7 +151,7 @@ branch test, not the line count, is the real driver.
      pass/fail; each lever's rule is stated once (in `## Writing levers`) and referenced —
      not restated — by `SKILL.md` and the checklist; repo-specific process is visually
      separate from the universal levers.
-  3. **Line count**: `SKILL.md` <= ~150 (target ~90); `REFERENCE.md` legible, no sprawl.
+  3. **Line count**: `SKILL.md` <= ~150 (target ~55); `REFERENCE.md` legible, no sprawl.
   4. `pre-commit run --all-files` passes (markdownlint, markdown-link-check, codespell).
   5. `code-review` Standards + Spec axes.
 

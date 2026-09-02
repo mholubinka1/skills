@@ -13,7 +13,7 @@ skill against a named set of **writing levers** (adapted from Matt Pocock's
 `writing-for-agents`, credited in one line, absorbed self-contained — no runtime dependency
 on the plugin). Fix the 100-vs-500 `SKILL.md` split contradiction with a single rule.
 
-- **`create-a-skill/SKILL.md`** (~90 lines; hard ceiling ~150):
+- **`create-a-skill/SKILL.md`** (~55 lines; hard ceiling ~150):
   - Frontmatter `description` rewritten as a context pointer: front-loaded trigger word;
     three genuinely distinct branches — create a new skill / revise an existing one / review
     a skill against the levers — with "create, write, or build" (synonym-branches)

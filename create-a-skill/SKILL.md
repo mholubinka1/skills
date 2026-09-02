@@ -1,6 +1,6 @@
 ---
 name: create-a-skill
-description: Create, rework, or review a Claude Code agent skill. Use when the user asks to build a skill, when an existing skill needs changing, or when checking a skill against the writing levers.
+description: Creates, reworks, or reviews a Claude Code agent skill. Use when the user asks to build a skill, when an existing skill needs changing, or when checking a skill against the writing levers.
 ---
 
 # Writing Skills
@@ -9,9 +9,9 @@ A skill is predictable when the agent takes the same *process* every run — not
 
 ## Process
 
-1. **Gather requirements** — get an answer to each of: the task or domain and its concrete use cases; a utility script or instructions only; reference material to bundle or point at; model-invoked or user-invoked (REFERENCE.md). Drafting starts once every one is answered.
+1. **Gather requirements** — get an answer to each of: the task or domain and its concrete use cases; a utility script or instructions only; reference material to bundle or point at; model-invoked or user-invoked (see *Model- vs user-invoked* in REFERENCE.md). Drafting starts once every one is answered.
 
-2. **Place each piece of content on the information hierarchy** (REFERENCE.md); the branch test (see *Progressive disclosure*) decides what to disclose. Done when every piece has a place.
+2. **Place each piece of content on the information hierarchy** (see *Information hierarchy* in REFERENCE.md); the branch test (see *Progressive disclosure*) decides what to disclose. Done when every piece has a place.
 
 3. **Draft** `SKILL.md`, plus `REFERENCE.md` / `EXAMPLES.md` / `scripts/` for whatever step 2 put there, applying every writing lever from REFERENCE.md as you write. Done when every lever holds.
 
