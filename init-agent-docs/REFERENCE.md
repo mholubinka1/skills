@@ -59,7 +59,7 @@ Then handle each of the three items below in order:
 Scan the `agent-docs/` directory for any remaining files or subdirectories that were not
 covered by the three items above (i.e. anything other than `agent.md`, `context.md`, `adr/`,
 and `docs/`). Do **not** warn about `docs/` — any ADR files inside `agent-docs/docs/adr/`
-will be migrated by Step 7. Common examples of items that do warrant a warning include
+will be migrated by Step 8. Common examples of items that do warrant a warning include
 `specs/`, `issues/`, or other subdirectories from an older skill layout.
 
 If any such files or directories remain:
@@ -136,15 +136,15 @@ Collect all matches found.
   > Please resolve manually by moving the correct file to `.agent-docs/context.md`, then
   > re-run this skill.
 
-- Skip to Step 6b.
+- Skip to Step 7.
 
 **If exactly one file is found**, move it to `.agent-docs/context.md`:
 
 1. Read the contents of the source file.
 2. Write those contents verbatim to `.agent-docs/context.md`.
-   - If the write fails, report the error clearly and skip to Step 6b. Do **not** delete the source file.
+   - If the write fails, report the error clearly and skip to Step 7. Do **not** delete the source file.
 3. Delete the source file only after the write succeeds.
-   - If the delete fails, report the error clearly and skip to Step 6b. The destination file has already been written.
+   - If the delete fails, report the error clearly and skip to Step 7. The destination file has already been written.
 
 If both steps succeed:
 
@@ -174,7 +174,7 @@ This step has two sub-paths depending on whether a `context.md` was found in Ste
      one- or two-sentence definition and an `_Avoid_` line listing synonyms to reject.
    - Subheadings grouping terms when natural clusters emerge.
 
-   If writing fails for any reason, report the error clearly and skip to Step 6b.
+   If writing fails for any reason, report the error clearly and skip to Step 7.
 
 4. Report: "Created `.agent-docs/context.md` from codebase analysis."
 
@@ -188,13 +188,13 @@ This step has two sub-paths depending on whether a `context.md` was found in Ste
    repos" section — this skill always bootstraps a single-context `context.md`.
 4. If shortcomings are found:
    - Write the improved file to `.agent-docs/context.md`.
-     If writing fails, report the error clearly and skip to Step 6b.
+     If writing fails, report the error clearly and skip to Step 7.
    - Report: "Improved `.agent-docs/context.md` — `<brief summary of changes>`."
 5. If no shortcomings are found:
    - Report: "`.agent-docs/context.md` reviewed — no improvements needed."
-   - Continue to Step 6b without writing.
+   - Continue to Step 7 without writing.
 
-## Step 6b — Bootstrap review.md
+## Step 7 — Bootstrap review.md
 
 `.agent-docs/review.md` holds review criteria this repository has accumulated from its own
 Copilot review rounds. It is written to by the `address-copilot-comments` skill (one
@@ -207,7 +207,7 @@ Check whether `.agent-docs/review.md` already exists in the current repository.
 If it exists:
 
 - Report: "`.agent-docs/review.md` already exists — skipping."
-- Continue to Step 7.
+- Continue to Step 8.
 
 If it does not exist:
 
@@ -215,7 +215,7 @@ If it does not exist:
 2. Read the full contents of this skill's `REVIEW-TEMPLATE.md` file (located in the same
    directory as this `REFERENCE.md`).
 3. Write those contents verbatim to `.agent-docs/review.md`.
-   - If the write fails, report the error clearly and continue to Step 7 — a missing
+   - If the write fails, report the error clearly and continue to Step 8 — a missing
      `review.md` does not block the rest of the bootstrap.
 4. Report: "Created `.agent-docs/review.md`."
 
@@ -223,7 +223,7 @@ Unlike `context.md`, there is no search-for-a-file-to-move sub-path and no
 review-and-improve sub-path: the file is machine-maintained, so an existing one is left
 exactly as found.
 
-## Step 7 — Migrate ADR files
+## Step 8 — Migrate ADR files
 
 Search the following locations for files matching the ADR naming convention (`[0-9]*-*.md`):
 
@@ -237,7 +237,7 @@ Collect all matches found across all four locations.
 **If no matching files are found:**
 
 - Record "no ADRs found — skipped" for the summary.
-- Continue to Step 8.
+- Continue to Step 9.
 
 **If matching files are found:**
 
@@ -261,9 +261,9 @@ Collect all matches found across all four locations.
    - If `agent-docs/docs/adr/` exists and is empty, delete it. If `agent-docs/docs/` is then empty, delete it too. If `agent-docs/` is then empty, delete it too.
    - If `.agent-docs/docs/adr/` exists and is empty, delete it. If `.agent-docs/docs/` is then empty, delete it too.
 
-Continue to Step 8.
+Continue to Step 9.
 
-## Step 8 — Check CLAUDE.md
+## Step 9 — Check CLAUDE.md
 
 Check whether `CLAUDE.md` exists in the current repository root.
 
@@ -271,18 +271,18 @@ Check the content of `CLAUDE.md` (if it exists) for the following strings, in th
 
 1. **If `CLAUDE.md` contains `.agent-docs/agent.md`** (new path, with dot):
    - Report: "`CLAUDE.md` already references `.agent-docs/agent.md` — skipping."
-   - Continue to Step 10.
+   - Continue to Step 11.
 
 2. **If `CLAUDE.md` contains `agent-docs/agent.md`** (old path, without dot):
    - Replace the old path string `agent-docs/agent.md` with `.agent-docs/agent.md` everywhere
      it appears in `CLAUDE.md`. This includes both the link text and the link target.
    - Report: "Migrated `CLAUDE.md` reference from `agent-docs/agent.md` to `.agent-docs/agent.md`."
-   - Continue to Step 10.
+   - Continue to Step 11.
 
 3. **If `CLAUDE.md` does not exist, or exists but contains neither path**:
-   - Continue to Step 9.
+   - Continue to Step 10.
 
-## Step 9 — Create or append CLAUDE.md
+## Step 10 — Create or append CLAUDE.md
 
 Append the following content to `CLAUDE.md` (create the file first if it does not exist).
 Write only the Markdown content below — do not include the code fence markers. When
@@ -303,7 +303,7 @@ If `CLAUDE.md` existed and was appended to:
 
 - Report: "Appended Agent Standards reference to existing `CLAUDE.md`."
 
-## Step 10 — Summary
+## Step 11 — Summary
 
 Report a brief summary of every action taken and every step skipped with a reason.
 Example (fresh repo with no prior agent docs):
