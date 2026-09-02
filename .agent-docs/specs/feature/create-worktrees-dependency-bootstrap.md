@@ -56,31 +56,38 @@ Commit ADR 0005 alongside, reworded to describe this prompted, non-automatic beh
 - **`create-worktrees/SKILL.md` — new Step 5 "Bootstrap dependencies (optional)"**, placed
   after Step 4 (worktree creation). It runs **only** on the fresh-creation path: Step 1
   (already isolated) and Step 2 (resume an existing worktree) both still stop before it.
-  - Detect ecosystems by the markers in `update-dependencies`' Detection Table — repo root
-    and one level of subdirectories. Do **not** restate the full marker list; cross-reference
-    it.
-  - **No ecosystem detected** → Step 5 is a silent no-op.
-  - **≥1 detected** → print the detected ecosystems and the exact install command(s), then
-    one `y`/`n` prompt: *"Install dependencies in this worktree now?"*
-    - **y** → run every detected ecosystem's install (table below), recording pass/fail per
-      ecosystem.
-    - **n** → leave the printed commands as a copy-paste hint; continue.
-  - **No TTY / non-interactive** → behave as **n** (print hint, continue); never read stdin.
-  - Any install failure — tool not on `PATH`, no network, unsatisfiable lock, compile error
-    — is reported on one line (naming the failing command and first error line) and does
-    **not** abort. The worktree is already created and usable.
-  - **Unknown ecosystem**: if a marker from the built-in courtesy list (Go `go.mod`, Rust
-    `Cargo.toml`, Ruby `Gemfile`) is present, attempt its conventional install
-    (`go mod download` / `cargo fetch` / `bundle install`), non-fatal. Whether the guessed
-    install succeeds or fails, print a prominent line:
-    `ACTION NEEDED: add <ecosystem> as a first-class entry in create-worktrees/REFERENCE.md`,
-    then use `AskUserQuestion` to make the human acknowledge it before the workflow
-    continues. A marker that matches nothing at all: print the same ACTION-NEEDED line +
-    acknowledgement, no install attempted.
+  - Detect ecosystems by `update-dependencies`' Detection Table markers — repo root and one
+    level of subdirectories — **and also** note any other dependency manifest present that
+    the table doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or comparable), so the
+    unknown-ecosystem branch actually has an input. Do **not** restate the Detection Table's
+    marker list; cross-reference it.
+  - **Nothing detected** → Step 5 is a silent no-op.
+  - **≥1 first-class ecosystem detected** → print each and its exact install command(s), then
+    ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options
+    *Install* / *Skip*.
+    - **No interactive user** (`AskUserQuestion` unavailable / non-interactive run) → take
+      **Skip**; never read stdin or otherwise block for input.
+    - Any answer that is not a clear *Install* → take **Skip**.
+    - **Skip** → leave the printed commands as a copy-paste hint; continue.
+    - **Install** → run every detected ecosystem's install (table below), recording pass/fail
+      per ecosystem.
+  - Any install failure — tool not on `PATH`, no network, unsatisfiable lock, `python -m venv`
+    unavailable, compile error — is reported on one line (naming the failing command and
+    first error line) and does **not** abort. The worktree is already created and usable.
+  - **Uncovered ecosystem(s)**: for any marker from step 1 that is not a first-class
+    Detection Table ecosystem — if it is on the built-in courtesy list (Go `go.mod`, Rust
+    `Cargo.toml`, Ruby `Gemfile`), attempt its conventional install
+    (`go mod download` / `cargo fetch` / `bundle install`), non-fatal; otherwise attempt
+    nothing. Then, once, covering every uncovered ecosystem found, print
+    `ACTION NEEDED: add <ecosystem>[, <ecosystem>…] as a first-class entry in create-worktrees/REFERENCE.md`
+    and use `AskUserQuestion` a single time to make the user acknowledge it before the
+    workflow continues.
 - **`create-worktrees/REFERENCE.md` — new section "Dependency bootstrap (Step 5)"**:
-  - A lead-in: ecosystems are detected exactly as in `update-dependencies`' Detection Table;
-    for each one found, run the matching command.
-  - Install-command table (lockfile-respecting, **install not upgrade**):
+  - A lead-in: first-class ecosystems are the ones in `update-dependencies`' Detection Table;
+    a manifest the table doesn't cover is an *uncovered* ecosystem handled by the courtesy
+    list.
+  - Install-command table (lockfile-respecting, **install not upgrade**), ecosystem name only
+    — no marker parentheticals, since detection is delegated to `update-dependencies`:
 
     | Ecosystem | Install command |
     |---|---|
@@ -88,26 +95,33 @@ Commit ADR 0005 alongside, reworded to describe this prompted, non-automatic beh
     | Python — Poetry | `poetry install` |
     | Python — PDM | `pdm install` |
     | Python — Pipenv | `pipenv sync` |
-    | Python — pip (`requirements.txt`) | `python -m venv .venv` then `.venv/<bin>/pip install -r requirements.txt` |
+    | Python — pip | create a venv, then install into it (pip note) |
     | .NET / C# | `dotnet restore` |
-    | Node — npm (`package-lock.json`) | `npm ci` |
-    | Node — yarn (`yarn.lock`) | `yarn install --frozen-lockfile` |
-    | Node — pnpm (`pnpm-lock.yaml`) | `pnpm install --frozen-lockfile` |
+    | Node — npm | `npm ci` |
+    | Node — yarn | `yarn install --immutable` (Yarn 2+) or `yarn install --frozen-lockfile` (Yarn 1) — pick by `yarn --version` |
+    | Node — pnpm | `pnpm install --frozen-lockfile` |
 
-  - A **courtesy list** for unknown ecosystems, mirroring `update-dependencies`' "Unknown
+  - A **courtesy list** for uncovered ecosystems, mirroring `update-dependencies`' "Unknown
     ecosystems" section: Go → `go mod download`, Rust → `cargo fetch`, Ruby → `bundle install`
-    — best-effort, non-fatal, always followed by the ACTION-NEEDED prompt.
-  - A note that the plain-pip row uses the interpreter-selection idiom from
-    `.pre-commit-config.yaml`'s `sync-claude-skills` hook (probe by running, not `command -v`)
-    when picking `python` for the `venv` step.
+    — best-effort, non-fatal, always followed by the ACTION-NEEDED prompt. An uncovered
+    marker not on the list gets no install attempt.
+  - A **pip note**: create `.venv` and install into it (never global site-packages); choose
+    `python` for `python -m venv` by probing `python3` then `python` with
+    `"$py" -c "" >/dev/null 2>&1` rather than `command -v` (same reason as
+    `.pre-commit-config.yaml`'s `sync-claude-skills` hook); if `python -m venv .venv` itself
+    fails, report it and skip the pip install.
 - **`create-worktrees` frontmatter `description`** gains a clause: after creating a worktree
   it optionally bootstraps detected dependency ecosystems on a prompt.
 - **ADR 0005**: commit the draft with the body reworded so the mechanism sentence reads,
-  in substance, "after creating a worktree, `create-worktrees` detects ecosystems and, on a
-  `y`/`n` prompt (default no, and skipped with no TTY), runs each detected ecosystem's
+  in substance, "after creating a worktree, `create-worktrees` detects ecosystems (reusing
+  `update-dependencies`' detection, plus a courtesy list) and, on a prompt (default no,
+  skipped when there is no interactive user), runs each detected ecosystem's
   lockfile-respecting install inside it" — i.e. drop "we now run … inside *every*
-  newly-created worktree". Keep the "Considered Options" section (copy / symlink /
-  fresh-install) unchanged. No `Status` frontmatter (matches ADRs 0001–0004).
+  newly-created worktree". The "Considered Options" section is kept, with one accuracy fix:
+  the chosen-option bullet's "the only option that reliably reproduces 'this worktree runs
+  code exactly as the main checkout does'" overclaim is softened (an install reproduces the
+  declared lockfile, not `main`'s possibly-drifted artifacts). No `Status` frontmatter
+  (matches ADRs 0001–0004).
 
 ## Testing Decisions
 

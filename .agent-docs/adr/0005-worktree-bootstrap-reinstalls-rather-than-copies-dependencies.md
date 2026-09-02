@@ -5,10 +5,11 @@ main checkout — but a fresh worktree has none of the gitignored dependency art
 (`.venv`, `node_modules`, NuGet packages, etc.) that the main checkout accumulated over time,
 so code that ran fine on `main` can fail to execute at all in the worktree. After creating a
 worktree, `create-worktrees` detects the repo's dependency ecosystems (reusing
-`update-dependencies`' detection) and, on a `y`/`n` prompt — default no, and skipped when
-there is no TTY — runs each detected ecosystem's lockfile-respecting install
-(`poetry install`, `npm ci`, `dotnet restore`, `uv sync`, etc.) inside it, rather than
-copying or symlinking the equivalent artifacts from the main checkout. The install is opt-in
+`update-dependencies`' detection, plus a courtesy list for ecosystems it doesn't cover) and,
+on a prompt — default no, and skipped when there is no interactive user — runs each detected
+ecosystem's lockfile-respecting install (`poetry install`, `npm ci`, `dotnet restore`,
+`uv sync`, etc.) inside it, rather than copying or symlinking the equivalent artifacts from
+the main checkout. The install is opt-in
 because the common task edits only docs or skills and never runs the code, so an automatic
 install would just add minutes and a network dependency to every worktree.
 
@@ -25,7 +26,7 @@ install would just add minutes and a network dependency to every worktree.
   shared across every worktree that points at it, so one worktree's `npm install` or `pip
   install` would silently mutate what every other worktree sees mid-task.
 - **Fresh install per worktree (chosen).** Slower than copying, but it's exactly what a human
-  cloning the repo fresh (or a CI runner) would do, so it's the only option that reliably
-  reproduces "this worktree runs code exactly as the main checkout does." Lockfile-respecting
-  variants (`npm ci`, `poetry install`, `dotnet restore`) reproduce the exact locked versions
-  rather than silently drifting to newer ones.
+  cloning the repo fresh (or a CI runner) would do, so it reproduces the locked dependency
+  set the repo declares rather than an ad-hoc copy of `main`'s possibly-drifted artifacts.
+  Lockfile-respecting variants (`npm ci`, `poetry install`, `dotnet restore`) install the
+  exact locked versions rather than silently drifting to newer ones.

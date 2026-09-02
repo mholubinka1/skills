@@ -24,9 +24,7 @@ Exact wording doesn't matter — the slug only has to be recognisable enough to 
 
 ## Dependency bootstrap (Step 5)
 
-A fresh worktree has none of the gitignored dependency artifacts the main checkout accumulated. Step 5 offers to install them so the worktree runs code the same way `main` does.
-
-**Detection.** Ecosystems are detected exactly as in `update-dependencies`' Detection Table — its marker rules, repo root plus one level of subdirectories. This skill adds only the install commands below; `update-dependencies` is upgrade-oriented and has none.
+**Detection.** First-class ecosystems are the ones in `update-dependencies`' Detection Table — its marker rules, repo root plus one level of subdirectories. This skill adds only the install commands below (`update-dependencies` is upgrade-oriented and has none). Any dependency manifest the table doesn't cover is an *uncovered* ecosystem — handled by the courtesy list.
 
 **Install commands** — lockfile-respecting (install, not upgrade):
 
@@ -36,15 +34,23 @@ A fresh worktree has none of the gitignored dependency artifacts the main checko
 | Python — Poetry | `poetry install` |
 | Python — PDM | `pdm install` |
 | Python — Pipenv | `pipenv sync` |
-| Python — pip (`requirements.txt`) | `python -m venv .venv`, then `.venv/Scripts/pip` (Windows) / `.venv/bin/pip` (POSIX) `install -r requirements.txt` |
+| Python — pip | create a venv, then install into it (see the pip note below) |
 | .NET / C# | `dotnet restore` |
-| Node — npm (`package-lock.json`) | `npm ci` |
-| Node — yarn (`yarn.lock`) | `yarn install --frozen-lockfile` |
-| Node — pnpm (`pnpm-lock.yaml`) | `pnpm install --frozen-lockfile` |
+| Node — npm | `npm ci` |
+| Node — yarn | `yarn install --immutable` (Yarn 2+) or `yarn install --frozen-lockfile` (Yarn 1) — pick by `yarn --version` |
+| Node — pnpm | `pnpm install --frozen-lockfile` |
 
-For the pip row, choose the `python` for `venv` creation by probing each candidate with `"$py" -c "" >/dev/null 2>&1` rather than `command -v` — the same reason as `.pre-commit-config.yaml`'s `sync-claude-skills` hook: a Windows Store `python3` alias is on `PATH` but exits non-zero.
+**pip note.** Create a project-local venv and install into it, so nothing lands in system or user site-packages:
 
-**Courtesy list** — ecosystems without a first-class entry. Best-effort, always non-fatal, and always followed by the Step 5 `ACTION NEEDED` prompt:
+```bash
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt   # Windows
+.venv/bin/pip install -r requirements.txt       # POSIX
+```
+
+Choose the `python` for `python -m venv` by probing `python3` then `python` with `"$py" -c "" >/dev/null 2>&1` rather than `command -v` — same reason as `.pre-commit-config.yaml`'s `sync-claude-skills` hook: a Windows Store `python3` alias is on `PATH` but exits non-zero. If `python -m venv .venv` itself fails (the platform's venv module is absent), report that and skip the pip install.
+
+**Courtesy list** — uncovered ecosystems. Best-effort, always non-fatal, always followed by the Step 5 `ACTION NEEDED` prompt:
 
 | Marker | Best-effort install |
 |---|---|
@@ -52,4 +58,4 @@ For the pip row, choose the `python` for `venv` creation by probing each candida
 | `Cargo.toml` | `cargo fetch` |
 | `Gemfile` | `bundle install` |
 
-Any other unrecognised dependency marker: attempt no install; Step 5 still prints the `ACTION NEEDED` line and takes the acknowledgement.
+An uncovered marker not on this list gets no install attempt — Step 5 still prints the `ACTION NEEDED` line and takes the acknowledgement.

@@ -55,21 +55,29 @@ No change to Steps 1–4, the `wip/` placeholder flow, or `.claude` gitignore ha
 
 - [ ] `create-worktrees/SKILL.md` has a Step 5 that runs only after a fresh worktree is
       created (not on already-isolated or resume).
-- [ ] Step 5 detects ecosystems via `update-dependencies`' Detection Table markers, root +
-      one subdir level, and cross-references that table rather than restating the markers.
-- [ ] No ecosystem → Step 5 is a silent no-op.
-- [ ] ≥1 ecosystem → a single `y`/`n` prompt after showing the install command(s); `y` runs
-      all detected installs, `n` prints them as a hint.
-- [ ] No TTY → defaults to `n`, no stdin read.
+- [ ] Step 5 detects first-class ecosystems via `update-dependencies`' Detection Table
+      markers (root + one subdir level, cross-referenced not restated) **and** also notes any
+      dependency manifest the table doesn't cover, so the uncovered-ecosystem branch has an
+      input.
+- [ ] Nothing detected → Step 5 is a silent no-op.
+- [ ] ≥1 first-class ecosystem → an `AskUserQuestion` *Install* / *Skip* prompt after showing
+      the install command(s); *Install* runs all detected installs, *Skip* prints them as a
+      hint.
+- [ ] No interactive user (`AskUserQuestion` unavailable) → take *Skip*; never read stdin or
+      block for input. Any answer that isn't a clear *Install* → *Skip*.
 - [ ] Install failure is one-line, non-fatal, worktree still created; `/implement` continues.
-- [ ] Unknown ecosystem → best-effort courtesy install (non-fatal) + `ACTION NEEDED` print +
-      `AskUserQuestion` acknowledgement gate before continuing.
+- [ ] Uncovered ecosystem(s) → best-effort courtesy install for `go.mod`/`Cargo.toml`/
+      `Gemfile` (non-fatal), nothing for others, then a single `ACTION NEEDED` print covering
+      all of them + one `AskUserQuestion` acknowledgement gate.
 - [ ] `create-worktrees/REFERENCE.md` has the "Dependency bootstrap (Step 5)" section with
-      the install-command table and courtesy list; detection is cross-referenced to
-      `update-dependencies`, not duplicated.
+      the install-command table (ecosystem name only, no marker parentheticals), the pip
+      note, and the courtesy list; detection is cross-referenced to `update-dependencies`.
+- [ ] The yarn row gives both `--immutable` (Yarn 2+) and `--frozen-lockfile` (Yarn 1) and
+      says to pick by `yarn --version`.
 - [ ] `create-worktrees` frontmatter `description` mentions the optional bootstrap.
-- [ ] ADR 0005 is committed, body reworded to prompted/opt-in wording, no `Status` field,
-      "Considered Options" unchanged.
+- [ ] ADR 0005 is committed, body reworded to prompted/opt-in wording (plus courtesy list),
+      no `Status` field; "Considered Options" kept with only the chosen-option overclaim
+      softened.
 - [ ] `.agent-docs/context.md` has the "Worktree dependency bootstrap" glossary entry.
 - [ ] `pre-commit run --all-files` passes (markdownlint included).
 - [ ] Steps 1–4 of `create-worktrees` are unchanged.

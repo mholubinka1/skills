@@ -77,18 +77,19 @@ If `EnterWorktree` errors because a branch of that name already exists (e.g. a l
 
 ## Step 5 — Bootstrap dependencies (optional)
 
-Runs only when Step 4 created a fresh worktree. Skip it entirely on the Step 1 (already isolated) and Step 2 (resume) paths.
+Runs only after Step 4 creates a fresh worktree — the Step 1 (already isolated) and Step 2 (resume) paths stop before reaching it.
 
-A fresh worktree is a bare checkout with none of the gitignored dependency artifacts (`.venv`, `node_modules`, NuGet caches, …) the main checkout accumulated, so code that runs on `main` may not run here. This step offers to close that gap by installing — never by copying or symlinking artifacts from the main checkout.
+A fresh worktree is a bare checkout: none of the gitignored dependency artifacts (`.venv`, `node_modules`, NuGet caches, …) the main checkout built up are present, so code that runs on `main` may not run here. This step offers to install them — never to copy or symlink them from the main checkout.
 
-1. Detect which dependency ecosystems the repo uses, applying the marker rules in `update-dependencies`' Detection Table — repo root and one level of subdirectories. The per-ecosystem install commands are in the Dependency bootstrap section of [REFERENCE.md](REFERENCE.md).
-2. **No ecosystem detected** — do nothing, continue to the caller.
-3. **One or more detected** — print each detected ecosystem and its exact install command(s), then ask once: *"Install dependencies in this worktree now? (y/n)"*.
-   - **Cannot prompt** (non-interactive / no TTY) — treat as **n**; never block waiting for input.
-   - **n** — leave the printed commands as a copy-paste hint and continue.
-   - **y** — run each detected ecosystem's install command, recording pass/fail per ecosystem. An install that fails — tool not on `PATH`, no network, unsatisfiable lockfile, compile error — is reported on one line (the failing command and its first error line) and does **not** abort: the worktree is already created and is usable for work that doesn't execute the code.
-4. **Unrecognised ecosystem** — a dependency marker that is not in the Detection Table:
-   - If it is on the courtesy list in REFERENCE.md (`go.mod`, `Cargo.toml`, `Gemfile`), attempt that conventional install — best-effort, non-fatal, reported the same way as step 3.
-   - Whether or not an install ran, print this line prominently:
-     `ACTION NEEDED: add <ecosystem> as a first-class entry in create-worktrees/REFERENCE.md`
-   - Then use `AskUserQuestion` to make the user acknowledge that line before the workflow continues.
+1. Detect the repo's dependency ecosystems. Apply `update-dependencies`' Detection Table marker rules (repo root and one level of subdirectories), **and also** note any other dependency-manifest file present that the Detection Table doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or anything comparable). The per-ecosystem install commands, the courtesy list for the uncovered ones, and the pip-interpreter note are in the Dependency bootstrap section of [REFERENCE.md](REFERENCE.md).
+2. **Nothing detected** — do nothing; continue to the caller.
+3. **One or more first-class ecosystems detected** — print each one and its exact install command(s), then ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*.
+   - **No interactive user** (`AskUserQuestion` unavailable — a non-interactive run) — take **Skip**; never read stdin or otherwise block for input.
+   - Any answer that is not a clear *Install* — take **Skip**.
+   - **Skip** — leave the printed commands as a copy-paste hint; continue.
+   - **Install** — run each detected ecosystem's install command, recording pass/fail per ecosystem. An install that fails — tool not on `PATH`, no network, unsatisfiable lockfile, `python -m venv` unavailable, compile error — is reported on one line (the failing command and its first error line) and does **not** abort: the worktree is created and is usable for work that doesn't execute the code.
+4. **Uncovered ecosystem(s)** — any marker from step 1 that is not a first-class Detection Table ecosystem:
+   - If it is on the courtesy list in REFERENCE.md, attempt that conventional install — best-effort, non-fatal, reported as in step 3. Otherwise attempt nothing.
+   - Then print once, covering every uncovered ecosystem found:
+     `ACTION NEEDED: add <ecosystem>[, <ecosystem>…] as a first-class entry in create-worktrees/REFERENCE.md`
+     and use `AskUserQuestion` a single time to make the user acknowledge it before the workflow continues.
