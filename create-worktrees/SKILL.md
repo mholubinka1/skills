@@ -89,7 +89,7 @@ Both prompts in this step go through `AskUserQuestion`. In a non-interactive run
    - **No interactive user** (`AskUserQuestion` unavailable — a non-interactive run) — take **Skip**; never read stdin or otherwise block for input.
    - Any answer that is not a clear *Install* — take **Skip**.
    - **Skip** — leave the printed commands as a copy-paste hint; continue.
-   - **Install** — run each detected ecosystem's install command, recording pass/fail per ecosystem. An install that fails — tool not on `PATH`, no network, unsatisfiable lockfile, `python -m venv` unavailable, compile error — is reported on one line (the failing command and its first error line) and does **not** abort: the worktree is created and is usable for work that doesn't execute the code.
+   - **Install** — run each detected ecosystem's install command, recording pass/fail per ecosystem. An install that fails — tool not on `PATH`, no network, unsatisfiable lockfile, venv creation unavailable, compile error — is reported on one line (the failing command and its first error line) and does **not** abort: the worktree is created and is usable for work that doesn't execute the code.
 4. **Uncovered ecosystem(s)** — any marker from step 1 that is not a first-class Detection Table ecosystem:
    - If it is on the courtesy list in REFERENCE.md, attempt that conventional install — best-effort, non-fatal, reported as in step 3. Otherwise attempt nothing.
    - Then print once, covering every uncovered ecosystem found:
