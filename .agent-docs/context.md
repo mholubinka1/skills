@@ -60,6 +60,10 @@ _Avoid_: sandbox, isolated checkout, workspace
 A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. Once `branch-hygiene`'s existing mismatch resolution switches to the real branch (confirmed from grill output), `/implement` deletes the now-empty placeholder.
 _Avoid_: temp branch, scratch branch
 
+**Worktree dependency bootstrap**:
+The optional final step of `create-worktrees` that, on a `y`/`n` prompt after a fresh worktree is created, runs each detected ecosystem's lockfile-respecting install (`uv sync`, `poetry install`, `npm ci`, `dotnet restore`, …) inside the worktree, since a fresh worktree has none of the gitignored dependency artifacts the main checkout accumulated. Skipped on resume, when no ecosystem is detected, and (default) when there is no TTY.
+_Avoid_: dependency sync, env setup, provisioning
+
 ### PR Review Loop
 
 **Review round**:

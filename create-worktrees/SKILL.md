@@ -1,6 +1,6 @@
 ---
 name: create-worktrees
-description: Enter an isolated git worktree for the current task so work never touches the main checkout. No-ops if the session is already isolated, resumes an existing worktree if one is found, otherwise ensures .claude is gitignored and creates a fresh worktree on a wip/<slug> placeholder branch. Use whenever starting implementation work that should be isolated from the main checkout, or as the first step of /implement.
+description: Enter an isolated git worktree for the current task so work never touches the main checkout. No-ops if the session is already isolated, resumes an existing worktree if one is found, otherwise ensures .claude is gitignored and creates a fresh worktree on a wip/<slug> placeholder branch, then optionally bootstraps the repo's detected dependency ecosystems into it on a prompt. Use whenever starting implementation work that should be isolated from the main checkout, or as the first step of /implement.
 ---
 
 # Create Worktrees
@@ -74,3 +74,21 @@ EnterWorktree(name: "wip/<slug>")
 The `wip/` prefix is deliberate — `branch-hygiene` already classifies `wip/*` as a placeholder that "must be renamed before code is written," so its existing mismatch-resolution step already moves work off this branch automatically once the real name is known from later work (e.g. a `/implement` grill session). No new mismatch-detection logic is needed here.
 
 If `EnterWorktree` errors because a branch of that name already exists (e.g. a leftover `wip/<slug>` from an earlier aborted run that was never cleaned up), append a short disambiguating suffix to the slug and retry.
+
+## Step 5 — Bootstrap dependencies (optional)
+
+Runs only when Step 4 created a fresh worktree. Skip it entirely on the Step 1 (already isolated) and Step 2 (resume) paths.
+
+A fresh worktree is a bare checkout with none of the gitignored dependency artifacts (`.venv`, `node_modules`, NuGet caches, …) the main checkout accumulated, so code that runs on `main` may not run here. This step offers to close that gap by installing — never by copying or symlinking artifacts from the main checkout.
+
+1. Detect which dependency ecosystems the repo uses, applying the marker rules in `update-dependencies`' Detection Table — repo root and one level of subdirectories. The per-ecosystem install commands are in the Dependency bootstrap section of [REFERENCE.md](REFERENCE.md).
+2. **No ecosystem detected** — do nothing, continue to the caller.
+3. **One or more detected** — print each detected ecosystem and its exact install command(s), then ask once: *"Install dependencies in this worktree now? (y/n)"*.
+   - **Cannot prompt** (non-interactive / no TTY) — treat as **n**; never block waiting for input.
+   - **n** — leave the printed commands as a copy-paste hint and continue.
+   - **y** — run each detected ecosystem's install command, recording pass/fail per ecosystem. An install that fails — tool not on `PATH`, no network, unsatisfiable lockfile, compile error — is reported on one line (the failing command and its first error line) and does **not** abort: the worktree is already created and is usable for work that doesn't execute the code.
+4. **Unrecognised ecosystem** — a dependency marker that is not in the Detection Table:
+   - If it is on the courtesy list in REFERENCE.md (`go.mod`, `Cargo.toml`, `Gemfile`), attempt that conventional install — best-effort, non-fatal, reported the same way as step 3.
+   - Whether or not an install ran, print this line prominently:
+     `ACTION NEEDED: add <ecosystem> as a first-class entry in create-worktrees/REFERENCE.md`
+   - Then use `AskUserQuestion` to make the user acknowledge that line before the workflow continues.
