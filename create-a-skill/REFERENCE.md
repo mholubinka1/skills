@@ -7,7 +7,7 @@ The writing levers, the description rules, and the Review Checklist. The process
 The `description` is the agent's main signal when choosing which skill to load — the skill's top-level **context pointer**. It must let the agent know *what capability this is* and *when to trigger it*. These rules govern a **model-invoked** skill's description; a user-invoked skill drops the trigger list and keeps a human-facing one-liner (see *Model- vs user-invoked*).
 
 - Third person; max 1024 chars.
-- First sentence: what the skill does. Second sentence: "Use when [triggers]".
+- Exactly two sentences — first: what the skill does; second: "Use when [triggers]".
 - Front-load the trigger word — the pointer does its work at the start.
 - One trigger per branch. Synonyms that rename a single branch ("create, write, or build a skill") are one branch written three times; keep only genuinely distinct cases.
 - Cut identity the body already carries — every word costs on every turn.
@@ -24,7 +24,7 @@ Each lever ends on a check the draft has to pass.
 
 *Check: from the pointer alone, can a reader name the exact cases that should load the material?*
 
-**The two loads.** A pointer or always-loaded line spends *context load* (tokens every turn); an unpointered doc spends *cognitive load* (the human remembering it exists).
+**The two loads.** A pointer or always-loaded line spends *context load* (tokens every turn); a doc that no pointer names spends *cognitive load* (the human remembering it exists).
 
 *Check: does each line earn the load it spends?*
 

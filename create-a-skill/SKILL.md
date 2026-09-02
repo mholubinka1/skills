@@ -17,7 +17,7 @@ A skill is predictable when the agent takes the same *process* every run — not
 
 4. **Review with the user** — walk the use cases from step 1; done when each is covered and the user has nothing to add.
 
-5. **Verify against the Review Checklist** (REFERENCE.md) — every item is pass/fail; a skill that fails one is not done.
+5. **Verify against the Review Checklist** (REFERENCE.md) — every item is pass/fail. Done when every item passes; a skill that fails one is not done.
 
 ## Skill structure
 
