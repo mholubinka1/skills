@@ -32,3 +32,10 @@ from — for example:
 - **Ambiguous cadence in an instruction step**: flag a directive to act "after every X" or
   "once Y" that does not say whether it runs each iteration or a single time at the end — an
   agent following it can pick the wrong cadence. (PR #72)
+- **Prose copies drift from shipped behaviour**: after a design detail changes mid-review (a
+  prompt mechanism, a default, a flag, a command), every prose statement of it — spec, issue,
+  glossary, ADR bullets, acceptance criteria, not just the primary skill file — must be
+  swept and reconciled with what the code/skill now does; a copy left at the pre-change
+  wording reads as a contradiction. Also verify any claim that characterises a referenced
+  document ("X only documents the upgrade flow", "Y has none of these") against that
+  document. (PR #78)
