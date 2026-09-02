@@ -1,6 +1,6 @@
 ---
 name: update-dependencies
-description: Sync the current repo with main/master, then update dependencies to their latest patch/minor versions across detected ecosystems (Python, .NET/C#, Node/TypeScript/React) plus pre-commit hook versions, and commit the result locally. Use when the user asks to update dependencies, bump packages, run a dependency upgrade, or refresh pre-commit hooks.
+description: Syncs the current repo with main/master, then updates dependencies to their latest patch/minor versions across detected ecosystems (Python, .NET/C#, Node/TypeScript/React) and pre-commit hooks, committing the result locally. Use when the user asks to update dependencies or refresh pre-commit hooks.
 ---
 
 # Update Dependencies
