@@ -11,7 +11,7 @@ A skill is predictable when the agent takes the same *process* every run — not
 
 1. **Gather requirements** — get an answer to each of: the task or domain and its concrete use cases; a utility script or instructions only; reference material to bundle or point at; model-invoked or user-invoked (REFERENCE.md). Drafting starts once every one is answered.
 
-2. **Place each piece of content on the information hierarchy** (REFERENCE.md), by the branch test. Done when every piece has a place.
+2. **Place each piece of content on the information hierarchy** (REFERENCE.md); the branch test (see *Progressive disclosure*) decides what to disclose. Done when every piece has a place.
 
 3. **Draft** `SKILL.md`, plus `REFERENCE.md` / `EXAMPLES.md` / `scripts/` for whatever step 2 put there, applying every writing lever from REFERENCE.md as you write. Done when every lever holds.
 

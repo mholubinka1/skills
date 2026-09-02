@@ -26,7 +26,7 @@ Each lever ends on a check the draft has to pass.
 
 **Information hierarchy.** Rank material by how soon the agent needs it: in-file step, then in-file reference, then disclosed reference behind a pointer. *Check: is anything a run always needs behind a pointer it might skip, or any branch-only detail bloating the top?*
 
-**Progressive disclosure.** Move branch-only material out of `SKILL.md` behind a pointer; keep what every branch needs inline. *Check: for each disclosed section, do only some branches reach it?*
+**Progressive disclosure.** Move branch-only material out of `SKILL.md` behind a pointer; keep what every branch needs inline — the **branch test**. *Check: for each disclosed section, do only some branches reach it?*
 
 **Co-location.** A concept's definition, rules, and caveats sit under one heading. *Check: does reading one part of a concept bring its caveats with it?*
 

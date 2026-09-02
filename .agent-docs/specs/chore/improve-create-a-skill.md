@@ -70,7 +70,9 @@ branch test, not the line count, is the real driver.
     them** — no inline tier lists, rule enumerations, or trigger lists: (1) gather
     requirements — task/domain and use cases, scripts-or-not, reference material, model- vs
     user-invoked — done once every question is answered; (2) place each piece of content on
-    the information hierarchy by the branch test — done when every piece has a place; (3)
+    the information hierarchy, naming *Progressive disclosure* for the branch test (which is
+    defined there, as a token, so the pointer has an anchor) — done when every piece has a
+    place; (3)
     draft the files, applying every writing lever from `REFERENCE.md` — done when every lever
     holds; (4) review with the user against the step-1 use cases — done when each is covered
     and the user has nothing to add; (5) verify against the Review Checklist.
