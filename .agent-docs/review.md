@@ -39,3 +39,19 @@ from — for example:
   wording reads as a contradiction. Also verify any claim that characterises a referenced
   document ("X only documents the upgrade flow", "Y has none of these") against that
   document. (PR #78)
+- **Doc fails its own standard**: when a file defines a checklist or rule set, flag any part
+  of that same file that breaks one of its own rules — a `description` that isn't third
+  person, a section longer than the length limit the file itself sets. (PR #80)
+- **Vague pointer where a precise anchor exists**: flag a cross-reference that names only the
+  target file when it could name the specific section or heading the reader needs — most of
+  all when the spec asks for the precise form. (PR #80)
+- **Inconsistent element across a parallel series**: flag a sequence of parallel items
+  (steps, sections, list entries) where one omits a structural element its siblings all
+  carry — a completion criterion, a "Done when", a heading. (PR #80)
+- **Rule looser than the check that enforces it**: flag a blanket rule with an unlisted
+  special case that breaks it, or a rule whose wording is vaguer than the checklist item
+  that tests it (prose says "first sentence … second sentence"; checklist says "exactly
+  two"); both places must state the same constraint. (PR #80)
+- **Coined word spellcheck will flag**: flag an invented compound or coinage in prose that
+  codespell or similar tooling is likely to trip on; prefer plain phrasing unless the term
+  is a deliberately pinned leading word. (PR #80)

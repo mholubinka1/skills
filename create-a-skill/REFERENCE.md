@@ -1,62 +1,113 @@
 # create-a-skill — Reference
 
-Description requirements and review checklist. The process and structure are in [SKILL.md](SKILL.md).
+The writing levers, the description rules, and the Review Checklist. The process and structure are in [SKILL.md](SKILL.md). The levers are adapted from Matt Pocock's `writing-for-agents` skill.
 
-## Description Requirements
+## Description requirements
 
-The description is **the only thing your agent sees** when deciding which skill to load. It's surfaced in the system prompt alongside all other installed skills. Your agent reads these descriptions and picks the relevant skill based on the user's request.
+The `description` is the agent's main signal when choosing which skill to load — the skill's top-level **context pointer**. It must let the agent know *what capability this is* and *when to trigger it*. These rules govern a **model-invoked** skill's description; a user-invoked skill drops the trigger list and keeps a human-facing one-liner (see *Model- vs user-invoked*).
 
-**Goal**: Give your agent just enough info to know:
+- Third person; max 1024 chars.
+- Exactly two sentences — first: what the skill does; second: "Use when [triggers]".
+- Front-load the trigger word — the pointer does its work at the start.
+- One trigger per branch. Synonyms that rename a single branch ("create, write, or build a skill") are one branch written three times; keep only genuinely distinct cases.
+- Cut identity the body already carries — every word costs on every turn.
 
-1. What capability this skill provides
-2. When/why to trigger it (specific keywords, contexts, file types)
+Good: `Extracts text and tables from PDF files, fills forms, merges documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.`
 
-**Format**:
+Bad: `Helps with documents.` — nothing distinguishes it from other document skills.
 
-- Max 1024 chars
-- Write in third person
-- First sentence: what it does
-- Second sentence: "Use when [specific triggers]"
+## Writing levers
 
-**Good example**:
+Each lever ends on a check the draft has to pass.
 
-```text
-Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when user mentions PDFs, forms, or document extraction.
-```
+**Context pointer.** A reference that names out-of-context material plus the branches that trigger reaching it; its wording, not its target, sets how reliably it fires.
 
-**Bad example**:
+*Check: from the pointer alone, can a reader name the exact cases that should load the material?*
 
-```text
-Helps with documents.
-```
+**The two loads.** A pointer or always-loaded line spends *context load* (tokens every turn); a doc that no pointer names spends *cognitive load* (the human remembering it exists).
 
-The bad example gives your agent no way to distinguish this from other document skills.
+*Check: does each line earn the load it spends?*
 
-## When to Add Scripts
+**Information hierarchy.** Rank material by how soon the agent needs it: in-file step, then in-file reference, then disclosed reference behind a pointer.
 
-Add utility scripts when:
+*Check: is anything a run always needs behind a pointer it might skip, or any branch-only detail bloating the top?*
 
-- Operation is deterministic (validation, formatting)
-- Same code would be generated repeatedly
-- Errors need explicit handling
+**Progressive disclosure.** Move branch-only material out of `SKILL.md` behind a pointer; keep what every branch needs inline — the **branch test**.
 
-Scripts save tokens and improve reliability vs generated code.
+*Check: for each disclosed section, do only some branches reach it?*
 
-## When to Split Files
+**Co-location.** A concept's definition, rules, and caveats sit under one heading.
 
-Split into separate files when:
+*Check: does reading one part of a concept bring its caveats with it?*
 
-- SKILL.md exceeds 100 lines
-- Content has distinct domains (finance vs sales schemas)
-- Advanced features are rarely needed
+**Completion criteria.** Every step ends on a condition that is *checkable* (done vs not-done) and *exhaustive* ("every X accounted for", not "produce a list"). A fuzzy bound invites premature completion — the step stops early as attention slips to *being done*; sharpen the bound before hiding later steps, and hiding works only across a real context boundary (a hand-off or subagent, not an inline call).
+
+*Check: can the agent tell done from not-done, and does the bound force the whole job?*
+
+**When to split.** Split by sequence — the **sequence test** — when later steps tempt a rush of the current one; split by invocation when a distinct leading word should trigger a part on its own, or another skill must reach it.
+
+*Check: does the cut buy more legwork or independent reach than the load it spends?*
+
+**Leading words.** A compact concept already in the model's pretraining (`tracer bullet`, `red`, `fog of war`), repeated as a token and never spelled out; prefer an existing word — a coined one costs the definition tokens a pretrained word gives free.
+
+*Check: is any triad or gesturing sentence begging to collapse into one word — "fast, deterministic, low-overhead" → *tight*?*
+
+**Steer positive.** State the target behaviour; a prohibition drags the banned thing into context and makes it *more* available. Reserve "don't" for a hard guardrail, paired with the positive target.
+
+*Check: does every instruction name what to do rather than what to avoid?*
+
+**Pruning.** One source of truth per meaning — changing behaviour is a one-place edit. The environment (`package.json` scripts, config, `--help`) is a source of truth too: restate it only when the lookup is expensive.
+
+*Check: run the document — did any line change behaviour versus the model's default? Would changing any rule take more than a one-place edit?*
+
+## Model- vs user-invoked
+
+- **Model-invoked** — keeps a `description`, so the agent can fire it autonomously and other skills can reach it. Permanent context load for discoverability. Omit `disable-model-invocation`; write the description to the rules above.
+- **User-invoked** — set `disable-model-invocation: true`. Only the human typing its name invokes it; no other skill can. Zero context load, but it spends cognitive load — the human is the index. The `description` becomes a human-facing one-liner with the trigger list stripped.
+
+Pick model-invocation only when the agent or another skill must reach the skill on its own. When user-invoked skills multiply past what the human can remember, add a **router skill** — one user-invoked skill that names the others and when to reach for each.
+
+## When to add scripts
+
+Add a utility script when the operation is deterministic (validation, formatting), the same code would be generated repeatedly, or errors need explicit handling. Scripts save tokens and improve reliability over generated code.
+
+## When to split files
+
+Split `SKILL.md` when a section is branch-only (disclose it) or a run of steps tempts a rush (split the sequence). Past ~150 lines is a **sprawl smell** — attention thins across the excess — so look for one of those cuts. The branch and sequence tests drive the split; the line count only says to look.
+
+## Common failure modes
+
+- **Sprawl** — too long even when every line is live. → Disclose reference behind pointers; split by branch or sequence.
+- **Negation steering** — a "don't X" makes X more available. → Prompt the positive target.
+- **Duplication** — one meaning in two places; a two-place edit to change behaviour. → Single source of truth.
+- **Scattering** — one meaning fragmented across headings. → Co-locate under one heading.
+- **No-op** — a line the model already obeys by default. → Delete the sentence, or use a stronger leading word.
+- **Premature completion** — a step stops before it is done. → Sharpen the criterion; then split the sequence if the rush persists.
 
 ## Review Checklist
 
-After drafting, verify:
+Every item is pass/fail. A skill that fails one is not done.
 
-- [ ] Description includes triggers ("Use when...")
-- [ ] SKILL.md under 100 lines
-- [ ] No time-sensitive info
-- [ ] Consistent terminology
-- [ ] Concrete examples included
-- [ ] References one level deep
+### Pointer
+
+- [ ] Description passes every rule in *Description requirements* (third person; ≤ 1024 chars; two sentences; front-loaded trigger word; one trigger per branch; no identity the body carries).
+
+### Hierarchy & disclosure
+
+- [ ] Each step's actions are in `SKILL.md`; the rules and reference a step consults may sit behind a pointer the step names; branch-only material is disclosed, not inline. References are one level deep.
+- [ ] `SKILL.md` is not sprawling — see *When to split files*.
+
+### Completion criteria
+
+- [ ] Every step ends on a criterion that is checkable and exhaustive.
+
+### Leading words & positivity
+
+- [ ] Reaches for a leading word where a triad or phrase repeats.
+- [ ] Steers positive — a "don't …" appears only as a guardrail paired with the positive target.
+
+### General
+
+- [ ] `name:` matches the directory name.
+- [ ] No time-sensitive info; consistent terminology throughout.
+- [ ] Concrete examples included.

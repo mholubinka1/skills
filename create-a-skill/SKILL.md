@@ -1,62 +1,57 @@
 ---
 name: create-a-skill
-description: Create new Claude Code agent skills with proper structure, progressive disclosure, and bundled resources. Use when user wants to create, write, or build a new skill.
+description: Creates, reworks, or reviews a Claude Code agent skill. Use when the user asks to build a skill, when an existing skill needs changing, or when checking a skill against the writing levers.
 ---
 
 # Writing Skills
 
-See [REFERENCE.md](REFERENCE.md) for description requirements and the review checklist.
+A skill is predictable when the agent takes the same *process* every run — not when it produces the same output. The **writing levers** that buy that, the description rules, the model/user-invocation choice, and the Review Checklist are all in [REFERENCE.md](REFERENCE.md).
 
 ## Process
 
-1. **Gather requirements** - ask user about:
-   - What task/domain does the skill cover?
-   - What specific use cases should it handle?
-   - Does it need executable scripts or just instructions?
-   - Any reference materials to include?
+1. **Gather requirements** — get an answer to each of: the task or domain and its concrete use cases; a utility script or instructions only; reference material to bundle or point at; model-invoked or user-invoked (see *Model- vs user-invoked* in REFERENCE.md). Drafting starts once every one is answered.
 
-2. **Draft the skill** - create:
-   - SKILL.md with concise instructions
-   - Additional reference files if content exceeds 500 lines
-   - Utility scripts if deterministic operations needed
+2. **Place each piece of content on the information hierarchy** (see *Information hierarchy* in REFERENCE.md); the branch test (see *Progressive disclosure*) decides what to disclose. Done when every piece has a place.
 
-3. **Review with user** - present draft and ask:
-   - Does this cover your use cases?
-   - Anything missing or unclear?
-   - Should any section be more/less detailed?
+3. **Draft** `SKILL.md`, plus `REFERENCE.md` / `EXAMPLES.md` / `scripts/` for whatever step 2 put there, applying every writing lever from REFERENCE.md as you write. Done when every lever holds.
 
-4. **Verify against checklist** — see the Review Checklist section in [REFERENCE.md](REFERENCE.md).
+4. **Review with the user** — walk the use cases from step 1; done when each is covered and the user has nothing to add.
 
-## Skill Structure
+5. **Verify against the Review Checklist** (REFERENCE.md) — every item is pass/fail. Done when every item passes; a skill that fails one is not done.
+
+## Skill structure
 
 ```text
 skill-name/
-├── SKILL.md           # Main instructions (required)
-├── REFERENCE.md       # Detailed docs (if needed)
-├── EXAMPLES.md        # Usage examples (if needed)
-└── scripts/           # Utility scripts (if needed)
+├── SKILL.md           # required — the process
+├── REFERENCE.md       # disclosed reference
+├── EXAMPLES.md        # worked examples
+└── scripts/           # utility scripts — see "When to add scripts"
     └── helper.py
 ```
 
-## SKILL.md Template
+`name:` matches the directory.
+
+## SKILL.md template
 
 ```md
 ---
 name: skill-name
-description: Brief description of capability. Use when [specific triggers].
+description: <what it does>. Use when <one trigger per branch>.
 ---
 
 # Skill Name
 
 ## Quick start
 
-[Minimal working example]
+<minimal working example>
 
 ## Workflows
 
-[Step-by-step processes with checklists for complex tasks]
+<steps, each ending on a completion criterion — e.g. "every changed file has a
+test and the full suite is green">
 
-## Advanced features
+## Advanced
 
-[Link to separate files: See [REFERENCE.md](REFERENCE.md)]
+See [REFERENCE.md](REFERENCE.md).
 ```
