@@ -90,8 +90,10 @@ Two edits, no behaviour change to either skill's steps:
   1. `git mv` preserves history — `git log --follow bdd/SKILL.md` shows the pre-rename
      commits.
   2. `grep -rn "behaviour-driven-development"` over the repo returns only the deliberately
-     preserved history-of-record files listed above (and nothing under `bdd/`,
-     `implement/`, `code-review/`, or the rest of `.agent-docs/context.md`).
+     preserved history-of-record files listed above, plus this branch's own
+     `skill-compliance-followups` spec and issue file (which describe the rename) — and
+     nothing under `bdd/`, `implement/`, `code-review/`, or the rest of
+     `.agent-docs/context.md`.
   3. `bdd/SKILL.md` frontmatter `name: bdd` now equals the directory basename.
   4. `pr-cleanup/SKILL.md` description is two sentences, second begins "Use when".
   5. `pre-commit run --all-files` passes (markdownlint, markdown-link-check, codespell).

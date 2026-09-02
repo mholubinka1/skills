@@ -29,12 +29,13 @@ out-of-scope bullet in the `improve-create-a-skill` spec.
 - [ ] `.agent-docs/context.md`'s "red-green-refactor" and "implementation subagent" glossary
       entries name "the `bdd` skill"; neither sentence still contains a bare
       `behaviour-driven-development`.
-- [ ] `grep -rn "behaviour-driven-development"` over the repo (excluding `.git/`) returns
-      only: `.agent-docs/specs/chore/bdd-clean-context-impl.md`,
-      `.agent-docs/issues/chore/bdd-clean-context-impl.md`,
-      `.agent-docs/specs/chore/fix-skill-checklist-compliance.md`,
-      `.agent-docs/issues/chore/fix-skill-checklist-compliance.md`, and
-      `.agent-docs/specs/chore/improve-create-a-skill.md`.
+- [ ] `grep -rn "behaviour-driven-development"` over the repo (excluding `.git/` and the
+      untracked `.claude/settings.local.json`) returns only: the five history-of-record files
+      — `.agent-docs/{specs,issues}/chore/bdd-clean-context-impl.md`,
+      `.agent-docs/{specs,issues}/chore/fix-skill-checklist-compliance.md`,
+      `.agent-docs/specs/chore/improve-create-a-skill.md` — plus this branch's own
+      `.agent-docs/{specs,issues}/chore/skill-compliance-followups.md`, which describe the
+      rename itself.
 - [ ] `pre-commit run --all-files` passes.
 
 ---
