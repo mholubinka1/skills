@@ -1,6 +1,6 @@
 ---
 name: pr-cleanup
-description: Pre-merge cleanup — check off acceptance criteria in .agent-docs/issues/<branch-name>.md, commit to the PR branch, close GitHub issues, and share the PR link for merging. Invoked automatically by /code-review after the Copilot review loop.
+description: Pre-merge cleanup — check off acceptance criteria in .agent-docs/issues/<branch-name>.md, commit to the PR branch, close GitHub issues, and share the PR link for merging. Use when a branch has passed review and its PR is ready to merge, or as the final step of /code-review after the Copilot review loop.
 ---
 
 # PR Cleanup
