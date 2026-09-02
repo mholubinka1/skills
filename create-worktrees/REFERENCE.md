@@ -24,7 +24,7 @@ Exact wording doesn't matter — the slug only has to be recognisable enough to 
 
 ## Dependency bootstrap (Step 5)
 
-**Detection.** First-class ecosystems are the ones in `update-dependencies`' Detection Table — its marker rules and its scan scope (repo root, plus one subdirectory level for a monorepo). This skill adds only the install commands below (`update-dependencies` is upgrade-oriented and has none). Any dependency manifest the table doesn't cover is an *uncovered* ecosystem — handled by the courtesy list.
+**Detection.** First-class ecosystems are the ones in `update-dependencies`' Detection Table — its marker rules and its scan scope (repo root, plus one subdirectory level for a monorepo). For each one detected, run its command from the install table below — the lockfile-respecting *install*, not the *upgrade* flow `update-dependencies` documents. Any dependency manifest the Detection Table doesn't cover is an *uncovered* ecosystem: the courtesy list installs the ones it recognises, and every other uncovered marker gets no install — just the `ACTION NEEDED` line.
 
 **Install commands** — lockfile-respecting (install, not upgrade):
 

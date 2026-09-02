@@ -15,11 +15,13 @@ exists but was never committed and describes behaviour that doesn't exist yet).
 ## Solution
 
 Add an **optional** final step to `create-worktrees` that, right after a fresh worktree is
-created, detects which dependency ecosystems the repo uses and offers — via a single `y`/`n`
-prompt — to run each one's lockfile-respecting install inside the new worktree. The default
-when there's no ecosystem, or no TTY, is to do nothing (or just print the commands as a
-hint). Installs are best-effort: a failure is reported but never aborts worktree creation or
-the `/implement` flow.
+created, detects which dependency ecosystems the repo uses and offers — via an
+`AskUserQuestion` *Install* / *Skip* prompt — to run each one's lockfile-respecting install
+inside the new worktree. With no ecosystem it does nothing; with no interactive user the
+*Install* / *Skip* prompt defaults to *Skip* (first-class installs are not run, though
+best-effort courtesy installs for uncovered ecosystems still are) and it just prints the
+commands as a hint. Installs are best-effort: a failure is reported but never aborts worktree
+creation or the `/implement` flow.
 
 Because the common `/implement` task is a docs/skill/config edit that never executes the
 target app, the step must not slow down or add network dependence to that path — hence the

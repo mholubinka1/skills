@@ -81,7 +81,7 @@ Runs only after Step 4 creates a fresh worktree — the Step 1 (already isolated
 
 A fresh worktree is a bare checkout: none of the gitignored dependency artifacts (`.venv`, `node_modules`, NuGet caches, …) the main checkout built up are present, so code that runs on `main` may not run here. This step offers to install them — never to copy or symlink them from the main checkout.
 
-Both prompts in this step go through `AskUserQuestion`. In a non-interactive run (no `AskUserQuestion` available), take the non-blocking default without reading stdin: *Skip* for the install question, acknowledge-and-continue for the `ACTION NEEDED` gate.
+Both prompts in this step go through `AskUserQuestion`. In a non-interactive run (no `AskUserQuestion` available), don't read stdin or block: take *Skip* for the install question, and for the `ACTION NEEDED` line just print it and continue (there is nothing to gate on).
 
 1. Detect the repo's dependency ecosystems. Apply `update-dependencies`' Detection Table marker rules (the repo root, plus one level of subdirectories for a monorepo), **and also** note any other dependency-manifest file present that the Detection Table doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or anything comparable). The per-ecosystem install commands, the courtesy list for the uncovered ones, and the pip-interpreter note are in the Dependency bootstrap section of [REFERENCE.md](REFERENCE.md).
 2. **Nothing detected** — do nothing; continue to the caller.

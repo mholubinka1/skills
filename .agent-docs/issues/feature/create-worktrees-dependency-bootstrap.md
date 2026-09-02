@@ -16,20 +16,26 @@ there — without copying or symlinking `.venv` / `node_modules` from the main c
   after Step 4:
   - Runs only on the fresh-creation path. Step 1 (already isolated) and Step 2 (resume) still
     stop before it.
-  - Detect ecosystems using `update-dependencies`' Detection Table markers (repo root + one
-    subdirectory level) — cross-reference that table, don't restate its marker list.
-  - No ecosystem detected → silent no-op.
-  - ≥1 detected → print the ecosystems + exact install command(s), then one `y`/`n` prompt
-    ("Install dependencies in this worktree now?"). `y` → run every detected ecosystem's
-    install, pass/fail recorded per ecosystem. `n` → leave the commands as a hint, continue.
-  - No TTY / non-interactive → behave as `n`; never read stdin.
-  - Any install failure (tool absent, offline, bad lock, compile error) → one-line reason
-    (failing command + first error line), non-fatal, worktree still created.
-  - Unknown ecosystem: if a courtesy-list marker is present (Go `go.mod`, Rust `Cargo.toml`,
-    Ruby `Gemfile`) attempt its conventional install, non-fatal; then — success or failure —
-    print `ACTION NEEDED: add <ecosystem> as a first-class entry in
-    create-worktrees/REFERENCE.md` and use `AskUserQuestion` to force acknowledgement before
-    continuing. A marker matching nothing at all: same ACTION-NEEDED + ack, no install.
+  - Detect ecosystems using `update-dependencies`' Detection Table markers and its scan scope
+    (repo root, plus one subdirectory level for a monorepo) — cross-reference that table,
+    don't restate its marker list — **and also** note any dependency manifest the table
+    doesn't cover.
+  - Nothing detected → silent no-op.
+  - ≥1 first-class ecosystem → print the ecosystems + exact install command(s), then an
+    `AskUserQuestion` *Install* / *Skip* prompt ("Install dependencies in this worktree
+    now?"). *Install* → run every detected ecosystem's install, pass/fail per ecosystem.
+    *Skip* → leave the commands as a hint, continue. No interactive user, or any answer that
+    is not a clear *Install* → *Skip*; never read stdin.
+  - Any install failure (tool absent, offline, bad lock, venv creation unavailable, compile
+    error) → one-line reason (failing command + first error line), non-fatal, worktree still
+    created.
+  - Uncovered ecosystem(s): if a courtesy-list marker is present (Go `go.mod`, Rust
+    `Cargo.toml`, Ruby `Gemfile`) attempt its conventional install, non-fatal; other uncovered
+    markers get no install. Then, once, covering every uncovered ecosystem found, print
+    `ACTION NEEDED: add <ecosystem>[, …] as a first-class entry in
+    create-worktrees/REFERENCE.md` and use `AskUserQuestion` a single time to force
+    acknowledgement before continuing — or, with no interactive user, print the line and
+    continue.
 - **`create-worktrees/REFERENCE.md`** — new **"Dependency bootstrap (Step 5)"** section:
   lead-in stating detection is per `update-dependencies`' Detection Table; the
   lockfile-respecting install-command table (`uv sync`, `poetry install`, `pdm install`,
