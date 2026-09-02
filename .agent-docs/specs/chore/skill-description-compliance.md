@@ -148,7 +148,7 @@ or behaviour change.
   Step 3 block from six rows to four while keeping every fork (threads/suppressed → 4,
   clean → 7b, exhausted → one final check → 4 or 7b). No command, condition, threshold,
   guard, or mutation changed — the Step 3 / 4b / 7b prose below the map stays authoritative
-  and its logic is untouched. Final: 149 lines.
+  and its logic is untouched. Final: 145 lines.
 - **D — `init-agent-docs` renumber**: apply high-to-low to avoid collisions —
   `Step 10→11`, `9→10`, `8→9`, `7→8`, `6b→7` — in `SKILL.md` (the `## Steps` list plus the
   jumps "skip to Step 10", "skip to Step 6b", "go to Step 6") and `REFERENCE.md` (the
