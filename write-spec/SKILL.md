@@ -1,6 +1,6 @@
 ---
 name: write-spec
-description: Synthesise the current conversation into a spec (PRD) and write it to .agent-docs/specs/<branch-name>.md. No interview — synthesis only. Use after a /grill session when the design is agreed and ready to record.
+description: Synthesises the current conversation into a spec (PRD) at .agent-docs/specs/<branch-name>.md — no interview, synthesis only. Use after a /grill session when the design is agreed and ready to record.
 attribution: Based on to-prd (Matt Pocock, mattpocock/skills)
 ---
 
