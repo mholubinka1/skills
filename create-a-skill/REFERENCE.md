@@ -32,7 +32,7 @@ Each lever ends on a check the draft has to pass.
 
 **Completion criteria.** Every step ends on a condition that is *checkable* (done vs not-done) and *exhaustive* ("every X accounted for", not "produce a list"). A fuzzy bound invites premature completion — the step stops early as attention slips to *being done*; sharpen the bound before hiding later steps, and hiding works only across a real context boundary (a hand-off or subagent, not an inline call). *Check: can the agent tell done from not-done, and does the bound force the whole job?*
 
-**When to split.** Split by sequence when later steps tempt a rush of the current one; split by invocation when a distinct leading word should trigger a part on its own, or another skill must reach it. *Check: does the cut buy more legwork or independent reach than the load it spends?*
+**When to split.** Split by sequence — the **sequence test** — when later steps tempt a rush of the current one; split by invocation when a distinct leading word should trigger a part on its own, or another skill must reach it. *Check: does the cut buy more legwork or independent reach than the load it spends?*
 
 **Leading words.** A compact concept already in the model's pretraining (`tracer bullet`, `red`, `fog of war`), repeated as a token and never spelled out; prefer an existing word — a coined one costs the definition tokens a pretrained word gives free. *Check: is any triad or gesturing sentence begging to collapse into one word — "fast, deterministic, low-overhead" → *tight*?*
 
