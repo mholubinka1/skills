@@ -143,11 +143,11 @@ A unit of work that delivers end-to-end value, used by `create-issues` to break 
 _Avoid_: story, task, feature slice
 
 **BDD loop**:
-The red-green-refactor cycle used in the `behaviour-driven-development` skill: write a failing Given-When-Then scenario, implement to pass it, then refactor. Split across a context boundary — the test-authoring context agrees the scenario list and writes the tracer bullet test (RED), then hands off to a clean **implementation subagent** that runs the vertical loop and refactor.
+The red-green-refactor cycle used in the `bdd` skill: write a failing Given-When-Then scenario, implement to pass it, then refactor. Split across a context boundary — the test-authoring context agrees the scenario list and writes the tracer bullet test (RED), then hands off to a clean **implementation subagent** that runs the vertical loop and refactor.
 _Avoid_: TDD cycle, test loop, test-first loop
 
 **Implementation subagent** (BDD sense):
-The fresh-context `general-purpose` agent the `behaviour-driven-development` skill spawns to run the red-green-refactor loop, after the test-authoring context has agreed the scenarios and written the failing tracer bullet test. Receives the agreed scenario list and interface changes inline in its prompt, then grinds the vertical loop — one scenario → test → minimal implementation → repeat — then refactors. Told not to re-invoke the `bdd` skill, so the loop does not recurse. On the normal path it writes every line of production code.
+The fresh-context `general-purpose` agent the `bdd` skill spawns to run the red-green-refactor loop, after the test-authoring context has agreed the scenarios and written the failing tracer bullet test. Receives the agreed scenario list and interface changes inline in its prompt, then grinds the vertical loop — one scenario → test → minimal implementation → repeat — then refactors. Told not to re-invoke the `bdd` skill, so the loop does not recurse. On the normal path it writes every line of production code.
 _Avoid_: impl agent, worker agent, coding subagent
 
 **Pre-commit check**:
