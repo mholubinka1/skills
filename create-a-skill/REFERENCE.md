@@ -74,7 +74,7 @@ Every item is pass/fail. A skill that fails one is not done.
 
 ### Hierarchy & disclosure
 
-- [ ] Material every run needs is in `SKILL.md`; branch-only sections are disclosed behind a pointer; references are one level deep.
+- [ ] Each step's actions are in `SKILL.md`; the rules and reference a step consults may sit behind a pointer the step names; branch-only material is disclosed, not inline. References are one level deep.
 - [ ] `SKILL.md` is not sprawling — see *When to split files*.
 
 ### Completion criteria

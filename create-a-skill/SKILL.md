@@ -1,6 +1,6 @@
 ---
 name: create-a-skill
-description: Create, revise, or review a Claude Code agent skill. Use when the user wants to write a new skill, rework an existing one, or review a skill against the writing levers.
+description: Create, rework, or review a Claude Code agent skill. Use when the user asks to build a skill, when an existing skill needs changing, or when checking a skill against the writing levers.
 ---
 
 # Writing Skills
@@ -11,7 +11,7 @@ A skill is predictable when the agent takes the same *process* every run — not
 
 1. **Gather requirements** — get an answer to each of: the task or domain and its concrete use cases; a utility script or instructions only; reference material to bundle or point at; model-invoked or user-invoked (REFERENCE.md). Drafting starts once every one is answered.
 
-2. **Place each piece of content on the information hierarchy** (REFERENCE.md) — in-file step, in-file reference, or disclosed reference — by the branch test. Done when every piece has a place.
+2. **Place each piece of content on the information hierarchy** (REFERENCE.md), by the branch test. Done when every piece has a place.
 
 3. **Draft** `SKILL.md`, plus `REFERENCE.md` / `EXAMPLES.md` / `scripts/` for whatever step 2 put there, applying every writing lever from REFERENCE.md as you write. Done when every lever holds.
 
@@ -23,10 +23,10 @@ A skill is predictable when the agent takes the same *process* every run — not
 
 ```text
 skill-name/
-├── SKILL.md           # required — the process, placed on the information hierarchy
-├── REFERENCE.md       # disclosed reference (branch-only content, or sprawl)
-├── EXAMPLES.md        # worked examples (same test)
-└── scripts/           # utility scripts (deterministic operations)
+├── SKILL.md           # required — the process
+├── REFERENCE.md       # disclosed reference
+├── EXAMPLES.md        # worked examples
+└── scripts/           # utility scripts — see "When to add scripts"
     └── helper.py
 ```
 

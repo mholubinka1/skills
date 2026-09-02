@@ -54,9 +54,10 @@ No change to any other skill, or to `create-a-skill`'s `name` / invocation model
 - [ ] `create-a-skill/SKILL.md` `## Process` has five steps (gather incl. model/user-invoked
       -> place on the information hierarchy -> draft applying every lever -> review against
       the step-1 use cases -> verify against the Review Checklist); each step ends on a
-      completion criterion and **points at `REFERENCE.md` for the rules rather than restating
-      them**; structure diagram + `SKILL.md` template retained; template shows a sample
-      completion criterion.
+      completion criterion and **names the `REFERENCE.md` section rather than restating any
+      rule** — no inline tier lists, rule enumerations, or trigger lists; structure diagram +
+      `SKILL.md` template retained (diagram comments are bare role labels; `scripts/` points
+      at "When to add scripts"); template shows a sample completion criterion.
 - [ ] `create-a-skill/SKILL.md` is <= ~150 lines (target ~55); one markdown pointer target
       (`REFERENCE.md`), references one level deep.
 - [ ] `create-a-skill/REFERENCE.md` has `## Writing levers` covering context pointer, the
@@ -75,7 +76,9 @@ No change to any other skill, or to `create-a-skill`'s `name` / invocation model
 - [ ] `## Review Checklist` is revised to grouped pass/fail items (Pointer, Hierarchy &
       disclosure, Completion criteria, Leading words & positivity, General) that **reference
       the rules rather than re-spell enumerations** — the `~150` number and the "every X /
-      not a list" phrasing each live once in their own section.
+      not a list" phrasing each live once in their own section. The Hierarchy item admits
+      named-pointer disclosure (a step's rules/reference may sit behind a pointer the step
+      names) so create-a-skill's own disclosure of the levers is not a self-fail.
 - [ ] Each lever's rule appears once in `## Writing levers`; `SKILL.md` and the checklist
       reference it, not restate it — SKILL.md steps name the `REFERENCE.md` section, the
       checklist points at *Description requirements* / *When to split files*.

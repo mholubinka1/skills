@@ -66,7 +66,8 @@ branch test, not the line count, is the real driver.
   - Short intro + one markdown pointer to `REFERENCE.md` for the levers, the description
     rules, the model/user-invocation choice, and the Review Checklist.
   - `## Process` rewritten to five numbered steps, each ending on a completion criterion, and
-    **each pointing at `REFERENCE.md` for the rules rather than restating them**: (1) gather
+    **each naming the `REFERENCE.md` section for the rules rather than restating any of
+    them** — no inline tier lists, rule enumerations, or trigger lists: (1) gather
     requirements — task/domain and use cases, scripts-or-not, reference material, model- vs
     user-invoked — done once every question is answered; (2) place each piece of content on
     the information hierarchy by the branch test — done when every piece has a place; (3)
@@ -74,8 +75,10 @@ branch test, not the line count, is the real driver.
     holds; (4) review with the user against the step-1 use cases — done when each is covered
     and the user has nothing to add; (5) verify against the Review Checklist.
   - Keep the skill-structure diagram and the `SKILL.md` template; the template's `## Workflows`
-    slot shows a one-line sample completion criterion. The diagram section does **not** carry
-    the sprawl rule (it lives once in `REFERENCE.md`'s "When to split files").
+    slot shows a one-line sample completion criterion. The diagram's per-line comments are
+    bare role labels — the `scripts/` line points at "When to add scripts" rather than
+    restating a subset of its triggers — and the diagram section does **not** carry the
+    sprawl rule (it lives once in `REFERENCE.md`'s "When to split files").
 - **`create-a-skill/REFERENCE.md`** (target ~130 lines; must not itself sprawl):
   - `## Description requirements` — kept, folded with the pointer-writing rules (front-load
     the trigger word; one trigger per branch, no synonym-branches; cut identity the body
@@ -121,9 +124,10 @@ branch test, not the line count, is the real driver.
     rather than re-spell enumerations** (the `~150` number and the "every X / not a list"
     phrasing each live once in their own section):
     - Pointer: the description passes every rule in *Description requirements*.
-    - Hierarchy & disclosure: material every run needs is in `SKILL.md`; branch-only sections
-      are disclosed behind a pointer; references one level deep; `SKILL.md` is not sprawling
-      (see *When to split files*).
+    - Hierarchy & disclosure: each step's actions are in `SKILL.md`; the rules and reference
+      a step consults may sit behind a pointer the step names; branch-only material is
+      disclosed, not inline; references one level deep; `SKILL.md` is not sprawling (see
+      *When to split files*).
     - Completion criteria: every step ends on a checkable and exhaustive criterion.
     - Leading words & positivity: reaches for a leading word where a triad or phrase repeats;
       steers positive (a "don't …" appears only as a guardrail paired with the positive
