@@ -156,8 +156,9 @@ two, per the spec's proposed wording. Bring `SKILL.md` under the ~150-line spraw
 (currently 173) by replacing Step 7b's *technique* paragraphs (Generalise / Dedupe / Write
 and commit) with a one-to-two-line summary plus a pointer to the "Distil Review Criteria"
 section already in `REFERENCE.md`; keep Step 7b's **Guard** and **Collect** paragraphs and
-the commit-command block inline. If still over ~150, also tighten the Step 3 and Step 4b
-prose. Keep the "Loop at a glance" map.
+the commit-command block inline. If still over ~150, also merge wrapped paragraphs across
+the other steps (prose density only) and compact the "Loop at a glance" Step 3 rows while
+keeping every fork; the map stays.
 
 ### Acceptance criteria
 
@@ -167,9 +168,11 @@ prose. Keep the "Loop at a glance" map.
 - [ ] Step 7b still states its run-guard (review_round set AND ≥ 1 Fix) and what to collect
       (every Fix; exclude push-backs), and still shows the `git add .agent-docs/review.md …
       commit … push` block.
-- [ ] `address-copilot-comments/REFERENCE.md` is unchanged; no step logic, command, or
-      branching line in `SKILL.md` changed — only prose density and the Step 7b technique
-      text.
+- [ ] `address-copilot-comments/REFERENCE.md` is unchanged; no step *logic* — command,
+      branch condition, threshold, guard, or mutation — changed in `SKILL.md`, only prose
+      density and the Step 7b technique text. The non-normative "Loop at a glance" map's
+      Step 3 rows are compacted (six → four) but keep every fork; the authoritative Step 3
+      prose below it is untouched.
 - [ ] `pre-commit run --all-files` passes.
 
 ---

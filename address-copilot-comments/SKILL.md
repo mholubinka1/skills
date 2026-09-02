@@ -18,10 +18,10 @@ Step 1  PR exists? ──No──► Step 2: create PR ──► Step 2b
 Step 2b Read PR diff (`gh pr diff`); review-required?
         No (exempt: docs/config/trivial only) ──► Step 8 (no trigger, no poll)
         Yes (functional code or skill step-logic) ──► trigger Copilot; review_round = 1 ──► Step 3
-Step 3  Record baseline Copilot review ID; poll every 60s:
+Step 3  Record baseline Copilot review ID; poll every 60s, max 10:
         threads or suppressed comments > 0? ─────────► Step 4
         new review, nothing actionable? ────────────► Step 7b (reviewed clean)
-        poll exhausted, still nothing? ─────────────► Step 7b
+        exhausted? one final check, same branching ──► Step 4 or Step 7b
 Step 4  For each unresolved thread and each suppressed-comment entry: decide fix or push-back; apply code changes
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately

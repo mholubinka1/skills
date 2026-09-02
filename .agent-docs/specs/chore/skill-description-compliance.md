@@ -78,9 +78,10 @@ or behaviour change.
   `write-spec`, `address-copilot-comments`, `bdd`, `code-review`, `design`,
   `pre-commit-check`, `quiz-the-diff`, `update-dependencies` `SKILL.md` (13 files);
   the `## Step` headings in `branch-hygiene/SKILL.md`; the step numbering in
-  `init-agent-docs/SKILL.md` and `init-agent-docs/REFERENCE.md`; the Step 7b body and
-  (if needed) Step 3 / Step 4b prose in `address-copilot-comments/SKILL.md`. Plus this
-  spec and its issue file.
+  `init-agent-docs/SKILL.md` and `init-agent-docs/REFERENCE.md`; the Step 7b body plus
+  prose density across the `gh` prereq line and Steps 1, 2b, 3, 4b, 4c, and 4d, and a
+  compaction of the "Loop at a glance" Step 3 rows (all forks kept), in
+  `address-copilot-comments/SKILL.md`. Plus this spec and its issue file.
 - **Proposed descriptions** (final wording settled in review; intent fixed here):
   - `branch-hygiene`: *Validates the current git branch before work begins — autoSetupRemote,
     trunk-branch detection, prefix-vs-change-type, and name relevance. Use at the start of a
@@ -139,8 +140,12 @@ or behaviour change.
   technique), replaces the **Generalise** / **Dedupe** / **Write and commit** paragraphs with
   a two-line summary + "see the Distil Review Criteria section in REFERENCE.md", and keeps
   the `git add .agent-docs/review.md … commit … push` block. Net ≈ −16 lines. Target:
-  `SKILL.md` ≤ 150. Fallback if still over: compress the Step 3 poll-loop prose and the
-  Step 4b blockquote.
+  `SKILL.md` ≤ 150. That alone landed at ~161, so the remaining ~11 came from merging
+  wrapped paragraphs (no wording lost — the `gh` prereq line, Steps 1, 2b, 3, 4b, 4c, 4d)
+  and compacting the "Loop at a glance" Step 3 block from six rows to four while keeping
+  every fork (threads/suppressed → 4, clean → 7b, exhausted → one final check → 4 or 7b).
+  No command, condition, threshold, guard, or mutation changed — the Step 3 / 4b / 7b prose
+  below the map stays authoritative and its logic is untouched. Final: 149 lines.
 - **D — `init-agent-docs` renumber**: apply high-to-low to avoid collisions —
   `Step 10→11`, `9→10`, `8→9`, `7→8`, `6b→7` — in `SKILL.md` (the `## Steps` list plus the
   jumps "skip to Step 10", "skip to Step 6b", "go to Step 6") and `REFERENCE.md` (the
