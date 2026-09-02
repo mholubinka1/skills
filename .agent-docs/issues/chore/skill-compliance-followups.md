@@ -11,8 +11,8 @@
 Rename the skill directory `behaviour-driven-development/` to `bdd/` with `git mv` (all
 seven files move, contents unchanged) so it matches its own `name: bdd` frontmatter and the
 name every other skill already uses for it. Update the repo's **live** references: the two
-`.agent-docs/context.md` glossary entries (the "red-green-refactor" definition and the
-"implementation subagent" definition) that currently say "the `behaviour-driven-development`
+`.agent-docs/context.md` glossary entries (the "BDD loop" definition and the
+"Implementation subagent" definition) that currently say "the `behaviour-driven-development`
 skill". Leave the old string untouched in history-of-record files — the merged
 `bdd-clean-context-impl` and `fix-skill-checklist-compliance` spec/issue files and the
 out-of-scope bullet in the `improve-create-a-skill` spec.
@@ -26,7 +26,7 @@ out-of-scope bullet in the `improve-create-a-skill` spec.
       preserved).
 - [ ] `bdd/SKILL.md` frontmatter `name:` value equals the directory basename `bdd`; the
       skill's step content is byte-for-byte unchanged.
-- [ ] `.agent-docs/context.md`'s "red-green-refactor" and "implementation subagent" glossary
+- [ ] `.agent-docs/context.md`'s "BDD loop" and "Implementation subagent" glossary
       entries name "the `bdd` skill"; neither sentence still contains a bare
       `behaviour-driven-development`.
 - [ ] `grep -rn "behaviour-driven-development"` over the repo (excluding `.git/` and the

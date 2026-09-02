@@ -37,8 +37,8 @@ Two edits, no behaviour change to either skill's steps:
 2. As a maintainer running the `create-a-skill` Review Checklist over every skill, I want
    `behaviour-driven-development` — now `bdd` — to pass the "`name:` matches the directory"
    item.
-3. As someone reading the glossary, I want `.agent-docs/context.md`'s "red-green-refactor"
-   and "implementation subagent" entries to name the `bdd` skill consistently, not mix the
+3. As someone reading the glossary, I want `.agent-docs/context.md`'s "BDD loop" and
+   "Implementation subagent" entries to name the `bdd` skill consistently, not mix the
    old directory name with the new skill name in one sentence.
 4. As an agent choosing which skill to load, I want `pr-cleanup`'s `description` to tell me
    *when* to reach for it, not just that `/code-review` calls it.
@@ -52,10 +52,14 @@ Two edits, no behaviour change to either skill's steps:
   - `behaviour-driven-development/` → `bdd/` (directory rename via `git mv`; all seven files
     move — `SKILL.md`, `WORKFLOW.md`, `deep-modules.md`, `interface-design.md`,
     `mocking.md`, `refactoring.md`, `tests.md` — contents unchanged).
-  - `.agent-docs/context.md` — two glossary entries (the "red-green-refactor" definition and
-    the "implementation subagent" definition) change the phrase "the
+  - `.agent-docs/context.md` — two glossary entries (the "BDD loop" definition and
+    the "Implementation subagent" definition) change the phrase "the
     `behaviour-driven-development` skill" to "the `bdd` skill".
   - `pr-cleanup/SKILL.md` — frontmatter `description` only.
+  - This branch's own `.agent-docs/specs/` and `issues/` copy of
+    `skill-compliance-followups.md` — the grep-residue acceptance criterion is kept in sync
+    with reality as the work lands (it now names the `settings.local.json` exclusion and this
+    branch's own files); the spec/issue pair is a live working document, not frozen text.
 - **`pr-cleanup` description** — new text:
   `Pre-merge cleanup — check off acceptance criteria in .agent-docs/issues/<branch-name>.md,
   commit to the PR branch, close GitHub issues, and share the PR link for merging. Use when a
