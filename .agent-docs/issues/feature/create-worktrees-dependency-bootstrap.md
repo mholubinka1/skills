@@ -1,5 +1,7 @@
 # Issues: feature/create-worktrees-dependency-bootstrap
 
+> Work complete — PR ready to merge.
+
 ## Add an optional dependency-bootstrap step to create-worktrees (#77)
 
 **Blocked by**: None
@@ -64,40 +66,40 @@ No change to Steps 1–4, the `wip/` placeholder flow, or `.claude` gitignore ha
 
 ### Acceptance criteria
 
-- [ ] `create-worktrees/SKILL.md` has a Step 5 that runs only after a fresh worktree is
+- [x] `create-worktrees/SKILL.md` has a Step 5 that runs only after a fresh worktree is
       created (not on already-isolated or resume).
-- [ ] Step 5 detects first-class ecosystems via `update-dependencies`' Detection Table
+- [x] Step 5 detects first-class ecosystems via `update-dependencies`' Detection Table
       markers **and its scan scope** (repo root, plus one subdir level *for a monorepo* —
       carry that qualifier, don't broaden it), cross-referenced not restated, **and** also
       notes any dependency manifest the table doesn't cover, so the uncovered-ecosystem
       branch has an input.
-- [ ] A lead-in note makes both prompts `AskUserQuestion` and gives the non-interactive
+- [x] A lead-in note makes both prompts `AskUserQuestion` and gives the non-interactive
       default without a stdin read: *Skip* the install question, and print the `ACTION NEEDED`
       line then continue (nothing to gate on) — so Step 5.4 inherits the same handling as 5.3.
-- [ ] The pip-note copy-paste block uses `"$py" -m venv .venv` (matching its own probe
+- [x] The pip-note copy-paste block uses `"$py" -m venv .venv` (matching its own probe
       prose), not a hardcoded `python`.
-- [ ] Nothing detected → Step 5 is a silent no-op.
-- [ ] ≥1 first-class ecosystem → an `AskUserQuestion` *Install* / *Skip* prompt after showing
+- [x] Nothing detected → Step 5 is a silent no-op.
+- [x] ≥1 first-class ecosystem → an `AskUserQuestion` *Install* / *Skip* prompt after showing
       the install command(s); *Install* runs all detected installs, *Skip* prints them as a
       hint.
-- [ ] No interactive user (`AskUserQuestion` unavailable) → take *Skip*; never read stdin or
+- [x] No interactive user (`AskUserQuestion` unavailable) → take *Skip*; never read stdin or
       block for input. Any answer that isn't a clear *Install* → *Skip*.
-- [ ] Install failure is one-line, non-fatal, worktree still created; `/implement` continues.
-- [ ] Uncovered ecosystem(s) → best-effort courtesy install for `go.mod`/`Cargo.toml`/
+- [x] Install failure is one-line, non-fatal, worktree still created; `/implement` continues.
+- [x] Uncovered ecosystem(s) → best-effort courtesy install for `go.mod`/`Cargo.toml`/
       `Gemfile` (non-fatal), nothing for others, then a single `ACTION NEEDED` print covering
       all of them + one `AskUserQuestion` acknowledgement (with no interactive user: print
       and continue).
-- [ ] `create-worktrees/REFERENCE.md` has the "Dependency bootstrap (Step 5)" section with
+- [x] `create-worktrees/REFERENCE.md` has the "Dependency bootstrap (Step 5)" section with
       the install-command table (ecosystem name only, no marker parentheticals), the pip
       note, and the courtesy list; detection is cross-referenced to `update-dependencies`.
-- [ ] The yarn row gives both `--immutable` (Yarn 2+) and `--frozen-lockfile` (Yarn 1) and
+- [x] The yarn row gives both `--immutable` (Yarn 2+) and `--frozen-lockfile` (Yarn 1) and
       says to pick by `yarn --version`.
-- [ ] `create-worktrees` frontmatter `description` mentions the optional bootstrap.
-- [ ] ADR 0005 is committed, body reworded to prompted/opt-in wording (plus courtesy list),
+- [x] `create-worktrees` frontmatter `description` mentions the optional bootstrap.
+- [x] ADR 0005 is committed, body reworded to prompted/opt-in wording (plus courtesy list),
       no `Status` field; "Considered Options" kept with only the chosen-option overclaim
       softened.
-- [ ] `.agent-docs/context.md` has the "Worktree dependency bootstrap" glossary entry.
-- [ ] `pre-commit run --all-files` passes (markdownlint included).
-- [ ] Steps 1–4 of `create-worktrees` are unchanged.
+- [x] `.agent-docs/context.md` has the "Worktree dependency bootstrap" glossary entry.
+- [x] `pre-commit run --all-files` passes (markdownlint included).
+- [x] Steps 1–4 of `create-worktrees` are unchanged.
 
 ---
