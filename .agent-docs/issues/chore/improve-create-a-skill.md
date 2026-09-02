@@ -51,16 +51,18 @@ No change to any other skill, or to `create-a-skill`'s `name` / invocation model
 
 ### Acceptance criteria
 
-- [ ] `create-a-skill/SKILL.md` `## Process` produces a skill against the levers (gather with
-      model/user-invoked -> place on hierarchy -> draft with pointer/criterion/leading-word
-      rules -> review -> verify against checklist); structure diagram + `SKILL.md` template
-      retained; template shows a sample completion criterion.
-- [ ] `create-a-skill/SKILL.md` is <= ~150 lines (target ~90) and has exactly one pointer
-      (to `REFERENCE.md`).
+- [ ] `create-a-skill/SKILL.md` `## Process` has five steps (gather incl. model/user-invoked
+      -> place on the information hierarchy -> draft applying every lever -> review against
+      the step-1 use cases -> verify against the Review Checklist); each step ends on a
+      completion criterion and **points at `REFERENCE.md` for the rules rather than restating
+      them**; structure diagram + `SKILL.md` template retained; template shows a sample
+      completion criterion.
+- [ ] `create-a-skill/SKILL.md` is <= ~150 lines (target ~55); one markdown pointer target
+      (`REFERENCE.md`), references one level deep.
 - [ ] `create-a-skill/REFERENCE.md` has `## Writing levers` covering context pointer, the
       two loads, information hierarchy, progressive disclosure, co-location, completion
-      criteria, when to split, leading words, steer positive, pruning — each a terse
-      imperative rule ending on a check.
+      criteria, when to split, leading words, steer positive, pruning — each a terse rule of
+      one to three sentences ending on an explicit `*Check:*` line.
 - [ ] `create-a-skill/REFERENCE.md` has `## Model- vs user-invoked` (`disable-model-invocation`,
       router skills) and `## Common failure modes` (Sprawl / Negation steering / Duplication /
       Scattering / No-op / Premature completion, each with its fix).
@@ -70,16 +72,18 @@ No change to any other skill, or to `create-a-skill`'s `name` / invocation model
 - [ ] The 100-vs-500 contradiction is gone: `SKILL.md`, `REFERENCE.md` "When to split
       files", and the checklist all say the same thing — ~150 = sprawl smell, branch test
       drives it.
-- [ ] `## Review checklist` is revised to ~10 grouped pass/fail items covering Pointer,
-      Hierarchy & disclosure, Completion criteria, Leading words & positivity, and General
-      (`name:` matches directory, no time-sensitive info, consistent terminology, concrete
-      examples).
+- [ ] `## Review Checklist` is revised to grouped pass/fail items (Pointer, Hierarchy &
+      disclosure, Completion criteria, Leading words & positivity, General) that **reference
+      the rules rather than re-spell enumerations** — the `~150` number and the "every X /
+      not a list" phrasing each live once in their own section.
 - [ ] Each lever's rule appears once in `## Writing levers`; `SKILL.md` and the checklist
-      reference it, not restate it.
+      reference it, not restate it — SKILL.md steps name the `REFERENCE.md` section, the
+      checklist points at *Description requirements* / *When to split files*.
 - [ ] `create-a-skill` passes its own revised checklist: description front-loads the trigger
-      word with three distinct branches; one pointer, one level deep; positive phrasing (a
-      "don't ..." only as a paired guardrail); reaches for leading words where a triad
-      repeats.
+      word with three distinct branches and no body-restating clause; one pointer target,
+      one level deep; every step ends on a checkable + exhaustive criterion; positive
+      phrasing (a "don't ..." only as a paired guardrail); reaches for leading words where a
+      triad repeats.
 - [ ] Content is credited in one line as adapted from `writing-for-agents`.
 - [ ] `.agent-docs/context.md` has the "Skill Authoring" glossary cluster.
 - [ ] `pre-commit run --all-files` passes.

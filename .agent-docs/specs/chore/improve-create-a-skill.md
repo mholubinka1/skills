@@ -58,28 +58,31 @@ branch test, not the line count, is the real driver.
 - **Self-contained absorption.** The levers are folded into `create-a-skill/REFERENCE.md` in
   this repo's voice, credited in one line as adapted from `writing-for-agents`. No pointer to
   the plugin as a required read; `create-a-skill` must stand alone if the plugin is absent.
-- **`create-a-skill/SKILL.md`** (~90 lines, hard ceiling ~150):
-  - Frontmatter `description` rewritten to obey the new pointer rules: front-loaded trigger
-    word, three genuinely distinct branches — create a new skill / revise an existing one /
-    review a skill against the levers — with the synonym-branch "create, write, or build"
-    collapsed.
-  - Short intro + one pointer to `REFERENCE.md` for the levers and the checklist.
-  - `## Process` rewritten to numbered steps: (1) gather requirements — task/domain, use
-    cases, scripts-or-not, reference materials, **and model- vs user-invoked**; (2) place
-    each piece of content on the information hierarchy, disclosing what only some branches
-    reach; (3) draft `SKILL.md` (+ `REFERENCE.md`/`EXAMPLES.md` when branch-only content or
-    sprawl warrants) writing the description as a context pointer, giving each step a
-    checkable + exhaustive completion criterion, reaching for leading words, steering
-    positive; (4) review with the user; (5) verify against the Review Checklist in
-    `REFERENCE.md`.
-  - Keep the skill-structure diagram and the `SKILL.md` template unchanged in substance; the
-    template gains a one-line sample completion criterion in its `## Workflows` slot.
+- **`create-a-skill/SKILL.md`** (~55 lines, hard ceiling ~150):
+  - Frontmatter `description` — front-loaded trigger word; three genuinely distinct branches
+    (create a new skill / rework an existing one / review a skill against the levers); the
+    synonym-branch "create, write, or build" collapsed; no clause restating what the body
+    covers.
+  - Short intro + one markdown pointer to `REFERENCE.md` for the levers, the description
+    rules, the model/user-invocation choice, and the Review Checklist.
+  - `## Process` rewritten to five numbered steps, each ending on a completion criterion, and
+    **each pointing at `REFERENCE.md` for the rules rather than restating them**: (1) gather
+    requirements — task/domain and use cases, scripts-or-not, reference material, model- vs
+    user-invoked — done once every question is answered; (2) place each piece of content on
+    the information hierarchy by the branch test — done when every piece has a place; (3)
+    draft the files, applying every writing lever from `REFERENCE.md` — done when every lever
+    holds; (4) review with the user against the step-1 use cases — done when each is covered
+    and the user has nothing to add; (5) verify against the Review Checklist.
+  - Keep the skill-structure diagram and the `SKILL.md` template; the template's `## Workflows`
+    slot shows a one-line sample completion criterion. The diagram section does **not** carry
+    the sprawl rule (it lives once in `REFERENCE.md`'s "When to split files").
 - **`create-a-skill/REFERENCE.md`** (target ~130 lines; must not itself sprawl):
   - `## Description requirements` — kept, folded with the pointer-writing rules (front-load
     the trigger word; one trigger per branch, no synonym-branches; cut identity the body
     carries; third person; <=1024 chars; first sentence = what it does, second = "Use
     when …").
-  - `## Writing levers` — each a terse imperative rule ending on a check:
+  - `## Writing levers` — each a terse rule of one to three sentences ending on an explicit
+    `*Check:*` line the draft has to pass:
     **context pointer** (wording not target decides reliability; the pointer-writing rules);
     **the two loads** (context load vs cognitive load; disclosure trades one for the other);
     **information hierarchy** (in-file step > in-file reference > disclosed reference; inline
@@ -114,15 +117,17 @@ branch test, not the line count, is the real driver.
     fragmented across headings -> co-locate); **No-op** (a line the model already obeys ->
     delete the sentence, or use a stronger leading word); **Premature completion** (a step
     stops before it is done -> sharpen the criterion, then split the sequence).
-  - `## Review checklist` — revised, ~10 grouped pass/fail items:
-    - Pointer: description front-loads the trigger word; one trigger per branch; no identity
-      the body repeats; third person; <=1024 chars; second sentence is "Use when …".
-    - Hierarchy: branch-only sections are disclosed behind a pointer; every-branch material
-      is in-file; `SKILL.md` is not sprawling (~150); references are one level deep.
+  - `## Review Checklist` — revised, grouped pass/fail items that **reference the rules
+    rather than re-spell enumerations** (the `~150` number and the "every X / not a list"
+    phrasing each live once in their own section):
+    - Pointer: the description passes every rule in *Description requirements*.
+    - Hierarchy & disclosure: material every run needs is in `SKILL.md`; branch-only sections
+      are disclosed behind a pointer; references one level deep; `SKILL.md` is not sprawling
+      (see *When to split files*).
     - Completion criteria: every step ends on a checkable and exhaustive criterion.
-    - Leading words / positivity: reaches for >=1 leading word where a triad or phrase
-      repeats; steers positive (a "don't …" appears only as a guardrail paired with the
-      positive target).
+    - Leading words & positivity: reaches for a leading word where a triad or phrase repeats;
+      steers positive (a "don't …" appears only as a guardrail paired with the positive
+      target).
     - General: `name:` matches the directory; no time-sensitive info; consistent
       terminology; concrete examples included.
 - **`create-a-skill` passes its own revised checklist** — this is an explicit acceptance
