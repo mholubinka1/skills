@@ -37,21 +37,26 @@ there — without copying or symlinking `.venv` / `node_modules` from the main c
     acknowledgement before continuing — or, with no interactive user, print the line and
     continue.
 - **`create-worktrees/REFERENCE.md`** — new **"Dependency bootstrap (Step 5)"** section:
-  lead-in stating detection is per `update-dependencies`' Detection Table; the
-  lockfile-respecting install-command table (`uv sync`, `poetry install`, `pdm install`,
-  `pipenv sync`, `python -m venv .venv` + `.venv/<bin>/pip install -r requirements.txt`,
-  `dotnet restore`, `npm ci`, `yarn install --frozen-lockfile`,
-  `pnpm install --frozen-lockfile`); the courtesy list (`go mod download`, `cargo fetch`,
-  `bundle install`); a note that the plain-pip row picks `python` via the probe-by-running
-  idiom from `.pre-commit-config.yaml`'s sync-claude-skills hook.
+  a Detection lead-in (first-class = `update-dependencies`' Detection Table; framed as the
+  lockfile-respecting *install*, not its *upgrade* flow; uncovered manifests → courtesy list
+  installs the recognised ones, others get no install + `ACTION NEEDED`); the install-command
+  table, ecosystem name only (`uv sync`, `poetry install`, `pdm install`, `pipenv sync`, pip
+  = venv + pip note, `dotnet restore`, `npm ci`, yarn = `--immutable` (Yarn 2+) or
+  `--frozen-lockfile` (Yarn 1) picked by `yarn --version`, `pnpm install --frozen-lockfile`);
+  a pip note (pick `py` by probing `python3` then `python` with `"$py" -c ""`, not
+  `command -v` — same idiom as `.pre-commit-config.yaml`'s sync-claude-skills hook; block
+  uses `"$py" -m venv .venv`; if that fails, report and skip); the courtesy list
+  (`go mod download`, `cargo fetch`, `bundle install`).
 - **`create-worktrees` frontmatter `description`** — add a clause: after creating a worktree
   it optionally bootstraps detected dependency ecosystems on a prompt.
 - **`.agent-docs/adr/0005-worktree-bootstrap-reinstalls-rather-than-copies-dependencies.md`**
   — commit the (previously untracked) draft, with the mechanism sentence reworded so it no
   longer claims automatic install on *every* worktree: "after creating a worktree,
-  `create-worktrees` detects ecosystems and, on a `y`/`n` prompt (default no, skipped with
-  no TTY), runs each detected ecosystem's lockfile-respecting install inside it." Keep the
-  "Considered Options" section unchanged. No `Status` frontmatter.
+  `create-worktrees` detects the repo's dependency ecosystems (reusing `update-dependencies`'
+  detection, plus a courtesy list) and, on a prompt — default no, and skipped when there is
+  no interactive user — runs each detected ecosystem's lockfile-respecting install inside
+  it." The "Considered Options" section is kept, with only the chosen-option overclaim
+  ("the only option that reliably reproduces …") softened. No `Status` frontmatter.
 - **`.agent-docs/context.md`** — glossary entry "Worktree dependency bootstrap" (done inline
   during the grill; this issue carries it through).
 
@@ -67,7 +72,8 @@ No change to Steps 1–4, the `wip/` placeholder flow, or `.claude` gitignore ha
       notes any dependency manifest the table doesn't cover, so the uncovered-ecosystem
       branch has an input.
 - [ ] A lead-in note makes both prompts `AskUserQuestion` and gives the non-interactive
-      default (Skip / acknowledge-and-continue) so Step 5.4's ack gate inherits 5.3's guard.
+      default without a stdin read: *Skip* the install question, and print the `ACTION NEEDED`
+      line then continue (nothing to gate on) — so Step 5.4 inherits the same handling as 5.3.
 - [ ] The pip-note copy-paste block uses `"$py" -m venv .venv` (matching its own probe
       prose), not a hardcoded `python`.
 - [ ] Nothing detected → Step 5 is a silent no-op.
@@ -79,7 +85,8 @@ No change to Steps 1–4, the `wip/` placeholder flow, or `.claude` gitignore ha
 - [ ] Install failure is one-line, non-fatal, worktree still created; `/implement` continues.
 - [ ] Uncovered ecosystem(s) → best-effort courtesy install for `go.mod`/`Cargo.toml`/
       `Gemfile` (non-fatal), nothing for others, then a single `ACTION NEEDED` print covering
-      all of them + one `AskUserQuestion` acknowledgement gate.
+      all of them + one `AskUserQuestion` acknowledgement (with no interactive user: print
+      and continue).
 - [ ] `create-worktrees/REFERENCE.md` has the "Dependency bootstrap (Step 5)" section with
       the install-command table (ecosystem name only, no marker parentheticals), the pip
       note, and the courtesy list; detection is cross-referenced to `update-dependencies`.

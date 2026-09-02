@@ -65,10 +65,10 @@ Commit ADR 0005 alongside, reworded to describe this prompted, non-automatic beh
     branch actually has an input. Do **not** restate the Detection Table's marker list;
     cross-reference it.
   - A single lead-in note handles the non-interactive case for **both** prompts once: both go
-    through `AskUserQuestion`; with no interactive user, take the non-blocking default without
-    reading stdin — *Skip* for the install, acknowledge-and-continue for the `ACTION NEEDED`
-    gate. Steps 5.3 and 5.4 then only reference it ("per the note above"), neither restates
-    it.
+    through `AskUserQuestion`; with no interactive user, don't read stdin or block — take
+    *Skip* for the install question, and for the `ACTION NEEDED` line just print it and
+    continue (nothing to gate on). Steps 5.3 and 5.4 then only reference it ("per the note
+    above"), neither restates it.
   - **Nothing detected** → Step 5 is a silent no-op.
   - **≥1 first-class ecosystem detected** → print each and its exact install command(s), then
     ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options
@@ -137,9 +137,9 @@ Commit ADR 0005 alongside, reworded to describe this prompted, non-automatic beh
   no shell test harness in this repo. Consistent with the `uv-support` and
   `sync-hook-interpreter-selection` slices this session.
 - Verification:
-  1. Read-through: Step 5's branch logic (fresh-only, no-ecosystem no-op, y/n, no-TTY→n,
-     non-fatal, unknown-ecosystem path) is internally consistent and the REFERENCE.md table
-     is copy-paste-correct.
+  1. Read-through: Step 5's branch logic (fresh-only, no-ecosystem no-op, `AskUserQuestion`
+     Install/Skip, no-interactive-user → Skip, non-fatal failures, uncovered-ecosystem path)
+     is internally consistent and the REFERENCE.md table is copy-paste-correct.
   2. Dogfood the install commands: in this worktree (this skills repo → Python) run the
      detected ecosystem's install command by hand and confirm it works and that a forced
      failure (e.g. tool renamed off PATH) is caught, not fatal.
