@@ -1,5 +1,7 @@
 # Issues: chore/skill-compliance-followups
 
+> Work complete — PR ready to merge.
+
 ## Rename behaviour-driven-development/ to bdd/ (#81)
 
 **Blocked by**: None
@@ -19,24 +21,24 @@ out-of-scope bullet in the `improve-create-a-skill` spec.
 
 ### Acceptance criteria
 
-- [ ] `bdd/` contains all seven files (`SKILL.md`, `WORKFLOW.md`, `deep-modules.md`,
+- [x] `bdd/` contains all seven files (`SKILL.md`, `WORKFLOW.md`, `deep-modules.md`,
       `interface-design.md`, `mocking.md`, `refactoring.md`, `tests.md`); no
       `behaviour-driven-development/` directory remains.
-- [ ] `git log --follow bdd/SKILL.md` shows commits from before the rename (history
+- [x] `git log --follow bdd/SKILL.md` shows commits from before the rename (history
       preserved).
-- [ ] `bdd/SKILL.md` frontmatter `name:` value equals the directory basename `bdd`; the
+- [x] `bdd/SKILL.md` frontmatter `name:` value equals the directory basename `bdd`; the
       skill's step content is byte-for-byte unchanged.
-- [ ] `.agent-docs/context.md`'s "BDD loop" and "Implementation subagent" glossary
+- [x] `.agent-docs/context.md`'s "BDD loop" and "Implementation subagent" glossary
       entries name "the `bdd` skill"; neither sentence still contains a bare
       `behaviour-driven-development`.
-- [ ] `grep -rn "behaviour-driven-development"` over the repo (excluding `.git/` and the
+- [x] `grep -rn "behaviour-driven-development"` over the repo (excluding `.git/` and the
       untracked `.claude/settings.local.json`) returns only: the five history-of-record files
       — `.agent-docs/{specs,issues}/chore/bdd-clean-context-impl.md`,
       `.agent-docs/{specs,issues}/chore/fix-skill-checklist-compliance.md`,
       `.agent-docs/specs/chore/improve-create-a-skill.md` — plus this branch's own
       `.agent-docs/{specs,issues}/chore/skill-compliance-followups.md`, which describe the
       rename itself.
-- [ ] `pre-commit run --all-files` passes.
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -55,11 +57,11 @@ the skill's steps.
 
 ### Acceptance criteria
 
-- [ ] `pr-cleanup/SKILL.md` `description` is exactly two sentences; the second begins "Use
+- [x] `pr-cleanup/SKILL.md` `description` is exactly two sentences; the second begins "Use
       when".
-- [ ] The trigger sentence still records that `/code-review` runs it as its final step.
-- [ ] `description` stays third person and under 1024 characters.
-- [ ] The skill body (everything below the frontmatter) is unchanged.
-- [ ] `pre-commit run --all-files` passes.
+- [x] The trigger sentence still records that `/code-review` runs it as its final step.
+- [x] `description` stays third person and under 1024 characters.
+- [x] The skill body (everything below the frontmatter) is unchanged.
+- [x] `pre-commit run --all-files` passes.
 
 ---
