@@ -125,7 +125,8 @@ or behaviour change.
   - `quiz-the-diff`: *Teaches a pull request's diff, then quizzes the reader with
     multiple-choice questions — re-teaching and moving to a fresh question on every wrong
     answer until ten are answered correctly. Use when the user wants to be quizzed on a PR or
-    diff, or says "quiz me on this PR" or "test my understanding of the diff".*
+    diff, wants to check their understanding of a change before reviewing it, or says "quiz
+    me on this PR".*
   - `update-dependencies`: *Syncs the current repo with main/master, then updates
     dependencies to their latest patch/minor versions across detected ecosystems (Python,
     .NET/C#, Node/TypeScript/React) and bumps pre-commit hook versions, committing the
@@ -169,9 +170,10 @@ or behaviour change.
   `create-worktrees-dependency-bootstrap`, `improve-create-a-skill`, and
   `skill-compliance-followups`.
 - Verification:
-  1. Each of the 13 descriptions: exactly two sentences (a `.` split yields 2), third
-     person, ≤ 1024 chars, sentence 2 starts with "Use ", no clause that merely restates a
-     body heading.
+  1. Each of the 13 descriptions: exactly two sentences (exactly one sentence-terminating
+     `.`/`!`/`?` followed by a space and a capital — ignoring path dots, `.md`, `.NET` and
+     similar), third person, ≤ 1024 chars, sentence 2 starts with "Use ", no clause that
+     merely restates a body heading.
   2. `wc -l address-copilot-comments/SKILL.md` ≤ ~150; its Step 7b still states the Guard and
      Collect conditions and the commit command; `REFERENCE.md` unchanged.
   3. `grep -nE "Step [0-9]+b?" init-agent-docs/SKILL.md init-agent-docs/REFERENCE.md` shows a
