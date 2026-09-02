@@ -62,21 +62,20 @@ Commit ADR 0005 alongside, reworded to describe this prompted, non-automatic beh
     doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or comparable), so the unknown-ecosystem
     branch actually has an input. Do **not** restate the Detection Table's marker list;
     cross-reference it.
-  - A lead-in note: both prompts go through `AskUserQuestion`; in a non-interactive run take
-    the non-blocking default without reading stdin — *Skip* for the install, acknowledge-and-
-    continue for the `ACTION NEEDED` gate — so Step 5.4's gate inherits the same guard as
-    5.3's.
+  - A single lead-in note handles the non-interactive case for **both** prompts once: both go
+    through `AskUserQuestion`; with no interactive user, take the non-blocking default without
+    reading stdin — *Skip* for the install, acknowledge-and-continue for the `ACTION NEEDED`
+    gate. Steps 5.3 and 5.4 then only reference it ("per the note above"), neither restates
+    it.
   - **Nothing detected** → Step 5 is a silent no-op.
   - **≥1 first-class ecosystem detected** → print each and its exact install command(s), then
     ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options
-    *Install* / *Skip*.
-    - **No interactive user** (`AskUserQuestion` unavailable / non-interactive run) → take
-      **Skip**; never read stdin or otherwise block for input.
-    - Any answer that is not a clear *Install* → take **Skip**.
+    *Install* / *Skip* (no interactive user, or any answer that is not a clear *Install* →
+    *Skip*, per the note).
     - **Skip** → leave the printed commands as a copy-paste hint; continue.
     - **Install** → run every detected ecosystem's install (table below), recording pass/fail
       per ecosystem.
-  - Any install failure — tool not on `PATH`, no network, unsatisfiable lock, `python -m venv`
+  - Any install failure — tool not on `PATH`, no network, unsatisfiable lock, venv creation
     unavailable, compile error — is reported on one line (naming the failing command and
     first error line) and does **not** abort. The worktree is already created and usable.
   - **Uncovered ecosystem(s)**: for any marker from step 1 that is not a first-class

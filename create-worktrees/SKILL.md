@@ -85,13 +85,11 @@ Both prompts in this step go through `AskUserQuestion`. In a non-interactive run
 
 1. Detect the repo's dependency ecosystems. Apply `update-dependencies`' Detection Table marker rules (the repo root, plus one level of subdirectories for a monorepo), **and also** note any other dependency-manifest file present that the Detection Table doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or anything comparable). The per-ecosystem install commands, the courtesy list for the uncovered ones, and the pip-interpreter note are in the Dependency bootstrap section of [REFERENCE.md](REFERENCE.md).
 2. **Nothing detected** — do nothing; continue to the caller.
-3. **One or more first-class ecosystems detected** — print each one and its exact install command(s), then ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*.
-   - **No interactive user** (`AskUserQuestion` unavailable — a non-interactive run) — take **Skip**; never read stdin or otherwise block for input.
-   - Any answer that is not a clear *Install* — take **Skip**.
+3. **One or more first-class ecosystems detected** — print each one and its exact install command(s), then ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options *Install* / *Skip* (no interactive user, or any answer that is not a clear *Install* → **Skip**, per the note above).
    - **Skip** — leave the printed commands as a copy-paste hint; continue.
    - **Install** — run each detected ecosystem's install command, recording pass/fail per ecosystem. An install that fails — tool not on `PATH`, no network, unsatisfiable lockfile, venv creation unavailable, compile error — is reported on one line (the failing command and its first error line) and does **not** abort: the worktree is created and is usable for work that doesn't execute the code.
 4. **Uncovered ecosystem(s)** — any marker from step 1 that is not a first-class Detection Table ecosystem:
    - If it is on the courtesy list in REFERENCE.md, attempt that conventional install — best-effort, non-fatal, reported as in step 3. Otherwise attempt nothing.
    - Then print once, covering every uncovered ecosystem found:
      `ACTION NEEDED: add <ecosystem>[, <ecosystem>…] as a first-class entry in create-worktrees/REFERENCE.md`
-     and use `AskUserQuestion` a single time to make the user acknowledge it before the workflow continues — or, with no interactive user, just print the line and continue (per the note above).
+     and use `AskUserQuestion` a single time to make the user acknowledge it before the workflow continues (no interactive user → print and continue, per the note above).
