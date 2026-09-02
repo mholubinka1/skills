@@ -22,6 +22,26 @@ _Avoid_: detail file, command reference, documentation file
 A file used by orchestrating skills (e.g. `implement`) to define a multi-step workflow executed inline in the current conversation rather than delegated to a sub-agent.
 _Avoid_: process file, workflow definition
 
+### Skill Authoring
+
+Vocabulary for writing skills, applied by `create-a-skill` (adapted from Matt Pocock's `writing-for-agents`).
+
+**Context pointer**:
+A reference held in the agent's context that names out-of-context material and encodes the condition for reaching it — a skill's `description`, or a line in `CLAUDE.md` naming a doc. The pointer's wording, not its target, decides when and how reliably the material is reached.
+_Avoid_: reference, link, trigger
+
+**Information hierarchy**:
+The ladder that ranks a skill's material by how immediately the agent needs it: in-file step, then in-file reference, then disclosed reference (pushed into a pointer-reached file). Where each piece sits is the core structuring decision.
+_Avoid_: structure, layout, organisation
+
+**Progressive disclosure**:
+Moving material down the information hierarchy — out of `SKILL.md` and behind a context pointer — so the top stays legible. Driven by branching: inline what every branch needs, disclose what only some branches reach.
+_Avoid_: extraction, splitting, factoring out
+
+**Leading word**:
+A compact concept already in the model's pretraining (`tracer bullet`, `red`, `fog of war`) repeated as a token, never a sentence, so it accumulates a distributed definition and anchors a region of behaviour cheaply.
+_Avoid_: keyword, term, jargon
+
 ### Skill Distribution
 
 **`sync_claude_skills.py`**:
