@@ -70,8 +70,9 @@ Commit ADR 0005 alongside, reworded to describe this prompted, non-automatic beh
   - **Nothing detected** → Step 5 is a silent no-op.
   - **≥1 first-class ecosystem detected** → print each and its exact install command(s), then
     ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options
-    *Install* / *Skip* (no interactive user, or any answer that is not a clear *Install* →
-    *Skip*, per the note).
+    *Install* / *Skip*. No interactive user → *Skip* per the lead-in note; and, separately,
+    any answer that is not a clear *Install* → *Skip* (this second rule is Step 5.3's own,
+    not the note's).
     - **Skip** → leave the printed commands as a copy-paste hint; continue.
     - **Install** → run every detected ecosystem's install (table below), recording pass/fail
       per ecosystem.
