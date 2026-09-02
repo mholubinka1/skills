@@ -81,7 +81,9 @@ Runs only after Step 4 creates a fresh worktree — the Step 1 (already isolated
 
 A fresh worktree is a bare checkout: none of the gitignored dependency artifacts (`.venv`, `node_modules`, NuGet caches, …) the main checkout built up are present, so code that runs on `main` may not run here. This step offers to install them — never to copy or symlink them from the main checkout.
 
-1. Detect the repo's dependency ecosystems. Apply `update-dependencies`' Detection Table marker rules (repo root and one level of subdirectories), **and also** note any other dependency-manifest file present that the Detection Table doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or anything comparable). The per-ecosystem install commands, the courtesy list for the uncovered ones, and the pip-interpreter note are in the Dependency bootstrap section of [REFERENCE.md](REFERENCE.md).
+Both prompts in this step go through `AskUserQuestion`. In a non-interactive run (no `AskUserQuestion` available), take the non-blocking default without reading stdin: *Skip* for the install question, acknowledge-and-continue for the `ACTION NEEDED` gate.
+
+1. Detect the repo's dependency ecosystems. Apply `update-dependencies`' Detection Table marker rules (the repo root, plus one level of subdirectories for a monorepo), **and also** note any other dependency-manifest file present that the Detection Table doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or anything comparable). The per-ecosystem install commands, the courtesy list for the uncovered ones, and the pip-interpreter note are in the Dependency bootstrap section of [REFERENCE.md](REFERENCE.md).
 2. **Nothing detected** — do nothing; continue to the caller.
 3. **One or more first-class ecosystems detected** — print each one and its exact install command(s), then ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*.
    - **No interactive user** (`AskUserQuestion` unavailable — a non-interactive run) — take **Skip**; never read stdin or otherwise block for input.
@@ -92,4 +94,4 @@ A fresh worktree is a bare checkout: none of the gitignored dependency artifacts
    - If it is on the courtesy list in REFERENCE.md, attempt that conventional install — best-effort, non-fatal, reported as in step 3. Otherwise attempt nothing.
    - Then print once, covering every uncovered ecosystem found:
      `ACTION NEEDED: add <ecosystem>[, <ecosystem>…] as a first-class entry in create-worktrees/REFERENCE.md`
-     and use `AskUserQuestion` a single time to make the user acknowledge it before the workflow continues.
+     and use `AskUserQuestion` a single time to make the user acknowledge it before the workflow continues — or, with no interactive user, just print the line and continue (per the note above).

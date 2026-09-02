@@ -24,7 +24,7 @@ Exact wording doesn't matter — the slug only has to be recognisable enough to 
 
 ## Dependency bootstrap (Step 5)
 
-**Detection.** First-class ecosystems are the ones in `update-dependencies`' Detection Table — its marker rules, repo root plus one level of subdirectories. This skill adds only the install commands below (`update-dependencies` is upgrade-oriented and has none). Any dependency manifest the table doesn't cover is an *uncovered* ecosystem — handled by the courtesy list.
+**Detection.** First-class ecosystems are the ones in `update-dependencies`' Detection Table — its marker rules and its scan scope (repo root, plus one subdirectory level for a monorepo). This skill adds only the install commands below (`update-dependencies` is upgrade-oriented and has none). Any dependency manifest the table doesn't cover is an *uncovered* ecosystem — handled by the courtesy list.
 
 **Install commands** — lockfile-respecting (install, not upgrade):
 
@@ -40,15 +40,15 @@ Exact wording doesn't matter — the slug only has to be recognisable enough to 
 | Node — yarn | `yarn install --immutable` (Yarn 2+) or `yarn install --frozen-lockfile` (Yarn 1) — pick by `yarn --version` |
 | Node — pnpm | `pnpm install --frozen-lockfile` |
 
-**pip note.** Create a project-local venv and install into it, so nothing lands in system or user site-packages:
+**pip note.** Create a project-local venv and install into it, so nothing lands in system or user site-packages. First pick the interpreter (`py`) — probe `python3` then `python` with `"$py" -c "" >/dev/null 2>&1` and take the first that runs, rather than `command -v`: same reason as `.pre-commit-config.yaml`'s `sync-claude-skills` hook, a Windows Store `python3` alias is on `PATH` but exits non-zero. Then:
 
 ```bash
-python -m venv .venv
+"$py" -m venv .venv
 .venv/Scripts/pip install -r requirements.txt   # Windows
 .venv/bin/pip install -r requirements.txt       # POSIX
 ```
 
-Choose the `python` for `python -m venv` by probing `python3` then `python` with `"$py" -c "" >/dev/null 2>&1` rather than `command -v` — same reason as `.pre-commit-config.yaml`'s `sync-claude-skills` hook: a Windows Store `python3` alias is on `PATH` but exits non-zero. If `python -m venv .venv` itself fails (the platform's venv module is absent), report that and skip the pip install.
+If `"$py" -m venv .venv` itself fails (the platform's venv module is absent), report that and skip the pip install.
 
 **Courtesy list** — uncovered ecosystems. Best-effort, always non-fatal, always followed by the Step 5 `ACTION NEEDED` prompt:
 

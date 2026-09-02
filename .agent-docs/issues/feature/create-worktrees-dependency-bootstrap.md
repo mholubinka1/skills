@@ -56,9 +56,14 @@ No change to Steps 1–4, the `wip/` placeholder flow, or `.claude` gitignore ha
 - [ ] `create-worktrees/SKILL.md` has a Step 5 that runs only after a fresh worktree is
       created (not on already-isolated or resume).
 - [ ] Step 5 detects first-class ecosystems via `update-dependencies`' Detection Table
-      markers (root + one subdir level, cross-referenced not restated) **and** also notes any
-      dependency manifest the table doesn't cover, so the uncovered-ecosystem branch has an
-      input.
+      markers **and its scan scope** (repo root, plus one subdir level *for a monorepo* —
+      carry that qualifier, don't broaden it), cross-referenced not restated, **and** also
+      notes any dependency manifest the table doesn't cover, so the uncovered-ecosystem
+      branch has an input.
+- [ ] A lead-in note makes both prompts `AskUserQuestion` and gives the non-interactive
+      default (Skip / acknowledge-and-continue) so Step 5.4's ack gate inherits 5.3's guard.
+- [ ] The pip-note copy-paste block uses `"$py" -m venv .venv` (matching its own probe
+      prose), not a hardcoded `python`.
 - [ ] Nothing detected → Step 5 is a silent no-op.
 - [ ] ≥1 first-class ecosystem → an `AskUserQuestion` *Install* / *Skip* prompt after showing
       the install command(s); *Install* runs all detected installs, *Skip* prints them as a

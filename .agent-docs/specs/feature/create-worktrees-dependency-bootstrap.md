@@ -56,11 +56,16 @@ Commit ADR 0005 alongside, reworded to describe this prompted, non-automatic beh
 - **`create-worktrees/SKILL.md` — new Step 5 "Bootstrap dependencies (optional)"**, placed
   after Step 4 (worktree creation). It runs **only** on the fresh-creation path: Step 1
   (already isolated) and Step 2 (resume an existing worktree) both still stop before it.
-  - Detect ecosystems by `update-dependencies`' Detection Table markers — repo root and one
-    level of subdirectories — **and also** note any other dependency manifest present that
-    the table doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or comparable), so the
-    unknown-ecosystem branch actually has an input. Do **not** restate the Detection Table's
-    marker list; cross-reference it.
+  - Detect ecosystems by `update-dependencies`' Detection Table markers and its scan scope
+    (repo root, plus one subdirectory level for a monorepo — carry that "monorepo" qualifier,
+    don't broaden it) — **and also** note any other dependency manifest present that the table
+    doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or comparable), so the unknown-ecosystem
+    branch actually has an input. Do **not** restate the Detection Table's marker list;
+    cross-reference it.
+  - A lead-in note: both prompts go through `AskUserQuestion`; in a non-interactive run take
+    the non-blocking default without reading stdin — *Skip* for the install, acknowledge-and-
+    continue for the `ACTION NEEDED` gate — so Step 5.4's gate inherits the same guard as
+    5.3's.
   - **Nothing detected** → Step 5 is a silent no-op.
   - **≥1 first-class ecosystem detected** → print each and its exact install command(s), then
     ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options
@@ -105,11 +110,12 @@ Commit ADR 0005 alongside, reworded to describe this prompted, non-automatic beh
     ecosystems" section: Go → `go mod download`, Rust → `cargo fetch`, Ruby → `bundle install`
     — best-effort, non-fatal, always followed by the ACTION-NEEDED prompt. An uncovered
     marker not on the list gets no install attempt.
-  - A **pip note**: create `.venv` and install into it (never global site-packages); choose
-    `python` for `python -m venv` by probing `python3` then `python` with
-    `"$py" -c "" >/dev/null 2>&1` rather than `command -v` (same reason as
-    `.pre-commit-config.yaml`'s `sync-claude-skills` hook); if `python -m venv .venv` itself
-    fails, report it and skip the pip install.
+  - A **pip note**: create `.venv` and install into it (never global site-packages); pick the
+    interpreter (`py`) first by probing `python3` then `python` with
+    `"$py" -c "" >/dev/null 2>&1` (not `command -v`; same reason as
+    `.pre-commit-config.yaml`'s `sync-claude-skills` hook), and the copy-paste block itself
+    uses `"$py" -m venv .venv` so it matches the prose; if `"$py" -m venv .venv` fails,
+    report it and skip the pip install.
 - **`create-worktrees` frontmatter `description`** gains a clause: after creating a worktree
   it optionally bootstraps detected dependency ecosystems on a prompt.
 - **ADR 0005**: commit the draft with the body reworded so the mechanism sentence reads,
