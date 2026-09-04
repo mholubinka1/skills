@@ -55,3 +55,17 @@ from — for example:
 - **Coined word spellcheck will flag**: flag an invented compound or coinage in prose that
   codespell or similar tooling is likely to trip on; prefer plain phrasing unless the term
   is a deliberately pinned leading word. (PR #80)
+- **Unqualified criterion that known-excluded files break**: flag an acceptance criterion or
+  rule stated as an absolute ("no file references X", "every Y is Z") when files the same
+  change deliberately leaves alone — history-of-record specs/issues, generated output,
+  vendored code — already violate it. Scope it to the class actually in play ("no skill or
+  workflow doc", not "no file"). (PR #97)
+- **Tightening prose drops something load-bearing**: when shortening a description, rule, or
+  comment, flag the loss of a qualifier that changes scope ("pre-commit hook versions" →
+  "pre-commit hooks", "patch/minor" → "latest") or of a clause naming a genuinely distinct
+  case (a trigger branch that is not a synonym of a kept one). Keep it unless it is provably
+  redundant. (PR #97)
+- **Verification step that doesn't verify**: flag a test-plan or acceptance step whose
+  stated method gives wrong answers on the actual inputs — a `.`-split sentence count on
+  text full of `.md`/`.NET`, a `grep` that also matches comments, a line count that
+  includes generated output. State a method that survives the real data. (PR #97)

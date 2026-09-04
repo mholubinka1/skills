@@ -1,6 +1,6 @@
 ---
 name: design
-description: Two-axis design session before any repository change — interviews from the business angle (what and why) then the engineering angle (how), updating CONTEXT.md and ADRs inline as decisions crystallise. Use whenever a user wants to make any change to the codebase, technical documents, skills, or configuration — implement a feature, fix a bug, update a runbook, modify a skill.
+description: Two-axis design session before any repository change — interviews from the business angle (what and why) then the engineering angle (how), updating CONTEXT.md and ADRs inline as decisions crystallise. Use whenever a user wants to change the codebase, technical documents, skills, or configuration.
 attribution: Combines grilling and grill-with-docs disciplines (Matt Pocock, mattpocock/skills)
 ---
 

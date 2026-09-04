@@ -1,6 +1,6 @@
 ---
 name: quiz-the-diff
-description: Teaches a pull request's diff, then examines the reader with a multiple-choice quiz that re-teaches and moves to a fresh question on every wrong answer until ten are answered correctly. Use when the user wants to be quizzed or tested on a PR or diff, wants to check or prove their understanding of a change before reviewing it, or says "quiz me on this PR", "test my understanding of the diff", "examine me on this branch".
+description: Teaches a pull request's diff, then quizzes the reader with multiple-choice questions — re-teaching and moving to a fresh question on every wrong answer until ten are answered correctly. Use when the user wants to be quizzed on a PR or diff, wants to check their understanding of a change before reviewing it, or says "quiz me on this PR".
 ---
 
 # Quiz the Diff
