@@ -36,9 +36,10 @@ itself a plain "not protected" result to report.
 - **Reachable self-hosted jobs** — read every file under `.github/workflows/` with `Read`
   and reason per job (no YAML-parsing script): cross each job's `runs-on:` against the
   workflow's effective trigger. A self-hosted/custom-label runner reachable by
-  `pull_request`, `pull_request_target`, or an unscoped `push: branches: ['**']` is a
-  **Reachable self-hosted job** finding — one per job. See *Trigger crossing* in
-  REFERENCE.md for the exact rule and worked fixture.
+  `pull_request`, `pull_request_target`, or a `push` with no branch filter at all (or one
+  matching an arbitrary/bot-created branch, e.g. `['**']`, `['*']`) is a **Reachable
+  self-hosted job** finding — one per job. See *Trigger crossing* in REFERENCE.md for the
+  exact rule and worked fixture.
 - **Actions pinning** — every `uses:` pinned to a tag or branch instead of a full commit SHA
   is a **Finding**, one per occurrence (same action pinned in two places is two findings,
   since each is rewritten at its own file/line). Separately check `sha_pinning_required`
@@ -52,7 +53,11 @@ itself a plain "not protected" result to report.
   admin enforcement. Report each sub-setting.
 - **Secrets exposure** — a job with self-hosted/runner-level access that also has
   `secrets:` or `${{ secrets.* }}` in scope is a **Finding**, distinct from (and in addition
-  to) any Reachable self-hosted job finding on the same job.
+  to) any Reachable self-hosted job finding on the same job. This check does not itself
+  re-check trigger reachability — a self-hosted job holding secrets is worth flagging even
+  behind an admin-only trigger like `workflow_dispatch`, since a later trigger change would
+  otherwise reopen an unreviewed exposure; reachability is what the separate Reachable
+  self-hosted job finding is for.
 
 **Done** when every check above has printed exactly one report line — pass, flagged, or
 skipped — with no check silently omitted, whether or not any finding turned up.
