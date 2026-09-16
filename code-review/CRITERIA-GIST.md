@@ -25,3 +25,5 @@ file's content wholesale, so there is no partial-append:
 3. Write that merged content to a local scratch file (e.g. via `mktemp`); `gh gist edit`
    reads its replacement content from a file path, not from inline text.
 4. Write it back: `gh gist edit <gist-id> --filename CRITERIA.md <path-to-the-scratch-file>`.
+5. Delete the scratch file — whether step 4 succeeded or failed. Nothing about it needs to
+   survive past this procedure, successful or not.

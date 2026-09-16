@@ -61,17 +61,29 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 leftover from before criteria moved to the shared [Criteria gist](CRITERIA-GIST.md). If it
 exists:
 
-- Read its `## Criteria` entries.
+- Read its `## Criteria` entries. If the file has no `## Criteria` heading, or content under
+  it doesn't parse as the expected bold-label bullet entries (e.g. it's been hand-edited into
+  something unrecognisable), **stop here**: report that the file couldn't be parsed and leave
+  it in place untouched. Never delete a file whose content you couldn't fully account for —
+  criteria outside a heading you didn't recognise would be silently lost.
 - Retag each `(PR #<number>)` as `(repo#PR)`, using the target repo's name
   (`gh repo view --json name -q .name`, run in the target repo) and the existing PR number.
-- Append the retagged entries — skipping any the gist already covers, matching on meaning —
-  using this skill's own [CRITERIA-GIST.md](CRITERIA-GIST.md)'s "Appending an entry"
-  procedure, and **confirm the write succeeded** (the `gh gist edit` call exits zero).
-- Only once that write is confirmed successful: delete `.agent-docs/review.md` from the
-  target repo. If the write failed for any reason — no network, `gh` not authenticated, the
-  gist unreachable — report the failure and leave `.agent-docs/review.md` in place; do
-  **not** delete it. A migrated-and-deleted file with a failed write would lose those
-  criteria permanently, since nothing else retains them.
+- **If there are any retagged entries left after dedupe** (skipping any the gist already
+  covers, matching on meaning): append them using this skill's own
+  [CRITERIA-GIST.md](CRITERIA-GIST.md)'s "Appending an entry" procedure, and **confirm the
+  write succeeded** (the `gh gist edit` call exits zero) before proceeding.
+  - If the write failed for any reason — no network, `gh` not authenticated, the gist
+    unreachable — report the failure and leave `.agent-docs/review.md` in place; do **not**
+    delete it. A migrated-and-deleted file with a failed write would lose those criteria
+    permanently, since nothing else retains them.
+- **If the file parsed cleanly but had nothing to append** (an empty list, only the
+  `_None yet._` placeholder, or every entry already covered by the gist): there is no write
+  to confirm — treat this as a successful no-op and proceed directly to deletion below.
+- Once the write (or no-op) is confirmed successful: delete `.agent-docs/review.md` from the
+  target repo, then stage and commit that deletion on its own
+  (`git add .agent-docs/review.md && git commit -m "chore: migrate review.md into the shared Criteria gist"`)
+  so it doesn't linger as an uncommitted working-tree change that a later checkout could
+  discard.
 
 This is idempotent: once `.agent-docs/review.md` is gone, later runs against the same repo
 skip straight past this check. A failed migration simply leaves the file in place for the

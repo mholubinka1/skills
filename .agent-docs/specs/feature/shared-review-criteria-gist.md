@@ -25,8 +25,8 @@ one shared pool instead of scattered per-repo files.
 
 Repos that already accumulated their own `.agent-docs/review.md` under the old scheme are
 migrated automatically: the next time `/code-review` runs against such a repo, it moves that
-file's entries into the gist and deletes the file, so the repo never needs special handling
-again.
+file's entries into the gist and, once that write succeeds, deletes the file — so the repo
+never needs special handling again.
 
 ## User Stories
 
@@ -69,12 +69,14 @@ again.
   `(repo#PR)` form, inferring the repo name) to the gist via the same read-append-write as
   above, confirm that write succeeded, and only then delete `.agent-docs/review.md` from the
   target repo — a failed write must leave the file in place rather than lose those criteria
-  permanently. Then read criteria from
-  three sources instead of two: `code-review/REVIEW-CRITERIA.md` (unchanged), the target
-  repo's `.agent-docs/review.md` (now only ever hit on the migration path, immediately before
-  it's deleted), and the Criteria gist (fetched live via `gh gist view`). If the gist is
-  unreachable for any reason, warn once ("shared criteria gist unavailable — continuing with
-  REVIEW-CRITERIA.md only") and proceed without it — never block the review.
+  permanently. Because this migration runs first and folds `.agent-docs/review.md`'s content
+  into the gist before anything downstream reads criteria, the Standards sub-agent is fed
+  from two live sources, not three: `code-review/REVIEW-CRITERIA.md` (unchanged) and the
+  Criteria gist (fetched live via `gh gist view`) — the target repo's `.agent-docs/review.md`
+  is never a separate input to the prompt, since by the time the prompt is assembled it has
+  either been migrated and deleted, or never existed. If the gist is unreachable for any
+  reason, warn once ("shared criteria gist unavailable — continuing with REVIEW-CRITERIA.md
+  only") and proceed without it — never block the review.
 - **`init-agent-docs`**: Step 7 currently bootstraps `.agent-docs/review.md` from
   `REVIEW-TEMPLATE.md` when missing. Since target repos should no longer have a local
   `review.md` at all going forward, remove this bootstrap step entirely (renumber subsequent

@@ -74,12 +74,13 @@ Update `code-review/SKILL.md` Step 4 to, before reading any criteria: check whet
 target repo has `.agent-docs/review.md`; if it does, read its entries, append them
 (`repo#PR`-tagged) to the gist via the same read-append-write as the writer side, confirm
 that write succeeded, and only then delete `.agent-docs/review.md` from the target repo — a
-failed write must leave the file in place rather than lose those criteria permanently. Then
-read criteria from three sources: the
-skill's own `REVIEW-CRITERIA.md` (unchanged), the target repo's `.agent-docs/review.md` (now
-only ever hit mid-migration, immediately before deletion), and the Criteria gist fetched live
-via `gh gist view --raw`. If the gist is unreachable for any reason (no network, `gh` not
-authenticated, gist deleted), warn once and continue with `REVIEW-CRITERIA.md` alone rather
+failed write must leave the file in place rather than lose those criteria permanently. Since
+this migration runs first, the Standards sub-agent ends up fed from two live sources, not
+three: the skill's own `REVIEW-CRITERIA.md` (unchanged) and the Criteria gist fetched live via
+`gh gist view --raw` — `.agent-docs/review.md` is never a separate input, since it's migrated
+and deleted (or never existed) before the prompt is assembled. If the gist is unreachable for
+any reason (no network, `gh` not authenticated, gist deleted), warn once and continue with
+`REVIEW-CRITERIA.md` alone rather
 than blocking the review.
 
 ### Acceptance criteria
