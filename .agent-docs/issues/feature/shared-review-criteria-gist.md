@@ -1,5 +1,7 @@
 # Issues: feature/shared-review-criteria-gist
 
+> Work complete — PR ready to merge.
+
 ## Create the shared Criteria gist (#99)
 
 **Blocked by**: None
