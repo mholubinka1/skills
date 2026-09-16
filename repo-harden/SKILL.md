@@ -57,11 +57,13 @@ itself a plain "not protected" result to report.
   default branch: required status checks, PR requirement, force-push/delete restriction,
   admin enforcement. Report each sub-setting.
 - **Secrets exposure** — a job with self-hosted/runner-level access that also has
-  `secrets:` or `${{ secrets.* }}` in scope is a **Finding**, distinct from (and in addition
-  to) any Reachable self-hosted job finding on the same job. This check does not itself
-  re-check trigger reachability — a self-hosted job holding secrets is worth flagging even
-  behind an admin-only trigger like `workflow_dispatch`, since a later trigger change would
-  otherwise reopen an unreviewed exposure; reachability is what the separate Reachable
+  `secrets:` or `${{ secrets.* }}` in scope is reported as **context, not a fixable
+  Finding** — there's no safe automated fix (removing a job's secrets access requires
+  knowing whether it legitimately needs them, a call this skill can't make, and rotating or
+  auditing the secret values themselves is out of scope). This check does not itself
+  re-check trigger reachability — worth reporting even behind an admin-only trigger like
+  `workflow_dispatch`, since a later trigger change would otherwise reopen an unreviewed
+  exposure with no record it was ever flagged; reachability is what the separate Reachable
   self-hosted job finding is for.
 
 **Done** when every check above has printed exactly one report line — pass, flagged, or
@@ -81,8 +83,11 @@ REFERENCE.md:
 - **Pin action** → resolve the tag to a commit SHA (`gh api repos/{action}/commits/{tag}`)
   and rewrite that `uses:` line to the SHA, keeping the original version as a trailing
   comment (`uses: actions/checkout@<sha> # v4`).
-- **Restrict trigger** → rewrite the job's trigger with `branches-ignore` for bot branches,
-  or gate the job behind an `environment:` requiring manual approval.
+- **Restrict trigger** → for a reachable `push`, add `branches-ignore:` naming the bot's
+  branch prefix; for `pull_request`/`pull_request_target`, `branches-ignore:` doesn't work
+  (it filters the PR's base branch, not the bot's head branch), so gate the job behind an
+  `environment:` requiring manual approval instead — the only trigger-restricting option for
+  those two events.
 - **Enable SHA pinning** → the Actions permissions API.
 - **Branch protection** → size the payload to the collaborator count from Step 1: a
   solo-maintained repo skips requiring any approving review — the sole collaborator can't

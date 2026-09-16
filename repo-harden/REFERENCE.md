@@ -16,7 +16,7 @@ never accept it as an argument.
 | Actions pinning | Read each workflow file; regex each `uses:` value | A value shaped `owner/repo@<40-hex-char>` is pinned to a SHA — passes. Anything else (`@v4`, `@main`, `@latest`, a short SHA) is a **Finding**, one per occurrence, identified by file path + job name + the `uses:` value. |
 | `sha_pinning_required` | 1. `gh api repos/{owner}/{repo}/actions/permissions --jq .sha_pinning_required` (repo-level) 2. If `{owner}` is an organization (not a user account — `gh api users/{owner} --jq .type` returns `Organization`), also try `gh api orgs/{owner}/actions/permissions --jq .sha_pinning_required` | Report the repo-level boolean; `false` is a **Finding** (its fix is "Enable SHA pinning" from the Fix commands table below, which is repo-level only) — this keeps it reachable through the same Finding-driven multi-select as every other check, including in an otherwise-clean repo where it's the only thing to offer. `true` is a pass. If the org-level call succeeds, report its value too as **context, not a Finding** — enabling it org-wide would affect every repo in the org at once, a larger blast radius than any other fix this skill offers, so there is no fix-phase option for it (an org-enforced `true` can still mask/override a repo-level `false`, which is exactly why it's worth showing even though it isn't actionable here). A `403` on the org-level call is "skipped — insufficient permission" like any other org-admin-only read, not a run-aborting failure. |
 | Branch protection | `gh api repos/{owner}/{repo}/branches/{default_branch}/protection` | `404` with body `"message": "Branch not protected"` → report "not protected" (expected, not an error). `403` → report that check as "skipped — insufficient permission" (see *Permission handling*). `200` → report `required_status_checks`, `required_pull_request_reviews` (and its `required_approving_review_count`), `allow_force_pushes.enabled`, `allow_deletions.enabled`, `enforce_admins.enabled`, one line each, flagging any that's missing or set to the unsafe value (force-push/deletion allowed, no status checks, no PR requirement, and `enforce_admins.enabled: false` — admins can then bypass every protection just reported). |
-| Secrets exposure | Read each workflow file | A job whose `runs-on:` is self-hosted or a custom label (not one of GitHub's hosted labels: `ubuntu-*`, `windows-*`, `macos-*`) **and** whose body contains `secrets:` (job-level, including `secrets: inherit`) or a step referencing `${{ secrets.* }}` is a **Finding**, one per job. |
+| Secrets exposure | Read each workflow file | A job whose `runs-on:` is self-hosted or a custom label (not one of GitHub's hosted labels: `ubuntu-*`, `windows-*`, `macos-*`) **and** whose body contains `secrets:` (job-level, including `secrets: inherit`) or a step referencing `${{ secrets.* }}` is reported as **context, not a Finding** — one line per job, no fix-phase option, since removing a job's secrets access without knowing whether it legitimately needs them isn't a call this skill can safely make. |
 
 Resolve `{default_branch}` from the visibility check's `gh repo view` call
 (`--json defaultBranchRef` gives `.defaultBranchRef.name`) rather than assuming `main`.
@@ -64,7 +64,7 @@ jobs:
       - uses: actions/checkout@v4  # Finding — mutable tag
 
   deploy:
-    runs-on: [self-hosted, gpu]    # Reachable self-hosted job AND secrets-exposure Finding
+    runs-on: [self-hosted, gpu]    # Reachable self-hosted job AND secrets-exposure context
     secrets: inherit
     steps:
       - uses: actions/checkout@v4  # Finding — mutable tag (separate occurrence)
@@ -79,11 +79,14 @@ jobs:
 ```
 
 Walking this by hand: `build-self-hosted` is flagged as Reachable (self-hosted + the
-workflow's `pull_request_target`/unscoped `push`); `deploy` is flagged both as Reachable
-and for secrets exposure (self-hosted labels + `secrets: inherit` + `${{ secrets.* }}`);
-`lint` is not Reachable (hosted runner) but its `checkout@v4` is still an unpinned-action
-Finding. All three `checkout@v4` lines are separate pinning Findings — three fix-phase
-options, not one, since each rewrites a different file/line.
+workflow's `pull_request_target`/unscoped `push`) — and since the reachable trigger includes
+`pull_request_target`, its fix-phase option is "gate behind approval," not
+"branches-ignore," per the Fix commands table. `deploy` is flagged as Reachable (a Finding)
+and separately reported for secrets exposure (context only, self-hosted labels +
+`secrets: inherit` + `${{ secrets.* }}` — no fix-phase option for that half). `lint` is not
+Reachable (hosted runner) but its `checkout@v4` is still an unpinned-action Finding. All
+three `checkout@v4` lines are separate pinning Findings — three fix-phase options, not one,
+since each rewrites a different file/line.
 
 ## Permission handling
 
@@ -105,8 +108,8 @@ around.
 | Fix | Command | Notes |
 |---|---|---|
 | Pin action to SHA | 1. `gh api repos/{action_owner}/{action_repo}/commits/{tag} --jq .sha` 2. Rewrite the finding's `uses:` line to `uses: {action_owner}/{action_repo}@{sha} # {tag}` | `{action_owner}/{action_repo}` and `{tag}` come from the Finding's original `uses:` value (e.g. `actions/checkout@v4` → owner `actions`, repo `checkout`, tag `v4`). The trailing comment preserves the human-readable version. |
-| Restrict trigger — exclude bot branches | Add `branches-ignore:` to the job's (or workflow's) `push:`/`pull_request:` block naming the bot's branch prefix (e.g. `dependabot/**`, `renovate/**`) | Use when the reachable trigger is `push` or `pull_request` from a known bot. |
-| Restrict trigger — gate behind approval | Add `environment: <name>` to the reachable job, where `<name>` is an existing or newly-described protected environment requiring manual reviewer approval | Use for `pull_request_target` or when no branch-prefix filter cleanly excludes the risk. |
+| Restrict trigger — exclude bot branches | Add `branches-ignore:` to the job's (or workflow's) `push:` block naming the bot's branch prefix (e.g. `dependabot/**`, `renovate/**`) | **`push` only.** `pull_request`/`pull_request_target`'s own `branches`/`branches-ignore` filters match the PR's *base* branch, not the bot's head branch, so adding this to a `pull_request:`/`pull_request_target:` block excludes nothing a bot's PR would trip — per the Trigger crossing rule, those two triggers stay Reachable regardless of branch filtering, so this fix cannot clear that Finding. Use only when the reachable trigger is `push` from a known bot. |
+| Restrict trigger — gate behind approval | Add `environment: <name>` to the reachable job, where `<name>` is an existing or newly-described protected environment requiring manual reviewer approval | The only trigger-restricting fix for `pull_request`/`pull_request_target` — branch filtering can't exclude a bot there (see the row above). Also use for a `push` case with no branch-prefix filter that cleanly excludes the risk. |
 | Enable SHA pinning | `gh api --method PUT repos/{owner}/{repo}/actions/permissions -f sha_pinning_required=true` | Repo-level; requires admin. |
 | Branch protection — solo-maintained (1 collaborator) | `gh api --method PUT repos/{owner}/{repo}/branches/{default_branch}/protection -F required_status_checks[strict]=true -f 'required_status_checks[contexts][]=<context>' -F enforce_admins=true -F 'required_pull_request_reviews[required_approving_review_count]=0' -F restrictions=null -F allow_force_pushes=false -F allow_deletions=false` | `gh api`'s bracket syntax (`key[subkey]=value`, `key[]=value` for arrays) — not dotted keys — is what nests JSON in this CLI. `required_pull_request_reviews` must stay a **non-null object** — setting it to JSON `null` disables "require a pull request before merging" entirely, allowing direct pushes, which is not what "skip requiring a second reviewer" asked for. `required_approving_review_count=0` keeps the PR requirement while requiring zero approvals. Repeat the `contexts[]` flag once per required check name (see below); `-F x=null` sends a real JSON `null`, where `-f` would send the four-character string `"null"` — used here only for `restrictions`, which is meant to be genuinely absent. |
 | Branch protection — multi-maintainer (2+ collaborators) | Same as above, but `-F 'required_pull_request_reviews[required_approving_review_count]=1'` (or higher, per team size) instead of `=0` | Everything else identical to the solo-maintained payload. |
