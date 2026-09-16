@@ -318,10 +318,11 @@ current PR number.
 
 ### Dedupe
 
-Fetch the gist's current content (see Writing the gist, below) and compare each candidate
-against its entries, matching on meaning rather than wording, and skip any that a current
-entry already covers. Do not read the `code-review` skill's `REVIEW-CRITERIA.md` — it's a
-different, curated list, and a little overlap between the two is acceptable.
+The gist's current content — fetched as part of the "Appending an entry" procedure below —
+is what you compare each candidate against: match on meaning rather than wording, and skip
+any that a current entry already covers. Do not read the `code-review` skill's
+`REVIEW-CRITERIA.md` — it's a different, curated list, and a little overlap between the two
+is acceptable.
 
 ### Writing the gist
 

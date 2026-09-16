@@ -10,13 +10,14 @@ by hand.
 
 `address-copilot-comments` reads the gist ID from here to append newly discovered criteria
 (`gh gist edit`). `code-review` Step 4 reads the gist ID from here to fetch the current
-staged criteria live (`gh gist view`) alongside `REVIEW-CRITERIA.md`. Neither skill needs
-any other per-machine configuration to find it.
+staged criteria live (`gh gist view`) alongside `REVIEW-CRITERIA.md`, and also appends —
+once per repo — when it migrates a legacy `.agent-docs/review.md` into the gist. Neither
+skill needs any other per-machine configuration to find it.
 
 ## Appending an entry
 
-Both skills above append entries the same way — `gh gist edit` replaces a file's content
-wholesale, so there is no partial-append:
+Whenever either skill above appends, it does so the same way — `gh gist edit` replaces a
+file's content wholesale, so there is no partial-append:
 
 1. Fetch the gist's current content: `gh gist view <gist-id> -f CRITERIA.md`.
 2. Append the new entry (or entries) to the end of its `## Criteria` list — the file always
