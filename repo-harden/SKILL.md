@@ -85,8 +85,9 @@ REFERENCE.md:
   or gate the job behind an `environment:` requiring manual approval.
 - **Enable SHA pinning** → the Actions permissions API.
 - **Branch protection** → size the payload to the collaborator count from Step 1: a
-  solo-maintained repo skips requiring a second approving review, but still requires status
-  checks and blocks force-push/delete, same as a multi-maintainer repo.
+  solo-maintained repo skips requiring any approving review — the sole collaborator can't
+  approve their own PR, so requiring even one would make every PR unmergeable — but still
+  requires status checks and blocks force-push/delete, same as a multi-maintainer repo.
 
 If the harness's own permission layer refuses a settings change (e.g. a tool-use denial),
 report the refusal on that finding's line and move to the next selected fix — never retry
