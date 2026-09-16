@@ -332,7 +332,10 @@ using the "Appending an entry" procedure documented there.
 
 If dedupe removed every candidate, skip this step entirely — make no gist write. This is a
 live network write to a resource outside the target repo; there is nothing to `git add`,
-commit, or push for it.
+commit, or push for it. If the fetch or the write fails — no network, `gh` not authenticated,
+the gist unreachable — report the failure plainly and continue to Step 8 regardless; there is
+no local file at risk here, so a failed write simply means this run's criteria go
+unrecorded rather than being lost from something that already existed.
 
 ---
 
