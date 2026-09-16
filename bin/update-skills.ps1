@@ -6,7 +6,13 @@
 # Refuses to run if the working tree is dirty - it never stashes, resets, or
 # force-pulls. No Git Bash dependency.
 
-$ErrorActionPreference = 'Stop'
+# Deliberately not $ErrorActionPreference = 'Stop': PowerShell promotes a
+# native command's stderr output into a terminating error under 'Stop',
+# which would crash the whole script the moment a probed interpreter (e.g.
+# the Windows Store `python3` alias stub) writes to stderr, instead of
+# letting the explicit $LASTEXITCODE checks below handle it gracefully —
+# the same "probe by running, check the exit code" contract as the bash
+# version's `>/dev/null 2>&1` probe.
 $BRANCH = 'main'
 
 function Say([string]$Message) {
@@ -67,7 +73,11 @@ if ($LASTEXITCODE -ne 0) {
 
 function Test-RunsOk([string]$Interpreter) {
     if (-not $Interpreter) { return $false }
-    & $Interpreter -c '' *> $null
+    # 'pass', not '': PowerShell silently drops a truly-empty-string argument
+    # when invoking a native executable under `-File` execution, which would
+    # otherwise turn "python -c ''" into "python -c" (a real usage error) and
+    # make every interpreter probe fail, even a working one.
+    & $Interpreter -c 'pass' *> $null
     return $LASTEXITCODE -eq 0
 }
 
