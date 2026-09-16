@@ -8,8 +8,8 @@ description: Audits the current repo's CI/CD trust boundary — visibility, coll
 Audits the repo the session is already in (no owner/repo argument, matching
 `update-dependencies`) for gaps in its **trust boundary** — the paths by which an
 untrusted PR or bot could reach a self-hosted runner or secrets — then offers fixes for
-only the findings the user picks. See [REFERENCE.md](REFERENCE.md) for every check's exact
-command and every fix's exact payload.
+only the findings the user picks. See the *Checks table* and *Fix commands* sections in
+[REFERENCE.md](REFERENCE.md) for every check's exact command and every fix's exact payload.
 
 ## At a glance
 
@@ -41,8 +41,10 @@ itself a plain "not protected" result to report.
   REFERENCE.md for the exact rule and worked fixture.
 - **Actions pinning** — every `uses:` pinned to a tag or branch instead of a full commit SHA
   is a **Finding**, one per occurrence (same action pinned in two places is two findings,
-  since each is rewritten at its own file/line). Separately report whether
-  `sha_pinning_required` is set (`gh api repos/{owner}/{repo}/actions/permissions`).
+  since each is rewritten at its own file/line). Separately check `sha_pinning_required`
+  (`gh api repos/{owner}/{repo}/actions/permissions`) — `false` is itself a **Finding**
+  (fixed by enabling it), so it's always offerable in Step 2 even in a repo with no other
+  findings.
 - **Dependabot config** — does `.github/dependabot.yml` (or equivalent) exist, and do the
   PRs it opens land in-repo on a branch pattern that would trigger a build.
 - **Branch protection** — `gh api repos/{owner}/{repo}/branches/{branch}/protection` on the

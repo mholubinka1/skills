@@ -75,7 +75,12 @@ together) and validated against the `create-a-skill` review checklist.
       then that action is flagged as an unpinned-action finding, and the report separately
       states whether `sha_pinning_required` is set org/repo-wide. (Fixture walkthrough for the
       flagging; `sha_pinning_required` verified live via `gh api
-      repos/mholubinka1/skills/actions/permissions` → `false`.)
+      repos/mholubinka1/skills/actions/permissions` → `false`. Corrected on review: the first
+      draft documented a `false` value as "a status line, not itself a fix-phase Finding,"
+      which made its "Enable SHA pinning" fix unreachable — Step 2's multi-select only ever
+      builds options from Findings and skips itself entirely at zero Findings, so a repo with
+      no other findings could never be offered this fix. `false` is now itself a Finding, same
+      as every other check, so it's always reachable.)
 - [x] Given a job with both self-hosted/runner-level access and secrets in scope, when the
       audit runs, then that overlap is flagged as a Finding. (Fixture's `deploy` job:
       `runs-on: [self-hosted, gpu]` + `secrets: inherit` + `${{ secrets.DEPLOY_TOKEN }}`,
@@ -103,7 +108,12 @@ together) and validated against the `create-a-skill` review checklist.
       and blocks force-push/delete. (This repo is itself the live solo-maintainer example —
       one collaborator, admin, confirmed via `gh api repos/.../collaborators`. Fix command
       construction verified by inspection only per the Testing Decisions section; never
-      applied to this repo's real settings.)
+      applied to this repo's real settings. Corrected on review: the first draft's payload set
+      `required_pull_request_reviews=null`, which per the GitHub API disables "require a pull
+      request before merging" entirely — allowing direct pushes — not just the second-reviewer
+      count this criterion asked to skip. Changed to
+      `required_pull_request_reviews[required_approving_review_count]=0`, a non-null object
+      that keeps the PR requirement while requiring zero approvals.)
 - [x] Given a selected "pin action" fix, when applied, then the action's `uses:` is rewritten
       to the resolved commit SHA with the original version kept as a trailing comment.
       (Command construction verified live: `gh api repos/actions/checkout/commits/v4 --jq
