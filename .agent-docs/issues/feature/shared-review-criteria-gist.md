@@ -46,13 +46,19 @@ edit`. Remove all language describing `review.md` as something this skill mainta
 
 ### Acceptance criteria
 
-- [ ] `address-copilot-comments`'s SKILL.md/REFERENCE.md no longer mention writing to
+- [x] `address-copilot-comments`'s SKILL.md/REFERENCE.md no longer mention writing to
       `.agent-docs/review.md` anywhere.
-- [ ] The rewritten instructions specify: read gist ID from `CRITERIA-GIST.md`, fetch current
+- [x] The rewritten instructions specify: read gist ID from `CRITERIA-GIST.md`, fetch current
       content, append tagged entry, write back whole content.
-- [ ] A dry-run walkthrough of the rewritten steps against a hypothetical accepted Copilot
-      finding produces an unambiguous, correctly-tagged gist entry.
-- [ ] Push-backs ("Ignored.") are still never recorded, matching today's behaviour.
+- [x] A dry-run walkthrough of the rewritten steps against a hypothetical accepted Copilot
+      finding produces an unambiguous, correctly-tagged gist entry. (Verified live: appended
+      `- **Dry-run smoke test**: ... (skills#101)` via `gh gist edit`, read it back verbatim,
+      then cleared it.)
+- [x] Push-backs ("Ignored.") are still never recorded, matching today's behaviour.
+
+Also removed `init-agent-docs/REVIEW-TEMPLATE.md`: this issue's rewrite deleted the last live
+reference to it (address-copilot-comments no longer needs it for a "review.md doesn't exist"
+fallback), so nothing legitimately points at it anymore — resolves the note left on issue #100.
 
 ---
 
