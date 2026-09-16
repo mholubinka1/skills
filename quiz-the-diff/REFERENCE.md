@@ -35,7 +35,7 @@ repo and executable agent logic in another.
 - Files that exist to explain the project to a human reader: `README*`, `CHANGELOG*`,
   `CONTRIBUTING*`, `CODE_OF_CONDUCT*`, `SECURITY*`.
 - Anything under a `docs/` or `.agent-docs/` directory at any depth (guides, specs, issues,
-  ADRs, `context.md`, `review.md`, `agent.md`).
+  ADRs, `context.md`, `agent.md`).
 - `LICENSE` / `NOTICE` (any casing, with or without extension), `*.rst`, `*.txt`.
 - `.md` / `.mdx` files that are narrative documentation — a design note, a how-to, a wiki
   page.

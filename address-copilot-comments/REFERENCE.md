@@ -307,33 +307,37 @@ A fixed finding names a specific mistake in a specific place. The criterion is t
 shape of it. Strip, in order: the file path, the line number, the concrete identifier or
 literal value, and the specific tool or command — keep the failure mode and the check that
 catches it. Phrase every entry as a bold label + imperative rule matching the bullets in the
-`code-review` skill's `REVIEW-CRITERIA.md`, ending with `(PR #<number>)`.
+`code-review` skill's `REVIEW-CRITERIA.md`, ending with `(repo#PR)` — the current repo's name
+(not the full `owner/repo`, just the repo name: `gh repo view --json name -q .name`) and the
+current PR number.
 
 | Fixed finding (specific) | Criterion (general) |
 |---|---|
-| `install.sh` checked `hooks/pre-commit` only and missed a needed `hooks/post-commit` | `- **Partial checks for compound state**: flag a readiness check that inspects one artefact when the state it gates has several parts. (PR #58)` |
-| A `git pull` error message asserted "history has diverged" when a network failure hits the same path | `- **Single-cause error text**: flag an error message that names one cause when the same failure has several. (PR #58)` |
+| `install.sh` checked `hooks/pre-commit` only and missed a needed `hooks/post-commit` | `- **Partial checks for compound state**: flag a readiness check that inspects one artefact when the state it gates has several parts. (acme-api#58)` |
+| A `git pull` error message asserted "history has diverged" when a network failure hits the same path | `- **Single-cause error text**: flag an error message that names one cause when the same failure has several. (acme-api#58)` |
 
 ### Dedupe
 
-Compare each candidate against the entries already in the target repo's
-`.agent-docs/review.md`, matching on meaning rather than wording, and skip any that a
-current entry already covers. Do not read the `code-review` skill's `REVIEW-CRITERIA.md` — it may be
-absent in the target repo, and a little overlap between the two files is acceptable.
+Start the "Appending an entry" procedure in `code-review/CRITERIA-GIST.md` now, but stop
+after its fetch step (step 1) —
+that gist content is what you compare each candidate against here: match on meaning rather
+than wording, and skip any that a current entry already covers. Carry that same fetched
+content forward into "Writing the gist" rather than fetching it again. Do not read the
+`code-review` skill's `REVIEW-CRITERIA.md` — it's a different, curated list, and a little
+overlap between the two is acceptable.
 
-### Writing the file
+### Writing the gist
 
-- **File exists**: append the surviving criteria to the end of its `## Criteria` list. If
-  that list holds only the placeholder `_None yet._`, replace that line with the first
-  criterion rather than leaving it above the list. If the file has been hand-edited and has
-  no `## Criteria` heading, add one at the end of the file, then append under it.
-- **File does not exist** (the target repo never ran `init-agent-docs`): create
-  `.agent-docs/review.md` using the header from the `init-agent-docs` skill's
-  `REVIEW-TEMPLATE.md` (its sibling skill directory — do not paste a copy of that header
-  here), then add the criteria under `## Criteria`.
-- Commit only that file, on its own commit, message
-  `docs: record <N> review criteria from Copilot review` where `<N>` is the count actually
-  added. If dedupe removed every candidate, make no commit.
+Read the gist ID from `code-review/CRITERIA-GIST.md` (this skill's sibling `code-review`
+skill directory — do not paste a copy of that ID here), then append the surviving criteria
+using the "Appending an entry" procedure documented there.
+
+If dedupe removed every candidate, skip this step entirely — make no gist write. This is a
+live network write to a resource outside the target repo; there is nothing to `git add`,
+commit, or push for it. If the fetch or the write fails — no network, `gh` not authenticated,
+the gist unreachable — report the failure plainly and continue to Step 8 regardless; there is
+no local file at risk here, so a failed write simply means this run's criteria go
+unrecorded rather than being lost from something that already existed.
 
 ---
 

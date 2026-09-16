@@ -5,6 +5,13 @@ All content here is passed verbatim to the Standards sub-agent. Two rule binding
 - **The repo overrides.** A documented repo standard always wins; where it endorses something that the smell baseline would flag, suppress the smell.
 - **Always a judgement call.** Smells are labelled heuristics, not hard violations. Documented-standard breaches may be blocking; smells are always advisory. Skip anything tooling already enforces.
 
+New criteria are not added here directly. `address-copilot-comments` stages them in the
+[Criteria gist](CRITERIA-GIST.md) — a live, cross-repo, cross-machine store — tagged
+`(repo#PR)`. Periodically, collate: read the gist, copy each durable entry into whichever
+section below fits it (Code Correctness, Code Quality, Security and Performance, Testing, or
+Documentation) via a normal PR to this repo, then delete that same line from the gist so it
+only ever holds entries not yet collated. Prune stale entries here by hand.
+
 ## Smell Baseline (Fowler, _Refactoring_ ch. 3 — via Matt Pocock)
 
 Each smell: _what it is_ → _how to fix_:

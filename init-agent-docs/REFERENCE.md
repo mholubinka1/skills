@@ -59,7 +59,7 @@ Then handle each of the three items below in order:
 Scan the `agent-docs/` directory for any remaining files or subdirectories that were not
 covered by the three items above (i.e. anything other than `agent.md`, `context.md`, `adr/`,
 and `docs/`). Do **not** warn about `docs/` — any ADR files inside `agent-docs/docs/adr/`
-will be migrated by Step 8. Common examples of items that do warrant a warning include
+will be migrated by Step 7. Common examples of items that do warrant a warning include
 `specs/`, `issues/`, or other subdirectories from an older skill layout.
 
 If any such files or directories remain:
@@ -194,36 +194,7 @@ This step has two sub-paths depending on whether a `context.md` was found in Ste
    - Report: "`.agent-docs/context.md` reviewed — no improvements needed."
    - Continue to Step 7 without writing.
 
-## Step 7 — Bootstrap review.md
-
-`.agent-docs/review.md` holds review criteria this repository has accumulated from its own
-Copilot review rounds. It is written to by the `address-copilot-comments` skill (one
-generalised criterion per Copilot finding that resulted in a code change; push-backs are
-never recorded) and read by the `code-review` skill's Standards sub-agent as documented repo
-standards. This step only ensures the file exists — it never edits an existing one.
-
-Check whether `.agent-docs/review.md` already exists in the current repository.
-
-If it exists:
-
-- Report: "`.agent-docs/review.md` already exists — skipping."
-- Continue to Step 8.
-
-If it does not exist:
-
-1. Create the `.agent-docs/` directory if it does not already exist.
-2. Read the full contents of this skill's `REVIEW-TEMPLATE.md` file (located in the same
-   directory as this `REFERENCE.md`).
-3. Write those contents verbatim to `.agent-docs/review.md`.
-   - If the write fails, report the error clearly and continue to Step 8 — a missing
-     `review.md` does not block the rest of the bootstrap.
-4. Report: "Created `.agent-docs/review.md`."
-
-Unlike `context.md`, there is no search-for-a-file-to-move sub-path and no
-review-and-improve sub-path: the file is machine-maintained, so an existing one is left
-exactly as found.
-
-## Step 8 — Migrate ADR files
+## Step 7 — Migrate ADR files
 
 Search the following locations for files matching the ADR naming convention (`[0-9]*-*.md`):
 
@@ -237,7 +208,7 @@ Collect all matches found across all four locations.
 **If no matching files are found:**
 
 - Record "no ADRs found — skipped" for the summary.
-- Continue to Step 9.
+- Continue to Step 8.
 
 **If matching files are found:**
 
@@ -261,9 +232,9 @@ Collect all matches found across all four locations.
    - If `agent-docs/docs/adr/` exists and is empty, delete it. If `agent-docs/docs/` is then empty, delete it too. If `agent-docs/` is then empty, delete it too.
    - If `.agent-docs/docs/adr/` exists and is empty, delete it. If `.agent-docs/docs/` is then empty, delete it too.
 
-Continue to Step 9.
+Continue to Step 8.
 
-## Step 9 — Check CLAUDE.md
+## Step 8 — Check CLAUDE.md
 
 Check whether `CLAUDE.md` exists in the current repository root.
 
@@ -271,18 +242,18 @@ Check the content of `CLAUDE.md` (if it exists) for the following strings, in th
 
 1. **If `CLAUDE.md` contains `.agent-docs/agent.md`** (new path, with dot):
    - Report: "`CLAUDE.md` already references `.agent-docs/agent.md` — skipping."
-   - Continue to Step 11.
+   - Continue to Step 10.
 
 2. **If `CLAUDE.md` contains `agent-docs/agent.md`** (old path, without dot):
    - Replace the old path string `agent-docs/agent.md` with `.agent-docs/agent.md` everywhere
      it appears in `CLAUDE.md`. This includes both the link text and the link target.
    - Report: "Migrated `CLAUDE.md` reference from `agent-docs/agent.md` to `.agent-docs/agent.md`."
-   - Continue to Step 11.
-
-3. **If `CLAUDE.md` does not exist, or exists but contains neither path**:
    - Continue to Step 10.
 
-## Step 10 — Create or append CLAUDE.md
+3. **If `CLAUDE.md` does not exist, or exists but contains neither path**:
+   - Continue to Step 9.
+
+## Step 9 — Create or append CLAUDE.md
 
 Append the following content to `CLAUDE.md` (create the file first if it does not exist).
 Write only the Markdown content below — do not include the code fence markers. When
@@ -303,7 +274,7 @@ If `CLAUDE.md` existed and was appended to:
 
 - Report: "Appended Agent Standards reference to existing `CLAUDE.md`."
 
-## Step 11 — Summary
+## Step 10 — Summary
 
 Report a brief summary of every action taken and every step skipped with a reason.
 Example (fresh repo with no prior agent docs):
@@ -313,7 +284,6 @@ init-agent-docs complete:
   - no agent-docs/ layout to migrate — skipped
   - Created `.agent-docs/agent.md`.
   - Created `.agent-docs/context.md` from codebase analysis.
-  - Created `.agent-docs/review.md`.
   - no ADRs found — skipped
   - Created `CLAUDE.md` with Agent Standards reference.
 ```
@@ -326,7 +296,6 @@ init-agent-docs complete:
   - `.agent-docs/agent.md` already exists — skipping.
   - `.agent-docs/context.md` found — proceeding to review.
   - Improved `.agent-docs/context.md` — tightened 2 definitions, added avoid-lists for 3 terms.
-  - Created `.agent-docs/review.md`.
   - no ADRs found — skipped
   - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
 ```
@@ -338,7 +307,6 @@ init-agent-docs complete (nothing to do):
   - no agent-docs/ layout to migrate — skipped
   - `.agent-docs/agent.md` already exists — skipping.
   - `.agent-docs/context.md` reviewed — no improvements needed.
-  - `.agent-docs/review.md` already exists — skipping.
   - no ADRs found — skipped
   - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
 ```
