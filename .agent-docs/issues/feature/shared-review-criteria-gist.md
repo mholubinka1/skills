@@ -132,8 +132,9 @@ REFERENCE.md, renumbering the subsequent steps (old Step 8 onward shift down by 
 - [x] SKILL.md's step list and REFERENCE.md's step-by-step detail no longer mention
       `review.md` or contain a step numbered as the old Step 7; numbering is contiguous.
 - [x] `REVIEW-TEMPLATE.md` is removed if it has no remaining reference, or left with a note if
-      something still legitimately points at it. (Left in place: `address-copilot-comments/REFERENCE.md`
-      still references it for the legacy "create review.md" path — issue #101 removes that
-      reference, at which point `REVIEW-TEMPLATE.md` has no remaining use.)
+      something still legitimately points at it. (At the time this issue's work was done,
+      `address-copilot-comments/REFERENCE.md` still referenced it for the legacy "create
+      review.md" path, so it was left in place. Issue #101 then removed that last reference
+      and deleted the file — this repo's shipped state has no `REVIEW-TEMPLATE.md` at all.)
 
 ---

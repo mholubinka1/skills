@@ -1,8 +1,13 @@
 # Criteria Gist
 
-The single secret GitHub gist that stages newly discovered review criteria across every repo
-and machine, before a human collates the durable ones into [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md)
-by hand.
+The single GitHub gist that stages newly discovered review criteria across every repo and
+machine, before a human collates the durable ones into [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md)
+by hand. It's created as a *secret* gist (unlisted, not indexed or discoverable via search) —
+but its ID is committed below in this public repo, which already makes it readable by anyone
+who reads this file, so treat "secret" here as "not casually stumbled on," not as an actual
+confidentiality boundary. **Never record anything sensitive in it** — only generalised,
+non-identifying review criteria belong here, the same bar `REVIEW-CRITERIA.md` already holds
+its own entries to.
 
 - **Gist ID**: `12aa6da56817811e0f101d6c3cbf1d7f`
 - **URL**: <https://gist.github.com/mholubinka1/12aa6da56817811e0f101d6c3cbf1d7f>
