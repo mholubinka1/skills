@@ -61,11 +61,13 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 leftover from before criteria moved to the shared [Criteria gist](CRITERIA-GIST.md). If it
 exists:
 
-- Read its `## Criteria` entries. If the file has no `## Criteria` heading, or content under
-  it doesn't parse as the expected bold-label bullet entries (e.g. it's been hand-edited into
-  something unrecognisable), **stop here**: report that the file couldn't be parsed and leave
-  it in place untouched. Never delete a file whose content you couldn't fully account for —
-  criteria outside a heading you didn't recognise would be silently lost.
+- Read its `## Criteria` entries. If the file has no `## Criteria` heading, or **any** entry
+  under it doesn't parse as the expected bold-label bullet form (e.g. it's been hand-edited
+  into something unrecognisable) — even if other entries in the same file parse fine —
+  **stop here**: report that the file couldn't be parsed and leave it in place untouched.
+  Never delete a file whose content you couldn't fully account for, and never salvage only
+  the entries that happened to parse; a partially-malformed file is treated the same as a
+  fully unparsable one.
 - Retag each `(PR #<number>)` as `(repo#PR)`, using the target repo's name
   (`gh repo view --json name -q .name`, run in the target repo) and the existing PR number.
 - **If there are any retagged entries left after dedupe** (skipping any the gist already
@@ -80,10 +82,13 @@ exists:
   `_None yet._` placeholder, or every entry already covered by the gist): there is no write
   to confirm — treat this as a successful no-op and proceed directly to deletion below.
 - Once the write (or no-op) is confirmed successful: delete `.agent-docs/review.md` from the
-  target repo, then stage and commit that deletion on its own
-  (`git add .agent-docs/review.md && git commit -m "chore: migrate review.md into the shared Criteria gist"`)
-  so it doesn't linger as an uncommitted working-tree change that a later checkout could
-  discard.
+  target repo and stage the deletion (`git add .agent-docs/review.md`) so it isn't lost to an
+  incidental `git checkout`/`git restore`. **Do not commit it** — this skill only reviews, it
+  never commits on its own initiative, and an unreviewed commit here would both bypass this
+  repo's own branch/PR discipline and fold an unrelated housekeeping commit into whatever this
+  review round's diff turns out to be. Leave the staged deletion for whatever commit already
+  concludes this review round (the calling workflow's own commit step) to pick up alongside
+  its other changes.
 
 This is idempotent: once `.agent-docs/review.md` is gone, later runs against the same repo
 skip straight past this check. A failed migration simply leaves the file in place for the
