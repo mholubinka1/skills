@@ -96,7 +96,11 @@ than blocking the review.
       a bad gist ID fails with a clear non-zero exit and "not found", which Step 4's
       instructions catch and soft-fail on.)
 - [x] The Standards sub-agent prompt in Step 4 is updated to describe all three criteria
-      sources it's being fed.
+      sources it's being fed. (Corrected on review: the shipped prompt names two live
+      sources — REVIEW-CRITERIA.md and the gist — not three. `.agent-docs/review.md` is
+      migrated into the gist and deleted *before* the prompt is assembled, so its content
+      reaches the sub-agent through the gist rather than as a separate third input. This
+      issue's original wording overstated it; the behaviour itself is correct.)
 
 ---
 

@@ -329,10 +329,13 @@ different, curated list, and a little overlap between the two is acceptable.
    skill directory — do not paste a copy of that ID here).
 2. Fetch the gist's current content: `gh gist view <gist-id> -f CRITERIA.md`.
 3. Append the surviving criteria to the end of its `## Criteria` list (the file always has
-   one, per the gist's own header).
+   one, per the gist's own header), and write that merged content to a local scratch file
+   (e.g. via `mktemp`) — `gh gist edit` reads its replacement content from a file path, not
+   from inline text.
 4. Write the full updated content back: `gh gist edit <gist-id> --filename CRITERIA.md
-   <path-to-updated-content>` — `gh gist edit` replaces the named file's content wholesale,
-   so the write must include everything above the new entries, not just the new lines.
+   <path-to-the-scratch-file-from-step-3>` — `gh gist edit` replaces the named file's content
+   wholesale, so the scratch file must include everything above the new entries, not just the
+   new lines.
 
 If dedupe removed every candidate, skip this step entirely — make no gist write. This is a
 live network write to a resource outside the target repo; there is nothing to `git add`,
