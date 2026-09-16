@@ -1,0 +1,139 @@
+# update-skills.ps1 - refresh ~/.claude/skills from this repo's main branch.
+#
+# Native PowerShell port of bin/update-skills: fast-forwards this clone to
+# origin/main, bootstraps the local .venv and the pre-commit hooks on first
+# run, then runs sync_claude_skills.py. Safe to run from any directory.
+# Refuses to run if the working tree is dirty - it never stashes, resets, or
+# force-pulls. No Git Bash dependency.
+
+$ErrorActionPreference = 'Stop'
+$BRANCH = 'main'
+
+function Say([string]$Message) {
+    Write-Host "==> $Message"
+}
+
+function Die([string]$Message) {
+    Write-Error "update-skills: $Message"
+    exit 1
+}
+
+# --- resolve the repo root from this script's own location ------------------
+$binDir = $PSScriptRoot
+$repo = Split-Path -Parent $binDir
+
+Set-Location $repo
+
+if (-not (Test-Path (Join-Path $repo 'sync_claude_skills.py'))) {
+    Die "$repo does not look like the skills repo (no sync_claude_skills.py) - run the copy that lives in the cloned repo's bin/."
+}
+
+git rev-parse --is-inside-work-tree *> $null
+if ($LASTEXITCODE -ne 0) {
+    Die "$repo is not a git work tree."
+}
+
+# --- guard: refuse on a dirty working tree --------------------------------
+$dirty = git status --porcelain
+if ($dirty) {
+    Write-Host "update-skills: working tree has uncommitted changes - aborting." -ForegroundColor Red
+    Write-Host ""
+    git status
+    exit 1
+}
+
+# --- refresh the branch --------------------------------------------------
+Say "Switching to $BRANCH"
+git checkout $BRANCH
+if ($LASTEXITCODE -ne 0) {
+    Die "'git checkout $BRANCH' failed - see the git output above for the reason."
+}
+
+Say "Fast-forwarding to origin/$BRANCH"
+git pull --ff-only origin $BRANCH
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "update-skills: 'git pull --ff-only origin $BRANCH' failed - see the git output above for the reason." -ForegroundColor Red
+    Write-Host "If the histories have diverged, resolve it by hand; update-skills will not force or reset."
+    Write-Host "It could also be a network or auth problem reaching origin."
+    exit 1
+}
+
+# --- resolve Python interpreters ----------------------------------------
+# Overall precedence matches .pre-commit-config.yaml's sync-claude-skills hook
+# (.venv/Scripts/python[.exe] -> python3 -> python), but the two system
+# candidates are only ever used to *create* the venv, never to run pip or the
+# sync - every install and the sync itself run against the venv, so
+# `pip install` can't leak into system/user site-packages.
+
+function Test-RunsOk([string]$Interpreter) {
+    if (-not $Interpreter) { return $false }
+    & $Interpreter -c '' *> $null
+    return $LASTEXITCODE -eq 0
+}
+
+$sysPy = $null
+# Probe by running, not Get-Command - the Windows Store `python3` alias is on
+# PATH but exits non-zero. Same rationale as bin/update-skills.
+foreach ($candidate in @('python3', 'python', 'py')) {
+    if (Get-Command $candidate -ErrorAction SilentlyContinue) {
+        if (Test-RunsOk $candidate) {
+            $sysPy = $candidate
+            break
+        }
+    }
+}
+
+function Get-VenvPython {
+    $candidate = Join-Path $repo '.venv\Scripts\python.exe'
+    if (Test-Path $candidate) {
+        return $candidate
+    }
+    return $null
+}
+
+# --- first-run bootstrap: .venv + pre-commit hooks ----------------------
+$venvPy = Get-VenvPython
+if ($venvPy -and -not (Test-RunsOk $venvPy)) {
+    Die ".venv exists but its interpreter ($venvPy) won't run - delete .venv and re-run."
+}
+if (-not $venvPy) {
+    if (-not $sysPy) {
+        Die "no working python3, python, or py found; cannot create .venv."
+    }
+    Say "Creating .venv"
+    & $sysPy -m venv .venv
+    $venvPy = Get-VenvPython
+    if (-not (Test-RunsOk $venvPy)) {
+        Die "created .venv but its interpreter is missing or won't run - your platform's python venv package is probably absent; install it and re-run. (Refusing to fall back to system Python: that would install pre-commit globally.)"
+    }
+}
+
+# hooks_ok - true only if BOTH hook types this repo configures
+# (default_install_hook_types in .pre-commit-config.yaml: pre-commit, post-commit)
+# are present and pre-commit-generated. Checking just hooks/pre-commit would let
+# a lone pre-commit hook mask a missing post-commit hook - and post-commit is
+# the one that runs sync_claude_skills.py.
+function Test-HooksOk {
+    foreach ($hook in @('pre-commit', 'post-commit')) {
+        $hookPath = git rev-parse --git-path "hooks/$hook"
+        if (-not (Test-Path $hookPath)) { return $false }
+        if (-not (Select-String -Path $hookPath -Pattern 'pre-commit\.com' -Quiet)) { return $false }
+    }
+    return $true
+}
+
+& $venvPy -m pre_commit --version *> $null
+if ($LASTEXITCODE -ne 0) {
+    Say "Installing pre-commit into .venv"
+    & $venvPy -m pip install --quiet pre-commit
+}
+if (-not (Test-HooksOk)) {
+    Say "Installing git hooks"
+    & $venvPy -m pre_commit install *> $null
+}
+
+# --- sync --------------------------------------------------------------
+Say "Syncing skills to ~/.claude/skills"
+& $venvPy sync_claude_skills.py
+
+Say "Done - ~/.claude/skills is up to date with origin/$BRANCH."
