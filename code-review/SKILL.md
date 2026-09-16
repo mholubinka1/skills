@@ -64,12 +64,9 @@ exists:
 1. Read its `## Criteria` entries.
 2. Retag each `(PR #<number>)` as `(repo#PR)`, using the target repo's name
    (`gh repo view --json name -q .name`, run in the target repo) and the existing PR number.
-3. Read this skill's own `CRITERIA-GIST.md` for the gist ID, fetch the gist's current
-   content (`gh gist view <gist-id> -f CRITERIA.md`), append the retagged entries — skipping
-   any the gist already covers, matching on meaning — write that merged content to a local
-   scratch file (e.g. via `mktemp`; `gh gist edit` reads its replacement content from a file
-   path, not inline text), and write it back (`gh gist edit <gist-id> --filename CRITERIA.md
-   <path-to-the-scratch-file>`).
+3. Append the retagged entries — skipping any the gist already covers, matching on meaning —
+   using this skill's own [CRITERIA-GIST.md](CRITERIA-GIST.md)'s "Appending an entry"
+   procedure.
 4. Delete `.agent-docs/review.md` from the target repo.
 
 This is idempotent: once `.agent-docs/review.md` is gone, later runs against the same repo
