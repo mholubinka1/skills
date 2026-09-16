@@ -72,8 +72,10 @@ fallback), so nothing legitimately points at it anymore — resolves the note le
 
 Update `code-review/SKILL.md` Step 4 to, before reading any criteria: check whether the
 target repo has `.agent-docs/review.md`; if it does, read its entries, append them
-(`repo#PR`-tagged) to the gist via the same read-append-write as the writer side, then delete
-`.agent-docs/review.md` from the target repo. Then read criteria from three sources: the
+(`repo#PR`-tagged) to the gist via the same read-append-write as the writer side, confirm
+that write succeeded, and only then delete `.agent-docs/review.md` from the target repo — a
+failed write must leave the file in place rather than lose those criteria permanently. Then
+read criteria from three sources: the
 skill's own `REVIEW-CRITERIA.md` (unchanged), the target repo's `.agent-docs/review.md` (now
 only ever hit mid-migration, immediately before deletion), and the Criteria gist fetched live
 via `gh gist view --raw`. If the gist is unreachable for any reason (no network, `gh` not
@@ -101,6 +103,12 @@ than blocking the review.
       migrated into the gist and deleted *before* the prompt is assembled, so its content
       reaches the sub-agent through the gist rather than as a separate third input. This
       issue's original wording overstated it; the behaviour itself is correct.)
+- [x] Added on review: the migration never deletes `.agent-docs/review.md` on a failed gist
+      write. The original wording above implied an unconditional append-then-delete, which
+      would permanently lose a repo's criteria (neither in the gist nor the file) if the
+      write failed offline, unauthenticated, or against a deleted gist. The delete is now
+      gated on a confirmed-successful write; a failure leaves the file in place for the next
+      run to retry.
 
 ---
 

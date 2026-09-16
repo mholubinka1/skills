@@ -67,7 +67,9 @@ again.
 - **`code-review/SKILL.md` Step 4**: before reading criteria, add a migration check against
   the target repo: if `.agent-docs/review.md` exists, read its entries, append them (in the
   `(repo#PR)` form, inferring the repo name) to the gist via the same read-append-write as
-  above, then delete `.agent-docs/review.md` from the target repo. Then read criteria from
+  above, confirm that write succeeded, and only then delete `.agent-docs/review.md` from the
+  target repo — a failed write must leave the file in place rather than lose those criteria
+  permanently. Then read criteria from
   three sources instead of two: `code-review/REVIEW-CRITERIA.md` (unchanged), the target
   repo's `.agent-docs/review.md` (now only ever hit on the migration path, immediately before
   it's deleted), and the Criteria gist (fetched live via `gh gist view`). If the gist is

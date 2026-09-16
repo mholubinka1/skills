@@ -61,18 +61,17 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 leftover from before criteria moved to the shared [Criteria gist](CRITERIA-GIST.md). If it
 exists:
 
-1. Read its `## Criteria` entries.
-2. Retag each `(PR #<number>)` as `(repo#PR)`, using the target repo's name
-   (`gh repo view --json name -q .name`, run in the target repo) and the existing PR number.
-3. Append the retagged entries — skipping any the gist already covers, matching on meaning —
-   using this skill's own [CRITERIA-GIST.md](CRITERIA-GIST.md)'s "Appending an entry"
-   procedure. **Confirm the write succeeded** (the `gh gist edit` call exits zero) before
-   continuing to step 4.
-4. Only if step 3 confirmed success: delete `.agent-docs/review.md` from the target repo. If
-   step 3 failed for any reason — no network, `gh` not authenticated, the gist unreachable —
-   report the failure and leave `.agent-docs/review.md` in place; do **not** delete it. A
-   migrated-and-deleted file with a failed write would lose those criteria permanently, since
-   nothing else retains them.
+- Read its `## Criteria` entries.
+- Retag each `(PR #<number>)` as `(repo#PR)`, using the target repo's name
+  (`gh repo view --json name -q .name`, run in the target repo) and the existing PR number.
+- Append the retagged entries — skipping any the gist already covers, matching on meaning —
+  using this skill's own [CRITERIA-GIST.md](CRITERIA-GIST.md)'s "Appending an entry"
+  procedure, and **confirm the write succeeded** (the `gh gist edit` call exits zero).
+- Only once that write is confirmed successful: delete `.agent-docs/review.md` from the
+  target repo. If the write failed for any reason — no network, `gh` not authenticated, the
+  gist unreachable — report the failure and leave `.agent-docs/review.md` in place; do
+  **not** delete it. A migrated-and-deleted file with a failed write would lose those
+  criteria permanently, since nothing else retains them.
 
 This is idempotent: once `.agent-docs/review.md` is gone, later runs against the same repo
 skip straight past this check. A failed migration simply leaves the file in place for the
