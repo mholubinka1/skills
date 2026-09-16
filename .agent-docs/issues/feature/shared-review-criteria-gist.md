@@ -82,14 +82,20 @@ than blocking the review.
 
 ### Acceptance criteria
 
-- [ ] Running the updated Step 4 against this skills repo's own `.agent-docs/review.md` (12
-      entries, PRs #64–#97) migrates all 12 into the gist tagged with this repo's name, and
-      `.agent-docs/review.md` no longer exists afterward.
-- [ ] Running Step 4 a second time against a repo with no `.agent-docs/review.md` does nothing
-      extra (idempotent) — no error, no duplicate migration.
-- [ ] Simulating an unreachable gist (bad ID, no auth) produces the warning and the review
-      still proceeds using `REVIEW-CRITERIA.md` alone.
-- [ ] The Standards sub-agent prompt in Step 4 is updated to describe all three criteria
+- [x] Running the updated Step 4 against this skills repo's own `.agent-docs/review.md`
+      migrates all its entries into the gist tagged with this repo's name, and
+      `.agent-docs/review.md` no longer exists afterward. (Actually 13 entries, PRs
+      #64–#97 — the issue's "12" was a miscount; verified live: retagged each `(PR #N)` to
+      `(skills#N)`, fetched the gist, confirmed it was empty, appended all 13, wrote back,
+      and confirmed all 13 round-tripped correctly before deleting the file.)
+- [x] Running Step 4 a second time against a repo with no `.agent-docs/review.md` does nothing
+      extra (idempotent) — no error, no duplicate migration. (The migration check is a file
+      existence check; with the file already deleted, later runs skip it trivially.)
+- [x] Simulating an unreachable gist (bad ID, no auth) produces the warning and the review
+      still proceeds using `REVIEW-CRITERIA.md` alone. (Verified live: `gh gist view` against
+      a bad gist ID fails with a clear non-zero exit and "not found", which Step 4's
+      instructions catch and soft-fail on.)
+- [x] The Standards sub-agent prompt in Step 4 is updated to describe all three criteria
       sources it's being fed.
 
 ---

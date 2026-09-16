@@ -15,7 +15,8 @@ Orchestrates a full review cycle: branch check → pre-commit → iterative two-
 Step 1  Branch hygiene check
 Step 2  Verify changes exist; run pre-commit hooks
 Step 3  Pin fixed point + identify spec source
-Step 4  Spawn parallel Standards + Spec review agents → aggregate findings
+Step 4  Migrate legacy review.md into the Criteria gist if present; spawn parallel
+        Standards + Spec review agents → aggregate findings
 Step 5  Address all findings — blocking first, then advisory
         Zero findings on both axes? ──► Step 6
         Findings addressed? ──► Step 4 (new agents, new context windows)
@@ -54,9 +55,30 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 2. A PRD/spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name.
 3. Ask the user. If there is no spec, the Spec sub-agent will skip and note "no spec available".
 
-## Step 4 — Spawn parallel review agents
+## Step 4 — Migrate legacy criteria, then spawn parallel review agents
 
-Read [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md) in full, and the target repo's `.agent-docs/review.md` if it exists (repo-specific criteria `address-copilot-comments` distils from past Copilot findings that resulted in a code change — push-backs are never recorded). Capture the diff:
+**Migrate first, if needed.** Check whether the target repo has `.agent-docs/review.md` — a
+leftover from before criteria moved to the shared [Criteria gist](CRITERIA-GIST.md). If it
+exists:
+
+1. Read its `## Criteria` entries.
+2. Retag each `(PR #<number>)` as `(repo#PR)`, using the target repo's name
+   (`gh repo view --json name -q .name`, run in the target repo) and the existing PR number.
+3. Read this skill's own `CRITERIA-GIST.md` for the gist ID, fetch the gist's current
+   content (`gh gist view <gist-id> -f CRITERIA.md`), append the retagged entries — skipping
+   any the gist already covers, matching on meaning — and write the full content back
+   (`gh gist edit <gist-id> --filename CRITERIA.md <path>`).
+4. Delete `.agent-docs/review.md` from the target repo.
+
+This is idempotent: once `.agent-docs/review.md` is gone, later runs against the same repo
+skip straight past this check.
+
+**Read criteria.** Read [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md) in full. Fetch the Criteria
+gist's current content live (`gh gist view <gist-id> -f CRITERIA.md`, gist ID from
+`CRITERIA-GIST.md`). If the fetch fails for any reason — no network, `gh` not authenticated,
+the gist deleted — warn once ("shared criteria gist unavailable — continuing with
+REVIEW-CRITERIA.md only") and continue without it; never block the review on it. Capture the
+diff:
 
 ```bash
 git diff origin/$BASE...HEAD
@@ -68,7 +90,10 @@ Send a **single message** with two `Agent` tool calls (type: `general-purpose`):
 **Standards sub-agent prompt** — include:
 
 - The full diff and commit list.
-- The complete contents of REVIEW-CRITERIA.md (smell baseline + project standards), and — if the target repo has one — the contents of its `.agent-docs/review.md` (repo-specific criteria distilled from past Copilot findings that resulted in a code change, push-backs excluded; treat its entries as documented standards, same status as REVIEW-CRITERIA.md).
+- The complete contents of REVIEW-CRITERIA.md (smell baseline + project standards), and the
+  Criteria gist's current content if it was reachable (criteria staged from Copilot findings
+  across every repo and machine, push-backs excluded; treat its entries as documented
+  standards, same status as REVIEW-CRITERIA.md).
 - Brief: "Report per file/hunk: (a) every place the diff violates a documented standard — cite the rule; (b) every baseline smell — name and quote the hunk. Mark each finding as **blocking** or **advisory**. Documented-standard breaches may be blocking; baseline smells are always advisory. Skip anything tooling already enforces. Under 500 words."
 
 **Spec sub-agent prompt** — include:
