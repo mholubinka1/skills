@@ -42,10 +42,13 @@ itself a plain "not protected" result to report.
   exact rule and worked fixture.
 - **Actions pinning** — every `uses:` pinned to a tag or branch instead of a full commit SHA
   is a **Finding**, one per occurrence (same action pinned in two places is two findings,
-  since each is rewritten at its own file/line). Separately check `sha_pinning_required` at
-  the repo level, and at the org level too when `{owner}` is an organization — `false` is
-  itself a **Finding** (fixed by enabling it), so it's always offerable in Step 2 even in a
-  repo with no other findings. See *Checks table* in REFERENCE.md for both commands.
+  since each is rewritten at its own file/line). Separately check `sha_pinning_required`:
+  the repo-level value's `false` is itself a **Finding** (fixed by enabling it), so it's
+  always offerable in Step 2 even in a repo with no other findings. When `{owner}` is an
+  organization, also report the org-level value as context — it isn't itself a fixable
+  Finding, since enabling it would change every repo in the org at once, a larger blast
+  radius than any other fix this skill offers. See *Checks table* in REFERENCE.md for both
+  commands.
 - **Dependabot config** — does `.github/dependabot.yml` (or equivalent) exist, and do the
   PRs it opens land in-repo on a branch pattern that would trigger a build.
 - **Branch protection** — `gh api repos/{owner}/{repo}/branches/{branch}/protection` on the
