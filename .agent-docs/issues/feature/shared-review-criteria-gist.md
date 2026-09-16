@@ -102,11 +102,13 @@ REFERENCE.md, renumbering the subsequent steps (old Step 8 onward shift down by 
 
 ### Acceptance criteria
 
-- [ ] Running `init-agent-docs` against a fresh repo with no `.agent-docs/` directory does not
+- [x] Running `init-agent-docs` against a fresh repo with no `.agent-docs/` directory does not
       create a `review.md` file.
-- [ ] SKILL.md's step list and REFERENCE.md's step-by-step detail no longer mention
+- [x] SKILL.md's step list and REFERENCE.md's step-by-step detail no longer mention
       `review.md` or contain a step numbered as the old Step 7; numbering is contiguous.
-- [ ] `REVIEW-TEMPLATE.md` is removed if it has no remaining reference, or left with a note if
-      something still legitimately points at it.
+- [x] `REVIEW-TEMPLATE.md` is removed if it has no remaining reference, or left with a note if
+      something still legitimately points at it. (Left in place: `address-copilot-comments/REFERENCE.md`
+      still references it for the legacy "create review.md" path — issue #101 removes that
+      reference, at which point `REVIEW-TEMPLATE.md` has no remaining use.)
 
 ---
