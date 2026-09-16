@@ -19,7 +19,7 @@ skill needs any other per-machine configuration to find it.
 Whenever either skill above appends, it does so the same way — `gh gist edit` replaces a
 file's content wholesale, so there is no partial-append:
 
-1. Fetch the gist's current content: `gh gist view <gist-id> -f CRITERIA.md`.
+1. Fetch the gist's current content: `gh gist view <gist-id> -f CRITERIA.md --raw`.
 2. Append the new entry (or entries) to the end of its `## Criteria` list — the file always
    has one, per its own header.
 3. Write that merged content to a local scratch file (e.g. via `mktemp`); `gh gist edit`

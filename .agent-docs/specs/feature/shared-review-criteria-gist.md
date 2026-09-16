@@ -82,10 +82,10 @@ again.
   (`code-review/CRITERIA-GIST.md`), and the collation convention (copy in, then delete from the
   gist) is spelled out there since that's now the only place criteria get promoted from.
 - **This skills repo's own `.agent-docs/review.md`**: goes through the exact same migration
-  path as any other repo — do not hand-collate its 12 entries directly into
-  `REVIEW-CRITERIA.md` as a special case; running the updated `/code-review` Step 4 against
-  this repo migrates them into the gist and deletes the file, proving the migration path works
-  on real data as part of this change's own review cycle.
+  path as any other repo — do not hand-collate its entries directly into `REVIEW-CRITERIA.md`
+  as a special case; running the updated `/code-review` Step 4 against this repo migrates them
+  into the gist and deletes the file, proving the migration path works on real data as part of
+  this change's own review cycle.
 - **Attribution and format**: entries written by `address-copilot-comments` need the target
   repo's name, derivable the same way `gh` commands already target a repo (`gh repo view
   --json nameWithOwner` or equivalent), combined with the PR number already in scope.
@@ -93,11 +93,11 @@ again.
 ## Testing Decisions
 
 - The only executable seam is the gist itself: create the real secret gist, then verify a
-  full round trip — write a criterion via `gh gist edit`, read it back via `gh gist view`,
-  confirm the content matches — before either skill is pointed at it.
+  full round trip — write a criterion via `gh gist edit`, read it back via `gh gist view
+  --raw`, confirm the content matches — before either skill is pointed at it.
 - The `.agent-docs/review.md`-migration path is verified by dry-running it against a real
-  case with actual data: this skills repo's own `.agent-docs/review.md` (12 entries,
-  PRs #64–#97). After Step 4's migration logic runs against it, confirm all 12 entries appear
+  case with actual data: this skills repo's own `.agent-docs/review.md` (13 entries,
+  PRs #64–#97). After Step 4's migration logic runs against it, confirm all 13 entries appear
   in the gist tagged with this repo's name and the file is gone.
 - The instruction-file changes (SKILL.md/REFERENCE.md wording) have no executable form to
   test; verify them by walking each rewritten step against two concrete scenarios — a repo

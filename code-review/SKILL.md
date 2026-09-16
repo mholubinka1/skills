@@ -73,7 +73,7 @@ This is idempotent: once `.agent-docs/review.md` is gone, later runs against the
 skip straight past this check.
 
 **Read criteria.** Read [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md) in full. Fetch the Criteria
-gist's current content live (`gh gist view <gist-id> -f CRITERIA.md`, gist ID from
+gist's current content live (`gh gist view <gist-id> -f CRITERIA.md --raw`, gist ID from
 `CRITERIA-GIST.md`). If the fetch fails for any reason — no network, `gh` not authenticated,
 the gist deleted — warn once ("shared criteria gist unavailable — continuing with
 REVIEW-CRITERIA.md only") and continue without it; never block the review on it. Capture the
