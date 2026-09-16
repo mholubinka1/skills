@@ -318,7 +318,8 @@ current PR number.
 
 ### Dedupe
 
-Start the "Appending an entry" procedure below now, but stop after its fetch step (step 1) —
+Start the "Appending an entry" procedure in `code-review/CRITERIA-GIST.md` now, but stop
+after its fetch step (step 1) —
 that gist content is what you compare each candidate against here: match on meaning rather
 than wording, and skip any that a current entry already covers. Carry that same fetched
 content forward into "Writing the gist" rather than fetching it again. Do not read the
