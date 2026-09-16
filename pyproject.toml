@@ -10,6 +10,11 @@ classifiers = [
 ]
 dependencies = []
 
+[dependency-groups]
+dev = [
+  "pre-commit>=4.6.2",
+]
+
 [tool.uv]
 package = false
 

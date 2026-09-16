@@ -32,6 +32,18 @@ Each smell: _what it is_ → _how to fix_:
 - **Partial checks for compound state**: flag a readiness or "already done" check that inspects one artefact when the state it gates has several parts — one of N git hooks, one of N config keys, one of N migrations, one file of a set written together. It must enumerate every part the operation needs.
 - **Async and concurrency safety**: verify logic is async-safe, uses approved libraries, and synchronous I/O is not blocking an event loop.
 - **Backwards compatibility**: check for breaking changes to response/request shapes or database column renames/removals. If other services need companion PRs, flag this explicitly.
+- **Unvalidated numeric input**: flag a numeric value read from external input, or computed from already-validated inputs, that is cached or used downstream without checking it is finite and in range — a malformed payload or an extreme-but-valid input can silently produce `NaN` or infinity. Validate the value itself, not just its inputs.
+- **Inconsistent safeguards across sibling call sites**: flag a guard — a lockfile-strict flag, a null check, a fail-fast lookup — applied at some call sites for a resource but not others in the same file. Every call site touching the same resource should fail the same way.
+- **Unreleased resource on the error path**: flag a teardown that calls several release steps with no guard on each — one step raising skips the rest and leaks whatever it would have released. The same applies to a stream left open when a write fails; abort it before the error propagates.
+- **Trusted 200 with an unchecked error envelope**: flag code that indexes into a parsed response without first checking an API's own success/error field — an application-level failure arriving as HTTP 200 raises an unhandled error instead of going through the handling built for transport failures.
+- **Borrowed exception type**: flag code that raises a dependency's own exception class to signal an application-level failure — it conflates a genuine transport fault with a business error under any handler written for the dependency's type. Raise the repo's own exception type instead.
+- **Watermark advanced before completion**: flag a cursor or last-seen value advanced before the guarded operation is confirmed to have completed. An early return after committing it makes an unprocessed input look already handled, silently suppressing the retry that return was meant to allow.
+- **Timestamp captured after a moved `await`**: flag a refactor that relocates a timestamp capture into code now running after an `await` that used to happen after it — a slow awaited call can shift which records pass a since-timestamp filter with no visible logic change in the diff.
+- **Permissive unknown keys after a rename**: flag a config or schema model without strict unknown-key rejection when a field has been renamed or moved — a leftover key from before the rename is dropped silently instead of failing loudly. Match any sibling model that already rejects unknown keys.
+- **Incomplete exception taxonomy in a parser**: when a loader promises to turn every malformed input into one domain error type, check it catches every exception its conversion helpers can raise — attribute, type, key, and value errors — not just the common one.
+- **Non-deterministic collection order**: flag a function returning a list assembled from a dict, set, or JSON object with no explicit sort — output order must not depend on input key or insertion order.
+- **Falsy-default coalescing**: flag `x or default` used to substitute a default for an optional argument — it silently discards a falsy-but-valid value such as an empty collection or `0`. Use `x if x is None else default` instead.
+- **Unvalidated bounded constructor argument**: flag a class whose `__init__` stores a range-limited parameter without rejecting out-of-range values there — a caller that already validates does not stop the class being constructed directly elsewhere.
 
 ## Code Quality
 
@@ -42,6 +54,8 @@ Each smell: _what it is_ → _how to fix_:
 - **Mutation and I/O hygiene**: functions must not mutate their arguments. `__init__` must not perform I/O. Default arguments must not be mutable.
 - **Observability**: new code paths must have required logging and tests and meet existing observability non-functional requirements.
 - **Claims that outrun the code**: flag a comment, docstring, or doc line promising a stronger guarantee than the code delivers — "exactly one", "in place", "atomic", "idempotent", "always", "never". Resolve by tightening the code or correcting the claim.
+- **Ambiguous log line from a shared dispatch point**: flag a warning or error log emitted from a helper that now serves more than one operation when the message names neither the operation nor a discriminator — a reader cannot tell which path produced it.
+- **Linear scan in a repeated-lookup path**: flag a `.index()` call or equivalent scan used as a sort key or evaluated on every comparison — precompute a dict mapping once instead of scanning per call.
 
 ## Security and Performance
 
@@ -52,12 +66,18 @@ Each smell: _what it is_ → _how to fix_:
 - **Performance bottlenecks**: flag infinite loops, database locks, large objects unnecessarily loaded into memory, and regexes compiled on every call.
 - **Unsafe fallback**: flag code that, when its preferred resource is missing, silently does something materially riskier instead of failing — installing into system/global scope when a virtualenv is absent, using an unpinned version when the pinned one is unavailable, writing to a world-writable or predictable path when a private one cannot be created. Failing with a clear message is usually the safer default.
 - **Predictable temp paths**: flag temp files or directories named from a fixed string, the PID (`$$`), or another guessable pattern instead of `mktemp` or the language's secure equivalent — they collide across concurrent runs and enable symlink attacks — and flag temp files left behind on the error path.
+- **Prototype-pollution-prone key iteration**: flag a loop over `Object.keys()` of parsed or untrusted input that gates each write with a truthiness check — a key like `__proto__` passes through the prototype chain and pollutes it. Gate on `hasOwnProperty` or an explicit allowed-key set instead.
+- **Expiry check with no safety margin**: flag a cached token or credential whose validity check uses the server-reported expiry exactly — clock skew or request latency can race it. Apply a margin against the nominal lifetime instead.
+- **Non-root runtime without writable paths**: flag a container image that drops to a non-root user and then runs a tool reading or writing a cache, home, or state directory, without making that directory writable or disabling the access explicitly.
 
 ## Testing
 
 - **Meaningful assertions**: tests should test behaviour, not the shape of the code. Assertions must provide information on failure. Flag tests that catch exceptions and assert nothing about them.
 - **Mock only at system boundaries**: do not mock code that can be controlled — only mock external systems (databases, APIs, queues).
 - **Coverage target**: there is an 80% code coverage requirement enforced at the pipeline level. Flag new code paths lacking test coverage.
+- **Single test for a branch with several triggers**: flag a catch-all exception or shared branch documented to have more than one cause when only one is exercised by a test. Add one test per distinct triggering path, not one test for the branch as a whole.
+- **Fixture that bypasses the mechanism under test**: flag a test fixture that supplies a value directly from a closure or literal when the fix under test changes how that value is looked up — such a fixture can pass identically against the unfixed code.
+- **Indistinguishable conversion test values**: flag a test for a unit conversion whose input and expected values are far enough apart that skipping the conversion entirely would not change the pass/fail outcome. Pick a value where the converted and unconverted results diverge.
 
 ## Documentation
 
