@@ -70,10 +70,13 @@ exists:
   fully unparsable one.
 - Retag each `(PR #<number>)` as `(repo#PR)`, using the target repo's name
   (`gh repo view --json name -q .name`, run in the target repo) and the existing PR number.
-- **If there are any retagged entries left after dedupe** (skipping any the gist already
-  covers, matching on meaning): append them using this skill's own
-  [CRITERIA-GIST.md](CRITERIA-GIST.md)'s "Appending an entry" procedure, and **confirm the
-  write succeeded** (the `gh gist edit` call exits zero) before proceeding.
+- Start this skill's own [CRITERIA-GIST.md](CRITERIA-GIST.md)'s "Appending an entry"
+  procedure now, but stop after its fetch step (step 1) — that gist content is what you
+  dedupe the retagged entries against, matching on meaning. Carry that same fetched content
+  forward into the rest of the procedure rather than fetching it again.
+- **If there are any retagged entries left after dedupe**: continue the "Appending an entry"
+  procedure from step 2 with the survivors, and **confirm the write succeeded** (the
+  `gh gist edit` call exits zero) before proceeding.
   - If the write failed for any reason — no network, `gh` not authenticated, the gist
     unreachable — report the failure and leave `.agent-docs/review.md` in place; do **not**
     delete it. A migrated-and-deleted file with a failed write would lose those criteria
