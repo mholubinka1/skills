@@ -18,13 +18,13 @@ hand" points at the Criteria gist by name/location instead of being vague.
 
 ### Acceptance criteria
 
-- [ ] A real secret gist exists containing one criteria file with an explanatory header and
+- [x] A real secret gist exists containing one criteria file with an explanatory header and
       the `(repo#PR)` tagging convention documented.
-- [ ] `gh gist edit` (append an entry) followed by `gh gist view --raw` (read it back) round
+- [x] `gh gist edit` (append an entry) followed by `gh gist view --raw` (read it back) round
       trips correctly — the appended entry appears verbatim.
-- [ ] `code-review/CRITERIA-GIST.md` exists, is committed, and contains the gist's ID/URL and
+- [x] `code-review/CRITERIA-GIST.md` exists, is committed, and contains the gist's ID/URL and
       a one-line explanation of what it is.
-- [ ] `code-review/REVIEW-CRITERIA.md`'s header references the Criteria gist and spells out
+- [x] `code-review/REVIEW-CRITERIA.md`'s header references the Criteria gist and spells out
       the collate-then-delete convention.
 
 ---
