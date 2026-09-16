@@ -61,17 +61,18 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 leftover from before criteria moved to the shared [Criteria gist](CRITERIA-GIST.md). If it
 exists:
 
-- **Validate the whole file, not just the entries.** The only accepted shape is the
-  `REVIEW-TEMPLATE.md`-derived one: explanatory header prose, then a `## Criteria` heading,
-  then zero or more entries each matching `- **Label**: text (PR #<number>)` exactly —
-  including that trailing `(PR #<number>)` suffix; an entry missing it doesn't parse either,
-  since there'd be nothing to retag and it would end up appended with no provenance. If the
-  file has no `## Criteria` heading, has **any** content that doesn't fit this shape
-  (anywhere in the file, not just under the heading — a stray note after the list is exactly
-  as unaccounted-for as a malformed entry), or **any** single entry fails to parse, **stop
-  here** for the whole file: report that it couldn't be parsed and leave it in place
-  untouched. Never delete a file whose content you couldn't fully account for, and never
-  salvage only the parts that happened to parse.
+- **Validate the whole file, not just the entries.** The only accepted content under
+  `## Criteria` is one of: the literal placeholder line `_None yet._` on its own, or zero or
+  more entries each matching `- **Label**: text (PR #<number>)` exactly — including that
+  trailing `(PR #<number>)` suffix; an entry missing it doesn't parse either, since there'd be
+  nothing to retag and it would end up appended with no provenance. Content above the heading
+  is free-form explanatory prose and isn't validated. If the file has no `## Criteria`
+  heading, has **any** content under that heading that isn't the placeholder or a
+  correctly-tagged entry (a stray note after the list is exactly as unaccounted-for as a
+  malformed entry), or **any** single entry fails to parse, **stop here** for the whole file:
+  report that it couldn't be parsed and leave it in place untouched. Never delete a file whose
+  content you couldn't fully account for, and never salvage only the parts that happened to
+  parse.
 - Retag each entry's `(PR #<number>)` as `(repo#PR)`, using the target repo's name and the
   existing PR number. Get the repo name via `gh repo view --json name -q .name`, run in the
   target repo. **If that lookup fails** (no network, `gh` not authenticated) — stop here:
