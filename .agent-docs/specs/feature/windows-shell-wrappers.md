@@ -169,3 +169,5 @@ Windows shells:
   spec that excluded native `.cmd`/`.ps1` entry points.
 - `install.sh` remains a bash script run via Git Bash on Windows (per the README); only its
   *effects* gain a Windows-specific branch, not its own implementation language.
+- `README.md` is also touched: its Windows setup instructions and interpreter-resolution list
+  were stale (still describing Git-Bash-only usage), so they're corrected alongside the code.

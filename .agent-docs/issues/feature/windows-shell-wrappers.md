@@ -37,6 +37,10 @@ behaviour natively, with no Git Bash dependency:
       no sync, and exits non-zero.
 - [ ] Given local `main` has diverged from `origin/main`, the fast-forward fails, is reported,
       and the script exits non-zero without forcing or resetting.
+- [ ] Given `pip install pre-commit`, `pre-commit install`, or `sync_claude_skills.py` itself
+      fails, the script surfaces it and exits non-zero — matching the bash script's
+      `set -euo pipefail` guarantee for the same three steps, rather than printing "Done" and
+      exiting 0 on a real failure.
 - [ ] `pre-commit-check` passes clean on the new file.
 
 ---
