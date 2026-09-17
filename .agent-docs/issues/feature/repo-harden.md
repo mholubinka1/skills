@@ -84,8 +84,8 @@ together) and validated against the `create-a-skill` review checklist.
       draft documented a `false` value as "a status line, not itself a fix-phase Finding,"
       which made its "Enable SHA pinning" fix unreachable — Step 2's multi-select only ever
       builds options from Findings and skips itself entirely at zero Findings, so a repo with
-      no other findings could never be offered this fix. `false` is now itself a Finding, same
-      as every other check, so it's always reachable.)
+      no other findings could never be offered this fix. `false` (when Actions is actually
+      enabled) is now itself a Finding, same as every other check, so it's always reachable.)
 - [x] Given a job with both self-hosted/runner-level access and secrets in scope, when the
       audit runs, then that overlap is reported as context, not a fixable Finding — there's
       no safe automated fix. (Fixture's `deploy` job: `runs-on: [self-hosted, gpu]` +
