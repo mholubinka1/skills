@@ -6,6 +6,11 @@
 # Windows). Idempotent: re-running drops any existing block(s) and appends one
 # current block at the end of the file, so a moved clone or a duplicate is
 # corrected without ever stacking blocks up.
+#
+# On Windows, this also persists bin/ onto the per-user PATH environment
+# variable — the one thing cmd.exe and PowerShell both read directly, with no
+# $PROFILE edit needed — so update-skills.cmd/.ps1 work outside Git Bash too.
+# That runs in addition to, never instead of, the rc-file wiring above.
 set -euo pipefail
 
 repo="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,6 +30,11 @@ block="$marker_start
 # Added by skills/install.sh — puts the update-skills command on PATH.
 $path_line
 $marker_end"
+
+# Set when the rc-file block is already correct, so the append section below
+# is skipped. On non-Windows this still exits immediately, same as before —
+# only on Windows does the script continue past it into the PATH section.
+rc_already_set_up=""
 
 # --- inspect any existing marker block(s) --------------------------------
 # Trigger on EITHER marker: a lone end marker (from a half-deleted block) must
@@ -59,45 +69,163 @@ if [ -f "$rc" ] && { grep -qF "$marker_start" "$rc" || grep -qF "$marker_end" "$
 		"OK blocks=1 match=1")
 			echo "update-skills is already set up in $rc — nothing to do."
 			echo "If it isn't on your PATH yet, open a new terminal or run: source $rc"
-			exit 0
+			if [ "${OS:-}" != "Windows_NT" ]; then
+				exit 0
+			fi
+			rc_already_set_up=1
 			;;
 	esac
 
-	echo "Refreshing the update-skills block in $rc."
-	remaining="$(awk -v s="$marker_start" -v e="$marker_end" '
-		$0 == s { skip = 1; next }
-		$0 == e { skip = 0; next }
-		!skip  { print }
-	' "$rc")"
-	if [ -n "$remaining" ]; then
-		printf '%s\n' "$remaining" > "$rc"
-	else
-		: > "$rc"
+	if [ -z "$rc_already_set_up" ]; then
+		echo "Refreshing the update-skills block in $rc."
+		remaining="$(awk -v s="$marker_start" -v e="$marker_end" '
+			$0 == s { skip = 1; next }
+			$0 == e { skip = 0; next }
+			!skip  { print }
+		' "$rc")"
+		if [ -n "$remaining" ]; then
+			printf '%s\n' "$remaining" > "$rc"
+		else
+			: > "$rc"
+		fi
 	fi
 fi
 
-# --- append the block, separated from existing content by exactly one blank line ---
-touch "$rc"
-if [ -s "$rc" ]; then
-	# strip any trailing blank lines first, so the separator below is the only one.
-	# mktemp (not "$rc.$$") avoids a predictable name / symlink footgun; same dir
-	# keeps the mv atomic.
-	tmp="$(mktemp "$(dirname "$rc")/.update-skills.XXXXXX")"
-	if awk 'NF { for (i = 0; i < pending; i++) print ""; pending = 0; print; next }
-	        { pending++ }' "$rc" > "$tmp"; then
-		mv "$tmp" "$rc"
-	else
-		rm -f "$tmp"
-		echo "install.sh: failed to normalise $rc — left unchanged." >&2
+if [ -z "$rc_already_set_up" ]; then
+	# --- append the block, separated from existing content by exactly one blank line ---
+	touch "$rc"
+	if [ -s "$rc" ]; then
+		# strip any trailing blank lines first, so the separator below is the only one.
+		# mktemp (not "$rc.$$") avoids a predictable name / symlink footgun; same dir
+		# keeps the mv atomic.
+		tmp="$(mktemp "$(dirname "$rc")/.update-skills.XXXXXX")"
+		if awk 'NF { for (i = 0; i < pending; i++) print ""; pending = 0; print; next }
+		        { pending++ }' "$rc" > "$tmp"; then
+			mv "$tmp" "$rc"
+		else
+			rm -f "$tmp"
+			echo "install.sh: failed to normalise $rc — left unchanged." >&2
+			exit 1
+		fi
+		printf '\n' >> "$rc"
+	fi
+	printf '%s\n' "$block" >> "$rc"
+
+	echo "Added update-skills to your PATH via $rc."
+	case ":${PATH:-}:" in
+		*":$bin_dir:"*) echo "(this shell already has $bin_dir on PATH)" ;;
+		*) echo "Open a new terminal, or run: source $rc" ;;
+	esac
+fi
+
+# --- Windows: also persist bin_dir onto the per-user PATH -----------------
+# cmd.exe and PowerShell both read this one per-user environment variable
+# directly — a freshly opened window picks it up with no $PROFILE edit.
+if [ "${OS:-}" = "Windows_NT" ]; then
+	if ! command -v cygpath >/dev/null 2>&1; then
+		echo "install.sh: cygpath not found — cannot convert $bin_dir to a native Windows path for cmd.exe/PowerShell." >&2
 		exit 1
 	fi
-	printf '\n' >> "$rc"
-fi
-printf '%s\n' "$block" >> "$rc"
+	# Assignment as an `if` condition, same reasoning as the powershell.exe
+	# invocation below: a plain failing assignment would be killed by `set -e`
+	# with no install-specific message, and an empty conversion result must be
+	# rejected too rather than handed to the PowerShell helper as a PATH entry.
+	if win_bin_dir="$(cygpath -w "$bin_dir")"; then
+		cygpath_exit=0
+	else
+		cygpath_exit=$?
+	fi
+	if [ "$cygpath_exit" -ne 0 ]; then
+		echo "install.sh: 'cygpath -w $bin_dir' exited $cygpath_exit — cannot configure the Windows PATH for cmd.exe/PowerShell." >&2
+		exit 1
+	fi
+	if [ -z "$win_bin_dir" ]; then
+		echo "install.sh: 'cygpath -w $bin_dir' produced no output — cannot configure the Windows PATH for cmd.exe/PowerShell." >&2
+		exit 1
+	fi
 
-echo "Added update-skills to your PATH via $rc."
-case ":${PATH:-}:" in
-	*":$bin_dir:"*) echo "(this shell already has $bin_dir on PATH)" ;;
-	*) echo "Open a new terminal, or run: source $rc" ;;
-esac
+	if ! command -v powershell.exe >/dev/null 2>&1; then
+		echo "install.sh: powershell.exe not found — cannot configure the Windows PATH for cmd.exe/PowerShell. Add $win_bin_dir to your user PATH manually." >&2
+		exit 1
+	fi
+
+	ps_helper="$(mktemp --suffix=.ps1)"
+	trap 'rm -f "$ps_helper"' EXIT
+	cat > "$ps_helper" <<'PS1_EOF'
+param([Parameter(Mandatory = $true)][string]$BinDir)
+
+$currentPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+if ($null -eq $currentPath) { $currentPath = '' }
+$entries = @($currentPath -split ';' | Where-Object { $_ -ne '' })
+
+# "Ours" is identified by content (both entry points present), not by an
+# assumed folder name -- correct even if the clone was renamed, though a
+# stale entry whose directory has since been deleted entirely can't be
+# identified this way (nothing left to inspect) and is left in place.
+$oursIndexes = @()
+for ($i = 0; $i -lt $entries.Count; $i++) {
+    $dir = $entries[$i]
+    if ((Test-Path (Join-Path $dir 'update-skills.cmd') -PathType Leaf) -and
+        (Test-Path (Join-Path $dir 'update-skills.ps1') -PathType Leaf)) {
+        $oursIndexes += $i
+    }
+}
+
+if ($oursIndexes.Count -eq 1 -and $entries[$oursIndexes[0]] -eq $BinDir) {
+    Write-Output 'STATUS:unchanged'
+    exit 0
+}
+
+$hadOurs = $oursIndexes.Count -gt 0
+$kept = @()
+for ($i = 0; $i -lt $entries.Count; $i++) {
+    if ($oursIndexes -notcontains $i) { $kept += $entries[$i] }
+}
+$kept += $BinDir
+[Environment]::SetEnvironmentVariable('Path', ($kept -join ';'), 'User')
+
+if ($hadOurs) {
+    Write-Output 'STATUS:replaced'
+} else {
+    Write-Output 'STATUS:added'
+}
+PS1_EOF
+
+	# Assignment as an `if` condition (not `x=$(...)` on its own line) is
+	# deliberate: under `set -e`, a plain failing assignment kills the script
+	# immediately -- before the failure can be reported with its actual cause.
+	# Inside an `if` condition, a non-zero exit is just data, so both paths
+	# below run normally. $ps_helper cleanup is handled by the trap above, so
+	# it runs even if this command substitution itself is what fails.
+	if win_output="$(powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$ps_helper" -BinDir "$win_bin_dir" 2>&1)"; then
+		win_exit=0
+	else
+		win_exit=$?
+	fi
+
+	if [ "$win_exit" -ne 0 ]; then
+		echo "install.sh: the Windows PATH update failed (powershell.exe exited $win_exit):" >&2
+		printf '%s\n' "$win_output" >&2
+		exit 1
+	fi
+
+	win_status="$(printf '%s\n' "$win_output" | tail -n 1)"
+
+	case "$win_status" in
+		STATUS:unchanged)
+			echo "update-skills is already on the per-user PATH — cmd.exe and PowerShell need no change."
+			;;
+		STATUS:added)
+			echo "Added $win_bin_dir to the per-user PATH for cmd.exe and PowerShell."
+			;;
+		STATUS:replaced)
+			echo "Replaced a stale update-skills PATH entry with $win_bin_dir."
+			;;
+		*)
+			echo "install.sh: could not confirm the Windows PATH update (unexpected output: $win_status) — check cmd.exe/PowerShell manually." >&2
+			exit 1
+			;;
+	esac
+fi
+
 echo "Then run: update-skills"

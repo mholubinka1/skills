@@ -21,9 +21,10 @@ The first `update-skills` run also creates `.venv` and installs the pre-commit h
 a consume-only machine this is the only setup you need — the rest of this section is for
 contributors.
 
-On Windows, run both `./install.sh` and `update-skills` from Git Bash (the shell the rest of
-this guide assumes); `install.sh` writes to `~/.bashrc`, which Git for Windows' `~/.bash_profile`
-sources.
+On Windows, `install.sh` itself still needs Git Bash to run (it's a bash script; it writes to
+`~/.bashrc`, which Git for Windows' `~/.bash_profile` sources). But it also puts `update-skills`
+on the per-user `PATH`, so afterwards `update-skills` itself works natively from `cmd.exe` and
+PowerShell too (via `update-skills.cmd`/`update-skills.ps1`), not just from Git Bash.
 
 ### Prerequisites
 
@@ -36,8 +37,9 @@ pre-commit install
 
 ### Python environment
 
-The `Sync Claude Skills` post-commit hook and the `update-skills` command both run
-`sync_claude_skills.py` using the first Python they find, checked in this order:
+The `Sync Claude Skills` post-commit hook and `update-skills` (`bin/update-skills`, the Git
+Bash/macOS/Linux script) both run `sync_claude_skills.py` using the first Python they find,
+checked in this order:
 
 1. `.venv/Scripts/python` (Windows venv)
 2. `.venv/Scripts/python.exe` (Windows venv, as seen from Git Bash)
@@ -45,8 +47,14 @@ The `Sync Claude Skills` post-commit hook and the `update-skills` command both r
 4. System `python3`
 5. System `python`
 
-`update-skills` only uses the system interpreters (4–5) to *create* the `.venv`; it always
-runs `pip` and the sync against the venv.
+The native `update-skills.ps1`/`update-skills.cmd` (cmd.exe/PowerShell) checks the same venv
+path (`.venv\Scripts\python.exe`) but falls back to Windows-native system interpreters only:
+`py` (the official launcher, tried first) then `python` — never `python3`, which on native
+Windows is either absent or the Windows Store's non-functional alias stub, never a real
+interpreter.
+
+Either script only uses its system interpreters to *create* the `.venv`; both always run
+`pip` and the sync against the venv itself.
 
 **macOS/Linux:**
 
