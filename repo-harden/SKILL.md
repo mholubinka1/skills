@@ -53,8 +53,11 @@ itself a plain "not protected" result to report.
 - **Actions pinning** — every `uses:` pinned to a tag or branch instead of a full commit SHA
   is a **Finding**, one per occurrence (same action pinned in two places is two findings,
   since each is rewritten at its own file/line). Separately check `sha_pinning_required`:
-  the repo-level value's `false` is itself a **Finding** (fixed by enabling it), so it's
-  always offerable in Step 2 even in a repo with no other findings. When `{owner}` is an
+  the repo-level value's `false` is itself a **Finding**, but only when Actions is actually
+  enabled for the repo (`enabled: true`) — fixing it would otherwise silently turn Actions on
+  repo-wide as a side effect, a far bigger change than "enable SHA pinning" implies, so a
+  disabled repo gets this reported as context instead. When `enabled` is `true`, it's always
+  offerable in Step 2 even in a repo with no other findings. When `{owner}` is an
   organization, also report the org-level value as context — it isn't itself a fixable
   Finding, since enabling it would change every repo in the org at once, a larger blast
   radius than any other fix this skill offers. See *Checks table* in REFERENCE.md for both
