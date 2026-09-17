@@ -88,6 +88,30 @@ Reachable (hosted runner) but its `checkout@v4` is still an unpinned-action Find
 three `checkout@v4` lines are separate pinning Findings — three fix-phase options, not one,
 since each rewrites a different file/line.
 
+### Second worked fixture — `push`-only, exercising the `branches:` rewrite
+
+The fixture above always routes to "gate behind approval" because `pull_request_target` is
+present workflow-wide, so it never exercises the `branches:`-allowlist rewrite case. A
+separate, `push`-only workflow does:
+
+```yaml
+on:
+  push:
+    branches: ['**']
+
+jobs:
+  release:
+    runs-on: self-hosted  # Reachable self-hosted job (push, unscoped branches allowlist)
+    steps:
+      - uses: actions/checkout@v4  # Finding — mutable tag
+```
+
+`release` is Reachable via `push` alone (no `pull_request_target` in this file), and its
+trigger already has a `branches:` allowlist rather than no filter or an existing
+`branches-ignore:`. Per the Fix commands table, the correct fix rewrites that allowlist in
+place — `branches: ['**', '!dependabot/**', '!renovate/**']` — never adds a `branches-ignore:`
+alongside it, since GitHub rejects a workflow declaring both for the same event.
+
 ## Permission handling
 
 A check's command returning `403` (or `gh`'s `HTTP 403`/"Resource not accessible") means
@@ -108,7 +132,7 @@ around.
 | Fix | Command | Notes |
 |---|---|---|
 | Pin action to SHA | 1. `gh api repos/{action_owner}/{action_repo}/commits/{tag} --jq .sha` 2. Rewrite the finding's `uses:` line to `uses: {action_owner}/{action_repo}@{sha} # {tag}` | `{action_owner}/{action_repo}` and `{tag}` come from the Finding's original `uses:` value (e.g. `actions/checkout@v4` → owner `actions`, repo `checkout`, tag `v4`). The trailing comment preserves the human-readable version. |
-| Restrict trigger — exclude bot branches | Add `branches-ignore:` to the job's (or workflow's) `push:` block naming the bot's branch prefix (e.g. `dependabot/**`, `renovate/**`) | **`push` only.** `pull_request`/`pull_request_target`'s own `branches`/`branches-ignore` filters match the PR's *base* branch, not the bot's head branch, so adding this to a `pull_request:`/`pull_request_target:` block excludes nothing a bot's PR would trip — per the Trigger crossing rule, those two triggers stay Reachable regardless of branch filtering, so this fix cannot clear that Finding. Use only when the reachable trigger is `push` from a known bot. |
+| Restrict trigger — exclude bot branches | Depends on the `push:` block's current filter (`branches:` and `branches-ignore:` can never coexist on the same event — GitHub rejects the workflow if both are present): **no filter at all** → add a fresh `branches-ignore:` list naming the bot's branch prefix(es) (e.g. `['dependabot/**', 'renovate/**']`). **Existing `branches-ignore:`** that just doesn't cover every bot prefix → append the missing prefix(es) to that same list; never add a second `branches-ignore:` key. **Existing `branches:` allowlist** (e.g. `['**']`) → do not add `branches-ignore:` alongside it; instead rewrite the existing `branches:` list in place to add negation patterns excluding the bot prefixes (e.g. `branches: ['**', '!dependabot/**', '!renovate/**']`) — GitHub's own documented way to combine include/exclude on one event. | **`push` only.** `pull_request`/`pull_request_target`'s own `branches`/`branches-ignore` filters match the PR's *base* branch, not the bot's head branch, so this fix excludes nothing there — per the Trigger crossing rule, those two triggers stay Reachable regardless of branch filtering. Use only when the reachable trigger is `push` from a known bot. |
 | Restrict trigger — gate behind approval | Add `environment: <name>` to the reachable job, where `<name>` is an existing or newly-described protected environment requiring manual reviewer approval | The only trigger-restricting fix for `pull_request`/`pull_request_target` — branch filtering can't exclude a bot there (see the row above). Also use for a `push` case with no branch-prefix filter that cleanly excludes the risk. |
 | Enable SHA pinning | `gh api --method PUT repos/{owner}/{repo}/actions/permissions -f sha_pinning_required=true` | Repo-level; requires admin. |
 | Branch protection — solo-maintained (1 collaborator) | `gh api --method PUT repos/{owner}/{repo}/branches/{default_branch}/protection -F required_status_checks[strict]=true -f 'required_status_checks[contexts][]=<context>' -F enforce_admins=true -F 'required_pull_request_reviews[required_approving_review_count]=0' -F restrictions=null -F allow_force_pushes=false -F allow_deletions=false` | `gh api`'s bracket syntax (`key[subkey]=value`, `key[]=value` for arrays) — not dotted keys — is what nests JSON in this CLI. `required_pull_request_reviews` must stay a **non-null object** — setting it to JSON `null` disables "require a pull request before merging" entirely, allowing direct pushes, which is not what "skip requiring a second reviewer" asked for. `required_approving_review_count=0` keeps the PR requirement while requiring zero approvals. Repeat the `contexts[]` flag once per required check name (see below); `-F x=null` sends a real JSON `null`, where `-f` would send the four-character string `"null"` — used here only for `restrictions`, which is meant to be genuinely absent. |
