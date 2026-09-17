@@ -43,7 +43,7 @@ itself a plain "not protected" result to report.
   `branches:` allowlist (e.g. `['**']`) as well as a `branches-ignore:` that exists but
   doesn't name every bot prefix actually in play (e.g. only `['main']`, still letting
   `dependabot/**` through) — presence of the key proves nothing on its own. See *Trigger
-  crossing* in REFERENCE.md for the exact rule and worked fixture.
+  crossing* in REFERENCE.md for the exact rule and its two worked fixtures.
 - **Actions pinning** — every `uses:` pinned to a tag or branch instead of a full commit SHA
   is a **Finding**, one per occurrence (same action pinned in two places is two findings,
   since each is rewritten at its own file/line). Separately check `sha_pinning_required`:

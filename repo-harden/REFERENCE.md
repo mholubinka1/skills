@@ -2,24 +2,23 @@
 
 Exact commands and fields for the workflow in [SKILL.md](SKILL.md): every read-only check,
 the trigger-crossing rule, and every fix-phase command. `{owner}/{repo}` below is always
-the current repo — resolve it once with `gh repo view --json owner,name` and reuse it,
-never accept it as an argument.
+the current repo — resolve it once via the Visibility check's own call (which already
+requests `owner,name,defaultBranchRef` alongside `visibility` — see the Checks table) and
+reuse both `{owner}/{repo}` and `{default_branch}` throughout; never accept either as an
+argument.
 
 ## Checks table
 
 | Check | Command | What to report |
 |---|---|---|
-| Visibility | `gh repo view --json visibility` | Always **context, not a Finding** — no fix-phase option; `PUBLIC` / `PRIVATE` / `INTERNAL`, verbatim. |
+| Visibility | `gh repo view --json visibility,owner,name,defaultBranchRef` | Always **context, not a Finding** — no fix-phase option; report `.visibility` verbatim (`PUBLIC` / `PRIVATE` / `INTERNAL`). This is the one `gh repo view` call the whole skill makes — `{owner}` is `.owner.login` (a nested object, not a bare string), `{repo}` is `.name`, and `{default_branch}` is `.defaultBranchRef.name`; resolve all three here and reuse them for every other check and fix below — nothing else re-fetches them. |
 | Collaborators | `gh api repos/{owner}/{repo}/collaborators --jq '.[] \| {login, permissions}'` | Always **context, not a Finding** — no fix-phase option. One line per collaborator: login + highest permission (`admin`/`maintain`/`push`/`triage`/`pull`). Count them — exactly one collaborator marks the repo **solo-maintained**, used to size the branch-protection fix in Step 2. |
-| Reachable self-hosted jobs | Read each workflow file; no separate command | See *Trigger crossing* below for the exact rule and a worked fixture. Each matching job is a **Finding**, one per job. |
+| Reachable self-hosted jobs | Read each workflow file; no separate command | See *Trigger crossing* below for the exact rule and its two worked fixtures. Each matching job is a **Finding**, one per job. |
 | Dependabot config | `gh api repos/{owner}/{repo}/contents/.github/dependabot.yml` | Always **context, not a Finding** — no fix-phase option either way. 404 → "no dependabot config found" (there's no config to inspect). Present → decode the base64 `content` field and report whether `updates[].target-branch` (or its default) names an in-repo branch matching a build-triggering pattern. This confirms the configured target, not the absence of a fork-based mirror/sync layered on top of it — no single API call verifies that, so report it as a known residual gap rather than implying it's covered. |
 | Actions pinning | Read each workflow file; regex each `uses:` value | A value shaped `owner/repo@<40-hex-char>` is pinned to a SHA — passes. Anything else (`@v4`, `@main`, `@latest`, a short SHA) is a **Finding**, one per occurrence, identified by file path + job name + the `uses:` value. |
 | `sha_pinning_required` | 1. `gh api repos/{owner}/{repo}/actions/permissions --jq .sha_pinning_required` (repo-level) 2. If `{owner}` is an organization (not a user account — `gh api users/{owner} --jq .type` returns `Organization`), also try `gh api orgs/{owner}/actions/permissions --jq .sha_pinning_required` | Report the repo-level boolean; `false` is a **Finding** (its fix is "Enable SHA pinning" from the Fix commands table below, which is repo-level only) — this keeps it reachable through the same Finding-driven multi-select as every other check, including in an otherwise-clean repo where it's the only thing to offer. `true` is a pass. If the org-level call succeeds, report its value too as **context, not a Finding** — enabling it org-wide would affect every repo in the org at once, a larger blast radius than any other fix this skill offers, so there is no fix-phase option for it (an org-enforced `true` can still mask/override a repo-level `false`, which is exactly why it's worth showing even though it isn't actionable here). A `403` on the org-level call is "skipped — insufficient permission" like any other org-admin-only read, not a run-aborting failure. |
 | Branch protection | `gh api repos/{owner}/{repo}/branches/{default_branch}/protection` | `404` with body `"message": "Branch not protected"` → report "not protected"; this is itself a **Finding** (missing protection entirely), fixed by the same payload below (expected result, not an error). `403` → report that check as "skipped — insufficient permission" (see *Permission handling*). `200` → report `required_status_checks`, `required_pull_request_reviews` (and its `required_approving_review_count`), `allow_force_pushes.enabled`, `allow_deletions.enabled`, `enforce_admins.enabled`, one line each; if any is missing or set to the unsafe value (force-push/deletion allowed, no status checks, no PR requirement, `enforce_admins.enabled: false`), that's one combined **Finding** for the branch as a whole — not one per sub-setting, since the Fix commands table's payload sets every sub-setting in a single atomic call. |
 | Secrets exposure | Read each workflow file | A job whose `runs-on:` is self-hosted or a custom label (not one of GitHub's hosted labels: `ubuntu-*`, `windows-*`, `macos-*`) **and** whose body contains `secrets:` (job-level, including `secrets: inherit`) or a step referencing `${{ secrets.* }}` is reported as **context, not a Finding** — one line per job, no fix-phase option, since removing a job's secrets access without knowing whether it legitimately needs them isn't a call this skill can safely make. |
-
-Resolve `{default_branch}` from the visibility check's `gh repo view` call
-(`--json defaultBranchRef` gives `.defaultBranchRef.name`) rather than assuming `main`.
 
 ## Trigger crossing
 
