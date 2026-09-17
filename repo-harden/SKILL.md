@@ -57,7 +57,10 @@ itself a plain "not protected" result to report.
   trigger a build.
 - **Branch protection** — `gh api repos/{owner}/{repo}/branches/{branch}/protection` on the
   default branch: required status checks, PR requirement, force-push/delete restriction,
-  admin enforcement. Report each sub-setting.
+  admin enforcement. Report each sub-setting on its own line; if any is missing or unsafe,
+  that's one combined **Finding** for the branch as a whole (not one per sub-setting) — its
+  single fix-phase option applies every missing setting in one atomic payload, matching the
+  one combined command in the Fix commands table.
 - **Secrets exposure** — a job with self-hosted/runner-level access that also has
   `secrets:` or `${{ secrets.* }}` in scope is reported as **context, not a fixable
   Finding** — there's no safe automated fix (removing a job's secrets access requires
