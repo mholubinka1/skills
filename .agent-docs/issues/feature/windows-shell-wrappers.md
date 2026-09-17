@@ -87,9 +87,11 @@ On Windows (detected via `$OS = Windows_NT`), `install.sh` additionally persists
 `bin/` directory onto the per-user `PATH` environment variable — via
 `[Environment]::SetEnvironmentVariable('Path', ..., 'User')` through `powershell.exe`, not
 `setx` — alongside the existing Git Bash rc-file wiring it already does on every platform.
-Idempotency is content-based: any existing `PATH` directory containing both
-`update-skills.cmd` and `update-skills.ps1` is treated as a stale prior entry, removed, and
-replaced with one current `bin_dir` entry. Non-Windows behaviour is unchanged. The
+Idempotency is content-based: any existing `PATH` directory that still exists and still
+contains both `update-skills.cmd` and `update-skills.ps1` is treated as a stale prior entry,
+removed, and replaced with one current `bin_dir` entry — a directory deleted or moved away
+entirely can't be identified this way and is left in place, an accepted limitation. Non-Windows
+behaviour is unchanged. The
 `context.md` glossary entry for `install.sh` is updated to describe both mechanisms (already
 drafted during the design session, included in this slice's commit).
 

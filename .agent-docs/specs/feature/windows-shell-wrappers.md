@@ -102,7 +102,11 @@ Windows shells:
     current per-user `PATH` for any directory that contains both `update-skills.cmd` and
     `update-skills.ps1` — remove all such entries, then append the current `bin_dir` once.
     Identifying "our" entry by contents (not by an assumed folder name like `...\skills\bin`)
-    keeps this correct even if the clone is renamed or relocated.
+    keeps this correct even if the clone is renamed or relocated — as long as the old
+    directory still exists at its (possibly stale) `PATH` location. One that's been deleted
+    or moved away entirely has nothing left to inspect for the two marker files, so it can't
+    be identified this way and is left in place; an accepted limitation of content-based
+    detection over a folder-naming convention.
   - Report what changed, same spirit as the existing rc-file report: "already set up" when
     the `PATH` entry is already exactly current, otherwise "added" / "replaced stale entry".
 - **`context.md`:** the `install.sh` glossary entry is updated (already done during the design
