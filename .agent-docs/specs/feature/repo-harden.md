@@ -81,7 +81,12 @@ existing convention — no cross-repo targeting.
     (not bundled by category) — e.g. each unpinned action gets its own line, each over-broad
     trigger gets its own line. Only the selected lines are applied.
   - Rewrite triggers to exclude bot branches from self-hosted jobs (`branches-ignore`), or gate
-    with an `environment:` requiring manual approval.
+    with an `environment:` requiring manual approval. Gating actually requires configuring the
+    environment's reviewers via the Environments API — referencing an `environment:` name alone
+    doesn't gate anything, since GitHub auto-creates an undefined environment with no
+    protection; a later audit also recognizes an already-gated job so it isn't re-flagged. See
+    `REFERENCE.md`'s *Gating a trigger behind approval* section and the Trigger crossing rule
+    for the full procedure.
   - Pin a selected third-party Action to its resolved commit SHA via
     `gh api repos/{action}/commits/{tag}`, keeping the original version as a trailing comment.
   - Enable `sha_pinning_required` via the Actions permissions API, if selected.

@@ -35,7 +35,12 @@ boundary in a read-only pass, then applies only the fixes the user explicitly se
 - **Fix phase** — an `AskUserQuestion` multi-select list, one line per individual finding
   (never bundled by category); only selected lines are applied:
   - Rewrite triggers to exclude bot branches from self-hosted jobs (`branches-ignore`), or
-    gate with an `environment:` requiring manual approval.
+    gate with an `environment:` requiring manual approval. Gating actually requires
+    configuring the environment's reviewers via the Environments API — referencing an
+    `environment:` name alone doesn't gate anything, since GitHub auto-creates an undefined
+    environment with no protection; a later audit also recognizes an already-gated job so it
+    isn't re-flagged. See `REFERENCE.md`'s *Gating a trigger behind approval* section and the
+    Trigger crossing rule for the full procedure.
   - Pin a selected third-party Action to its resolved commit SHA
     (`gh api repos/{action}/commits/{tag}`), keeping the original version as a trailing
     comment.
@@ -82,9 +87,10 @@ together) and validated against the `create-a-skill` review checklist.
       no other findings could never be offered this fix. `false` is now itself a Finding, same
       as every other check, so it's always reachable.)
 - [x] Given a job with both self-hosted/runner-level access and secrets in scope, when the
-      audit runs, then that overlap is flagged as a Finding. (Fixture's `deploy` job:
-      `runs-on: [self-hosted, gpu]` + `secrets: inherit` + `${{ secrets.DEPLOY_TOKEN }}`,
-      walked by hand against REFERENCE.md's Secrets exposure rule.)
+      audit runs, then that overlap is reported as context, not a fixable Finding — there's
+      no safe automated fix. (Fixture's `deploy` job: `runs-on: [self-hosted, gpu]` +
+      `secrets: inherit` + `${{ secrets.DEPLOY_TOKEN }}`, walked by hand against
+      REFERENCE.md's Secrets exposure rule.)
 - [x] Given a check that fails from insufficient `gh` permission, when the audit runs, then
       that check is reported "skipped — insufficient permission" and every other check still
       completes. (Verified by inspection: `SKILL.md` Step 1 and `REFERENCE.md`'s Permission
