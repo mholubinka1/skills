@@ -126,7 +126,23 @@ if [ "${OS:-}" = "Windows_NT" ]; then
 		echo "install.sh: cygpath not found — cannot convert $bin_dir to a native Windows path for cmd.exe/PowerShell." >&2
 		exit 1
 	fi
-	win_bin_dir="$(cygpath -w "$bin_dir")"
+	# Assignment as an `if` condition, same reasoning as the powershell.exe
+	# invocation below: a plain failing assignment would be killed by `set -e`
+	# with no install-specific message, and an empty conversion result must be
+	# rejected too rather than handed to the PowerShell helper as a PATH entry.
+	if win_bin_dir="$(cygpath -w "$bin_dir")"; then
+		cygpath_exit=0
+	else
+		cygpath_exit=$?
+	fi
+	if [ "$cygpath_exit" -ne 0 ]; then
+		echo "install.sh: 'cygpath -w $bin_dir' exited $cygpath_exit — cannot configure the Windows PATH for cmd.exe/PowerShell." >&2
+		exit 1
+	fi
+	if [ -z "$win_bin_dir" ]; then
+		echo "install.sh: 'cygpath -w $bin_dir' produced no output — cannot configure the Windows PATH for cmd.exe/PowerShell." >&2
+		exit 1
+	fi
 
 	if ! command -v powershell.exe >/dev/null 2>&1; then
 		echo "install.sh: powershell.exe not found — cannot configure the Windows PATH for cmd.exe/PowerShell. Add $win_bin_dir to your user PATH manually." >&2
