@@ -112,7 +112,7 @@ if ($venvPy -and -not (Test-RunsOk $venvPy)) {
 }
 if (-not $venvPy) {
     if (-not $sysPy) {
-        Die "no working python3, python, or py found; cannot create .venv."
+        Die "no working py or python found; cannot create .venv."
     }
     Say "Creating .venv"
     & $sysPy -m venv .venv

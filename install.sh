@@ -134,6 +134,7 @@ if [ "${OS:-}" = "Windows_NT" ]; then
 	fi
 
 	ps_helper="$(mktemp --suffix=.ps1)"
+	trap 'rm -f "$ps_helper"' EXIT
 	cat > "$ps_helper" <<'PS1_EOF'
 param([Parameter(Mandatory = $true)][string]$BinDir)
 
@@ -176,15 +177,15 @@ PS1_EOF
 
 	# Assignment as an `if` condition (not `x=$(...)` on its own line) is
 	# deliberate: under `set -e`, a plain failing assignment kills the script
-	# immediately -- before $ps_helper is cleaned up and before the failure
-	# can be reported with its actual cause. Inside an `if` condition, a
-	# non-zero exit is just data, so both paths below run normally.
+	# immediately -- before the failure can be reported with its actual cause.
+	# Inside an `if` condition, a non-zero exit is just data, so both paths
+	# below run normally. $ps_helper cleanup is handled by the trap above, so
+	# it runs even if this command substitution itself is what fails.
 	if win_output="$(powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$ps_helper" -BinDir "$win_bin_dir" 2>&1)"; then
 		win_exit=0
 	else
 		win_exit=$?
 	fi
-	rm -f "$ps_helper"
 
 	if [ "$win_exit" -ne 0 ]; then
 		echo "install.sh: the Windows PATH update failed (powershell.exe exited $win_exit):" >&2
