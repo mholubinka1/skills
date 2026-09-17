@@ -139,10 +139,17 @@ around.
 
 **Populating `contexts`**: read existing check-run names from
 `gh api repos/{owner}/{repo}/commits/{default_branch}/check-runs --jq '.check_runs[].name'`
-and pass each as its own `-f 'required_status_checks[contexts][]=<name>'`. If no check runs
+and pass each as its own `-f 'required_status_checks[contexts][]=<context>'`. If no check runs
 exist yet (no CI configured), pass `-f 'required_status_checks[contexts][]'` (no `=value`)
 for an empty array and note in the report that status-check enforcement is a no-op until a
 CI workflow exists to name.
+
+`contexts` (a plain string array) is what's used above rather than GitHub's newer `checks`
+field (an array of `{context, app_id}` objects that GitHub's docs say will eventually
+replace it) — `contexts` is still live and functional today, and `checks`' array-of-objects
+shape has no verified `gh api` bracket-flag construction (untested here, since applying it
+would mean a live mutating call against real branch-protection settings, which this skill's
+own testing rules exclude). Revisit if GitHub actually removes `contexts` support.
 
 None of the fix-phase commands above were executed against a real repo's live settings
 during this skill's own build or testing — deliberately, since a branch-protection or
