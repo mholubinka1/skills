@@ -37,17 +37,16 @@ there is no parsing script in this repo's skills, by convention.
      known bot prefix within that same list** (GitHub evaluates negation patterns like
      `!dependabot/**` within `branches:` itself — verified against GitHub's docs — so
      `branches: ['**', '!dependabot/**', '!renovate/**']` is NOT reachable by those bots even
-     though `'**'` is still literally present; check what the negations actually exclude, the
-     same way a `branches-ignore:` list is judged below, not whether `'**'` appears); or a
-     `branches-ignore:` denylist that doesn't name every known bot prefix in play
-     (cross-reference the repo's actual bot configs, e.g. `dependabot.yml`/`dependabot.yaml` —
-     `branches-ignore: ['main']` alone still lets `dependabot/**`/`renovate/**` through).
-     Either form of exclusion — a `branches-ignore:` denylist, or negation patterns inside a
-     `branches:` allowlist — naming every bot prefix the repo actually uses clears the *bot*
-     risk this check targets; neither can guarantee exclusion of an arbitrary human-created
-     branch the way a plain `branches:` allowlist with no negations can — that residual is a
-     non-admin-collaborator-push risk, not this check's concern. Check what's actually
-     excluded, not whether `'**'` or the key itself is present.
+     though `'**'` is still literally present); or a `branches-ignore:` denylist that doesn't
+     name every known bot prefix in play (cross-reference the repo's actual bot configs, e.g.
+     `dependabot.yml`/`dependabot.yaml` — `branches-ignore: ['main']` alone still lets
+     `dependabot/**`/`renovate/**` through). Either form of exclusion — a `branches-ignore:`
+     denylist, or negation patterns inside a `branches:` allowlist — naming every bot prefix
+     the repo actually uses clears the *bot* risk this check targets; neither can guarantee
+     exclusion of an arbitrary human-created branch the way a plain `branches:` allowlist
+     with no negations can — that residual is a non-admin-collaborator-push risk, not this
+     check's concern. Check what's actually excluded, not whether `'**'` or the key itself is
+     present.
 2. For each `jobs.<name>`, read `runs-on:`. It's **self-hosted or custom-label** unless
    every value in it is one of GitHub's hosted labels (`ubuntu-latest`, `ubuntu-22.04`,
    `windows-latest`, `macos-latest`, etc. — the `<os>-<version>`/`<os>-latest` hosted
