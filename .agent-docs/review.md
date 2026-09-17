@@ -69,3 +69,13 @@ from — for example:
   stated method gives wrong answers on the actual inputs — a `.`-split sentence count on
   text full of `.md`/`.NET`, a `grep` that also matches comments, a line count that
   includes generated output. State a method that survives the real data. (PR #97)
+- **Unchecked sibling of a guarded external command**: flag a native command invocation left
+  without an exit-code (and, where relevant, empty-output) check when an adjacent,
+  structurally identical invocation in the same file already has one — apply the same guard
+  for consistency rather than leaving one call site to fail silently or crash without a clear
+  message. (PR #108)
+- **Absolute cleanup/detection claim without its real limitation**: flag a stated guarantee
+  ("removes/replaces any stale X", "correct even if renamed or relocated") that omits a known
+  failure mode of the underlying detection mechanism — e.g. content-based matching that
+  requires the target to still exist on disk. State the limitation everywhere the guarantee
+  is claimed (glossary, spec, issue), not just in the implementing code's own comment. (PR #108)
