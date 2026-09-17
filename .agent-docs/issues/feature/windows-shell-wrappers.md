@@ -1,5 +1,7 @@
 # Issues: feature/windows-shell-wrappers
 
+> Work complete — PR ready to merge.
+
 ## `update-skills.ps1` native reimplementation
 
 **GitHub issue**: #103
@@ -28,20 +30,20 @@ behaviour natively, with no Git Bash dependency:
 
 ### Acceptance criteria
 
-- [ ] Given a clean tree, running `powershell -File bin\update-skills.ps1` fast-forwards to
+- [x] Given a clean tree, running `powershell -File bin\update-skills.ps1` fast-forwards to
       `origin/main` and leaves `~/.claude/skills/` matching the repo's current `SKILL.md`
       directories.
-- [ ] Given no `.venv`, running it creates `.venv`, installs `pre-commit` into it, installs
+- [x] Given no `.venv`, running it creates `.venv`, installs `pre-commit` into it, installs
       the git hooks, and completes the sync; a second run skips the bootstrap.
-- [ ] Given uncommitted changes, running it prints `git status`, changes no git state, runs
+- [x] Given uncommitted changes, running it prints `git status`, changes no git state, runs
       no sync, and exits non-zero.
-- [ ] Given local `main` has diverged from `origin/main`, the fast-forward fails, is reported,
+- [x] Given local `main` has diverged from `origin/main`, the fast-forward fails, is reported,
       and the script exits non-zero without forcing or resetting.
-- [ ] Given `pip install pre-commit`, `pre-commit install`, or `sync_claude_skills.py` itself
+- [x] Given `pip install pre-commit`, `pre-commit install`, or `sync_claude_skills.py` itself
       fails, the script surfaces it and exits non-zero — matching the bash script's
       `set -euo pipefail` guarantee for the same three steps, rather than printing "Done" and
       exiting 0 on a real failure.
-- [ ] `pre-commit-check` passes clean on the new file.
+- [x] `pre-commit-check` passes clean on the new file.
 
 ---
 
@@ -62,14 +64,14 @@ without a second logic implementation.
 
 ### Acceptance criteria
 
-- [ ] Given the same clean-tree setup as Slice 1's happy path, running
+- [x] Given the same clean-tree setup as Slice 1's happy path, running
       `.\bin\update-skills.cmd` from `cmd.exe` produces the same outcome and equivalent output
       to running the `.ps1` directly.
-- [ ] Given a dirty tree, running `.\bin\update-skills.cmd` refuses the same way the `.ps1`
+- [x] Given a dirty tree, running `.\bin\update-skills.cmd` refuses the same way the `.ps1`
       does (prints `git status`, exits non-zero).
-- [ ] `-ExecutionPolicy Bypass` is scoped to this one invocation only — no machine-wide
+- [x] `-ExecutionPolicy Bypass` is scoped to this one invocation only — no machine-wide
       policy change.
-- [ ] `pre-commit-check` passes clean on the new file.
+- [x] `pre-commit-check` passes clean on the new file.
 
 ---
 
@@ -97,21 +99,21 @@ drafted during the design session, included in this slice's commit).
 
 ### Acceptance criteria
 
-- [ ] Given a clean Windows machine, running `./install.sh` adds the Git Bash rc-file block
+- [x] Given a clean Windows machine, running `./install.sh` adds the Git Bash rc-file block
       (as before) **and** adds `bin_dir` to the per-user `PATH`; a freshly opened `cmd.exe`
       and a freshly opened PowerShell window both resolve `update-skills`.
-- [ ] Given `install.sh` has already run once, re-running it unchanged leaves exactly one
+- [x] Given `install.sh` has already run once, re-running it unchanged leaves exactly one
       `PATH` entry for this repo's `bin/` (no duplicate) and an unchanged rc-file block.
-- [ ] Given the repo was re-cloned to a new path and `install.sh` is re-run from there, the
+- [x] Given the repo was re-cloned to a new path and `install.sh` is re-run from there, the
       per-user `PATH` no longer contains the old path's `bin/` directory and contains the new
       one instead.
-- [ ] Given a non-Windows machine, running `install.sh` executes no `PATH`-environment-variable
+- [x] Given a non-Windows machine, running `install.sh` executes no `PATH`-environment-variable
       logic and behaves identically to before this change.
-- [ ] Given the Windows PATH update fails for any reason (`powershell.exe` missing, the helper
+- [x] Given the Windows PATH update fails for any reason (`powershell.exe` missing, the helper
       erroring, unexpected output), `install.sh` exits non-zero with a clear message rather
       than silently reporting success — even if the rc-file wiring above it already succeeded.
-- [ ] `.agent-docs/context.md`'s `install.sh` entry describes both the rc-file and Windows
+- [x] `.agent-docs/context.md`'s `install.sh` entry describes both the rc-file and Windows
       `PATH` mechanisms.
-- [ ] `pre-commit-check` passes clean on all changed files.
+- [x] `pre-commit-check` passes clean on all changed files.
 
 ---
