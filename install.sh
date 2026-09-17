@@ -130,9 +130,11 @@ if [ "${OS:-}" = "Windows_NT" ]; then
 
 	if ! command -v powershell.exe >/dev/null 2>&1; then
 		echo "install.sh: powershell.exe not found — cannot configure the Windows PATH for cmd.exe/PowerShell. Add $win_bin_dir to your user PATH manually." >&2
-	else
-		ps_helper="$(mktemp --suffix=.ps1)"
-		cat > "$ps_helper" <<'PS1_EOF'
+		exit 1
+	fi
+
+	ps_helper="$(mktemp --suffix=.ps1)"
+	cat > "$ps_helper" <<'PS1_EOF'
 param([Parameter(Mandatory = $true)][string]$BinDir)
 
 $currentPath = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -172,24 +174,41 @@ if ($hadOurs) {
 }
 PS1_EOF
 
-		win_status="$(powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$ps_helper" -BinDir "$win_bin_dir" 2>&1 | tail -n 1)"
-		rm -f "$ps_helper"
-
-		case "$win_status" in
-			STATUS:unchanged)
-				echo "update-skills is already on the per-user PATH — cmd.exe and PowerShell need no change."
-				;;
-			STATUS:added)
-				echo "Added $win_bin_dir to the per-user PATH for cmd.exe and PowerShell."
-				;;
-			STATUS:replaced)
-				echo "Replaced a stale update-skills PATH entry with $win_bin_dir."
-				;;
-			*)
-				echo "install.sh: could not confirm the Windows PATH update (unexpected output: $win_status) — check cmd.exe/PowerShell manually." >&2
-				;;
-		esac
+	# Assignment as an `if` condition (not `x=$(...)` on its own line) is
+	# deliberate: under `set -e`, a plain failing assignment kills the script
+	# immediately -- before $ps_helper is cleaned up and before the failure
+	# can be reported with its actual cause. Inside an `if` condition, a
+	# non-zero exit is just data, so both paths below run normally.
+	if win_output="$(powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$ps_helper" -BinDir "$win_bin_dir" 2>&1)"; then
+		win_exit=0
+	else
+		win_exit=$?
 	fi
+	rm -f "$ps_helper"
+
+	if [ "$win_exit" -ne 0 ]; then
+		echo "install.sh: the Windows PATH update failed (powershell.exe exited $win_exit):" >&2
+		printf '%s\n' "$win_output" >&2
+		exit 1
+	fi
+
+	win_status="$(printf '%s\n' "$win_output" | tail -n 1)"
+
+	case "$win_status" in
+		STATUS:unchanged)
+			echo "update-skills is already on the per-user PATH — cmd.exe and PowerShell need no change."
+			;;
+		STATUS:added)
+			echo "Added $win_bin_dir to the per-user PATH for cmd.exe and PowerShell."
+			;;
+		STATUS:replaced)
+			echo "Replaced a stale update-skills PATH entry with $win_bin_dir."
+			;;
+		*)
+			echo "install.sh: could not confirm the Windows PATH update (unexpected output: $win_status) — check cmd.exe/PowerShell manually." >&2
+			exit 1
+			;;
+	esac
 fi
 
 echo "Then run: update-skills"

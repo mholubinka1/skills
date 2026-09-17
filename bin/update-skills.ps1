@@ -82,9 +82,13 @@ function Test-RunsOk([string]$Interpreter) {
 }
 
 $sysPy = $null
-# Probe by running, not Get-Command - the Windows Store `python3` alias is on
-# PATH but exits non-zero. Same rationale as bin/update-skills.
-foreach ($candidate in @('python3', 'python', 'py')) {
+# Windows-native candidates only: `py` (the official launcher, tried first
+# since it reliably resolves to a real interpreter) then `python`. `python3`
+# is deliberately not probed here -- on native Windows it is essentially
+# always either absent or the Windows Store's non-functional alias stub (see
+# Test-RunsOk above), never a real interpreter, unlike on macOS/Linux where
+# bin/update-skills probes it first for good reason.
+foreach ($candidate in @('py', 'python')) {
     if (Get-Command $candidate -ErrorAction SilentlyContinue) {
         if (Test-RunsOk $candidate) {
             $sysPy = $candidate

@@ -51,9 +51,10 @@ behaviour natively, with no Git Bash dependency:
 
 ### What to build
 
-A one-line `bin/update-skills.cmd` that invokes the `.ps1` script
-(`powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0update-skills.ps1" %*`), so
-`cmd.exe` gets identical behaviour without a second logic implementation.
+A thin `bin/update-skills.cmd` shim that invokes the `.ps1` script
+(`powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0update-skills.ps1" %*`) and
+propagates its exit code via `exit /b %ERRORLEVEL%`, so `cmd.exe` gets identical behaviour
+without a second logic implementation.
 
 ### Acceptance criteria
 
@@ -100,6 +101,9 @@ drafted during the design session, included in this slice's commit).
       one instead.
 - [ ] Given a non-Windows machine, running `install.sh` executes no `PATH`-environment-variable
       logic and behaves identically to before this change.
+- [ ] Given the Windows PATH update fails for any reason (`powershell.exe` missing, the helper
+      erroring, unexpected output), `install.sh` exits non-zero with a clear message rather
+      than silently reporting success — even if the rc-file wiring above it already succeeded.
 - [ ] `.agent-docs/context.md`'s `install.sh` entry describes both the rc-file and Windows
       `PATH` mechanisms.
 - [ ] `pre-commit-check` passes clean on all changed files.

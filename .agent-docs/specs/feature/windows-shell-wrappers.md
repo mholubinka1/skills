@@ -66,26 +66,38 @@ Windows shells:
   - Final step: run `sync_claude_skills.py` with the venv interpreter.
   - Every step prints a one-line `==>` progress marker, matching the bash script's `say()`
     output style, so failures are attributable the same way in either shell.
-- **`bin/update-skills.cmd`** is a one-line delegation shim:
+- **`bin/update-skills.cmd`** is a thin delegation shim (three lines — `@echo off`, the
+  `powershell` call, and an explicit `exit /b %ERRORLEVEL%`):
 
   ```bat
-  @powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0update-skills.ps1" %*
+  @echo off
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0update-skills.ps1" %*
+  exit /b %ERRORLEVEL%
   ```
 
   `-ExecutionPolicy Bypass` is scoped to this one invocation only (not a machine-wide policy
   change) — it's the standard pattern for shipping a runnable `.ps1` alongside a `.cmd` shim
-  without requiring the user to have already loosened their execution policy.
+  without requiring the user to have already loosened their execution policy. The explicit
+  `exit /b %ERRORLEVEL%` guarantees the shim's own exit code always matches the `.ps1`'s,
+  rather than relying on cmd.exe's implicit last-command behaviour.
 - **`install.sh` Windows PATH wiring:**
   - Detect Windows via `[ "${OS:-}" = "Windows_NT" ]` (set by Windows itself, inherited into
     Git Bash's environment — `install.sh` is always run via Git Bash per the README, even on
     Windows).
   - On Windows only, in addition to the existing rc-file block, persist `bin_dir` onto the
     per-user `PATH` environment variable via
-    `[Environment]::SetEnvironmentVariable('Path', ..., 'User')` (invoked through
-    `powershell.exe -NoProfile -Command`), not `setx` — avoids `setx`'s ~1024-character
-    truncation risk on an already-long `PATH`, while still triggering the same
-    `WM_SETTINGCHANGE` broadcast `setx` relies on, so freshly opened `cmd.exe`/PowerShell
-    windows pick it up without a reboot.
+    `[Environment]::SetEnvironmentVariable('Path', ..., 'User')`. This runs from a small
+    generated `.ps1` helper written to a temp file and invoked via
+    `powershell.exe -NoProfile -ExecutionPolicy Bypass -File`, not a `-Command` one-liner —
+    the helper's logic (scanning and rebuilding the `PATH` list) is easier to get right as a
+    real script than as an inline string passed across the bash/PowerShell quoting boundary.
+    Not `setx`: avoids `setx`'s ~1024-character truncation risk on an already-long `PATH`,
+    while still triggering the same `WM_SETTINGCHANGE` broadcast `setx` relies on, so freshly
+    opened `cmd.exe`/PowerShell windows pick it up without a reboot. A failure at any point
+    (`powershell.exe` missing, the helper erroring, unexpected output) is a hard `install.sh`
+    failure (non-zero exit, clear message) rather than a silent degrade — the rc-file wiring
+    may have already succeeded, but the user must not be left believing the Windows PATH was
+    set when it wasn't.
   - Idempotency without marker comments (a `PATH` string has nowhere to put them): scan the
     current per-user `PATH` for any directory that contains both `update-skills.cmd` and
     `update-skills.ps1` — remove all such entries, then append the current `bin_dir` once.
