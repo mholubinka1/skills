@@ -18,7 +18,7 @@ only the findings the user picks. See the *Checks table* and *Fix commands* sect
                     per check — pass, flagged (a Finding), or skipped — never omit a line
 2 Fix phase         findings only → one AskUserQuestion, multiSelect, one option per
                     individual Finding; apply only what's picked
-3 Summary           findings first, then which fixes were applied/declined/refused
+3 Summary           findings first, then which fixes were applied, refused, or unselected
 ```
 
 ## Step 1 — Run the read-only audit
