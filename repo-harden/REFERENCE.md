@@ -9,8 +9,8 @@ never accept it as an argument.
 
 | Check | Command | What to report |
 |---|---|---|
-| Visibility | `gh repo view --json visibility` | `PUBLIC` / `PRIVATE` / `INTERNAL`, verbatim |
-| Collaborators | `gh api repos/{owner}/{repo}/collaborators --jq '.[] \| {login, permissions}'` | One line per collaborator: login + highest permission (`admin`/`maintain`/`push`/`triage`/`pull`). Count them — exactly one collaborator marks the repo **solo-maintained**, used to size the branch-protection fix in Step 2. |
+| Visibility | `gh repo view --json visibility` | Always **context, not a Finding** — no fix-phase option; `PUBLIC` / `PRIVATE` / `INTERNAL`, verbatim. |
+| Collaborators | `gh api repos/{owner}/{repo}/collaborators --jq '.[] \| {login, permissions}'` | Always **context, not a Finding** — no fix-phase option. One line per collaborator: login + highest permission (`admin`/`maintain`/`push`/`triage`/`pull`). Count them — exactly one collaborator marks the repo **solo-maintained**, used to size the branch-protection fix in Step 2. |
 | Reachable self-hosted jobs | Read each workflow file; no separate command | See *Trigger crossing* below for the exact rule and a worked fixture. Each matching job is a **Finding**, one per job. |
 | Dependabot config | `gh api repos/{owner}/{repo}/contents/.github/dependabot.yml` | Always **context, not a Finding** — no fix-phase option either way. 404 → "no dependabot config found" (there's no config to inspect). Present → decode the base64 `content` field and report whether `updates[].target-branch` (or its default) names an in-repo branch matching a build-triggering pattern. This confirms the configured target, not the absence of a fork-based mirror/sync layered on top of it — no single API call verifies that, so report it as a known residual gap rather than implying it's covered. |
 | Actions pinning | Read each workflow file; regex each `uses:` value | A value shaped `owner/repo@<40-hex-char>` is pinned to a SHA — passes. Anything else (`@v4`, `@main`, `@latest`, a short SHA) is a **Finding**, one per occurrence, identified by file path + job name + the `uses:` value. |
