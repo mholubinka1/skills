@@ -94,10 +94,10 @@ Windows shells:
     Not `setx`: avoids `setx`'s ~1024-character truncation risk on an already-long `PATH`,
     while still triggering the same `WM_SETTINGCHANGE` broadcast `setx` relies on, so freshly
     opened `cmd.exe`/PowerShell windows pick it up without a reboot. A failure at any point
-    (`powershell.exe` missing, the helper erroring, unexpected output) is a hard `install.sh`
-    failure (non-zero exit, clear message) rather than a silent degrade — the rc-file wiring
-    may have already succeeded, but the user must not be left believing the Windows PATH was
-    set when it wasn't.
+    (`cygpath` or `powershell.exe` missing, the helper erroring, unexpected output) is a hard
+    `install.sh` failure (non-zero exit, clear message) rather than a silent degrade — the
+    rc-file wiring may have already succeeded, but the user must not be left believing the
+    Windows PATH was set when it wasn't.
   - Idempotency without marker comments (a `PATH` string has nowhere to put them): scan the
     current per-user `PATH` for any directory that contains both `update-skills.cmd` and
     `update-skills.ps1` — remove all such entries, then append the current `bin_dir` once.

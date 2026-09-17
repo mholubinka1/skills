@@ -141,14 +141,23 @@ function Test-HooksOk {
 if ($LASTEXITCODE -ne 0) {
     Say "Installing pre-commit into .venv"
     & $venvPy -m pip install --quiet pre-commit
+    if ($LASTEXITCODE -ne 0) {
+        Die "'pip install pre-commit' failed - see the output above for the reason."
+    }
 }
 if (-not (Test-HooksOk)) {
     Say "Installing git hooks"
     & $venvPy -m pre_commit install *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Die "'pre-commit install' failed - see the output above for the reason."
+    }
 }
 
 # --- sync --------------------------------------------------------------
 Say "Syncing skills to ~/.claude/skills"
 & $venvPy sync_claude_skills.py
+if ($LASTEXITCODE -ne 0) {
+    Die "sync_claude_skills.py failed - see the output above for the reason."
+}
 
 Say "Done - ~/.claude/skills is up to date with origin/$BRANCH."
