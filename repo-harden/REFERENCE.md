@@ -35,8 +35,8 @@ there is no parsing script in this repo's skills, by convention.
      that matches an arbitrary or bot-created branch pattern (e.g. `['**']`, `['*']`, or one
      that includes a known bot prefix like `dependabot/**`); or a `branches-ignore:` denylist
      that doesn't name every known bot prefix in play (cross-reference the repo's actual bot
-     configs, e.g. `dependabot.yml` — `branches-ignore: ['main']` alone still lets
-     `dependabot/**`/`renovate/**` through). A `branches-ignore:` naming every bot prefix the
+     configs, e.g. `dependabot.yml`/`dependabot.yaml` — `branches-ignore: ['main']` alone
+     still lets `dependabot/**`/`renovate/**` through). A `branches-ignore:` naming every bot prefix the
      repo actually uses clears the *bot* risk this check targets; it can never guarantee
      exclusion of an arbitrary human-created branch the way a `branches:` allowlist can —
      that residual is a non-admin-collaborator-push risk, not this check's concern. Check
