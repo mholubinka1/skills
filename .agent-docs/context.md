@@ -57,7 +57,7 @@ A command placed on the user's `PATH` by `install.sh` that fast-forwards the loc
 _Avoid_: updater, refresh script, sync command
 
 **`install.sh`**:
-The one-time setup script at the repo root. Adds the repo's `bin/` directory to `PATH` via a marker-delimited block in the user's shell rc file (`~/.zshrc` for zsh, else `~/.bashrc`). Idempotent — re-running drops any existing block(s) and re-appends a single current one.
+The one-time setup script at the repo root. Adds the repo's `bin/` directory to `PATH`: via a marker-delimited block in the user's shell rc file (`~/.zshrc` for zsh, else `~/.bashrc`) on every platform, and, on Windows, additionally onto the persistent per-user `PATH` environment variable so `update-skills.cmd`/`update-skills.ps1` resolve from `cmd.exe` and PowerShell too. Idempotent on both paths — re-running drops any stale entry (rc-file block, or a prior `PATH` directory holding `update-skills.cmd`/`update-skills.ps1`) and replaces it with one current entry.
 _Avoid_: installer, bootstrap script
 
 ### Workflow Execution
