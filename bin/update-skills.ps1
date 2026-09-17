@@ -65,11 +65,12 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # --- resolve Python interpreters ----------------------------------------
-# Overall precedence matches .pre-commit-config.yaml's sync-claude-skills hook
-# (.venv/Scripts/python[.exe] -> python3 -> python), but the two system
-# candidates are only ever used to *create* the venv, never to run pip or the
-# sync - every install and the sync itself run against the venv, so
-# `pip install` can't leak into system/user site-packages.
+# Shape matches .pre-commit-config.yaml's sync-claude-skills hook: venv
+# interpreter first, system interpreters only as a fallback to *create* the
+# venv, never to run pip or the sync - every install and the sync itself run
+# against the venv, so `pip install` can't leak into system/user
+# site-packages. The system-candidate list itself differs (py/python here,
+# not that hook's python3/python) - see the Windows-native rationale below.
 
 function Test-RunsOk([string]$Interpreter) {
     if (-not $Interpreter) { return $false }
