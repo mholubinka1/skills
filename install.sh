@@ -122,11 +122,11 @@ fi
 # cmd.exe and PowerShell both read this one per-user environment variable
 # directly — a freshly opened window picks it up with no $PROFILE edit.
 if [ "${OS:-}" = "Windows_NT" ]; then
-	if command -v cygpath >/dev/null 2>&1; then
-		win_bin_dir="$(cygpath -w "$bin_dir")"
-	else
-		win_bin_dir="$bin_dir"
+	if ! command -v cygpath >/dev/null 2>&1; then
+		echo "install.sh: cygpath not found — cannot convert $bin_dir to a native Windows path for cmd.exe/PowerShell." >&2
+		exit 1
 	fi
+	win_bin_dir="$(cygpath -w "$bin_dir")"
 
 	if ! command -v powershell.exe >/dev/null 2>&1; then
 		echo "install.sh: powershell.exe not found — cannot configure the Windows PATH for cmd.exe/PowerShell. Add $win_bin_dir to your user PATH manually." >&2
