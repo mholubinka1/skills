@@ -59,12 +59,12 @@ itself a plain "not protected" result to report.
   option, same treatment as secrets exposure): does `.github/dependabot.yml` (or
   equivalent) exist, and do the PRs it opens land in-repo on a branch pattern that would
   trigger a build.
-- **Branch protection** — `gh api repos/{owner}/{repo}/branches/{branch}/protection` on the
-  default branch: required status checks, PR requirement, force-push/delete restriction,
-  admin enforcement. Report each sub-setting on its own line; if any is missing or unsafe,
-  that's one combined **Finding** for the branch as a whole (not one per sub-setting) — its
-  single fix-phase option applies every missing setting in one atomic payload, matching the
-  one combined command in the Fix commands table.
+- **Branch protection** — the default branch's protection settings (see *Checks table* in
+  REFERENCE.md for the exact command): required status checks, PR requirement, force-push/
+  delete restriction, admin enforcement. Report each sub-setting on its own line; if any is
+  missing or unsafe, that's one combined **Finding** for the branch as a whole (not one per
+  sub-setting) — its single fix-phase option applies every missing setting in one atomic
+  payload, matching the one combined command in the Fix commands table.
 - **Secrets exposure** — a job with self-hosted/runner-level access that also has
   `secrets:` or `${{ secrets.* }}` in scope is reported as **context, not a fixable
   Finding** — there's no safe automated fix (removing a job's secrets access requires
@@ -89,9 +89,9 @@ option, one over-broad trigger is another). If the answer selects none of them, 
 each option the user did select, apply its fix from the Fix commands table in
 REFERENCE.md:
 
-- **Pin action** → resolve the tag to a commit SHA (`gh api repos/{action}/commits/{tag}`)
-  and rewrite that `uses:` line to the SHA, keeping the original version as a trailing
-  comment (`uses: actions/checkout@<sha> # v4`).
+- **Pin action** → resolve the tag to a commit SHA (see *Fix commands* in REFERENCE.md for
+  the exact command) and rewrite that `uses:` line to the SHA, keeping the original version
+  as a trailing comment (`uses: actions/checkout@{sha} # v4`).
 - **Restrict trigger** → for `pull_request`/`pull_request_target`, `branches-ignore:`
   doesn't work (it filters the PR's base branch, not the bot's head branch), so gate the job
   behind an `environment:` requiring manual approval instead — the only trigger-restricting
