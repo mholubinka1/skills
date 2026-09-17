@@ -107,8 +107,11 @@ together) and validated against the `create-a-skill` review checklist.
 - [x] Given the audit has produced one or more findings, when the fix phase begins, then each
       finding is presented as its own selectable line in a multi-select `AskUserQuestion`, and
       only the selected lines are applied. (Verified by inspection of `SKILL.md` Step 2: one
-      `AskUserQuestion` with `multiSelect: true`, one option per individual Finding, never
-      grouped by category.)
+      option per individual Finding, never grouped by category, every question
+      `multiSelect: true`. Corrected on review: the original text assumed a single
+      `AskUserQuestion` call always suffices, but the tool caps each question at 4 options and
+      each call at 4 questions — Findings beyond that batch across multiple questions/calls,
+      with the selections combined into one set before applying anything.)
 - [x] Given a repo with a single collaborator/maintainer, when a branch-protection fix is
       offered, then it does not require a second reviewer, but still requires status checks
       and blocks force-push/delete. (This repo is itself the live solo-maintainer example —
@@ -119,7 +122,14 @@ together) and validated against the `create-a-skill` review checklist.
       request before merging" entirely — allowing direct pushes — not just the second-reviewer
       count this criterion asked to skip. Changed to
       `required_pull_request_reviews[required_approving_review_count]=0`, a non-null object
-      that keeps the PR requirement while requiring zero approvals.)
+      that keeps the PR requirement while requiring zero approvals. Also corrected on review:
+      the payload originally sent a fixed set of fields unconditionally, which — since this
+      endpoint's `PUT` fully replaces the protection object — could silently reset unrelated
+      settings the check never flagged (existing push restrictions, review dismissal rules).
+      It now reads the branch's current protection first and carries those fields through
+      untouched, and no longer sends an unverified empty-array flag when no CI exists yet to
+      name a status check — it explicitly disables the status-check requirement and reports
+      why, rather than guessing at `gh api` syntax that was never confirmed to work.)
 - [x] Given a selected "pin action" fix, when applied, then the action's `uses:` is rewritten
       to the resolved commit SHA with the original version kept as a trailing comment.
       (Command construction verified live: `gh api repos/actions/checkout/commits/v4 --jq

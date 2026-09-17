@@ -85,11 +85,15 @@ skipped — with no check silently omitted, whether or not any finding turned up
 
 Skip this step entirely if Step 1 found zero Findings — say so and stop; nothing changes.
 
-Otherwise, issue one `AskUserQuestion` with `multiSelect: true` and one option per
-individual Finding from Step 1 (never grouped by category — one unpinned action is one
-option, one over-broad trigger is another). If the answer selects none of them, report
-"no fixes selected — nothing changed" and stop; the repo is left exactly as audited. For
-each option the user did select, apply its fix from the Fix commands table in
+Otherwise, present one option per individual Finding from Step 1 (never grouped by
+category — one unpinned action is one option, one over-broad trigger is another) via
+`AskUserQuestion`, every question `multiSelect: true`. `AskUserQuestion` caps each question
+at 4 options and each call at 4 questions: 4 or fewer Findings fit in one question; more than
+4 need multiple questions (up to 4 per question, up to 16 Findings in one call); more than 16
+need further calls, until every Finding has been offered exactly once. Combine the selections
+from every question and call into a single set before applying anything. If that combined set
+is empty, report "no fixes selected — nothing changed" and stop; the repo is left exactly as
+audited. For each Finding the user did select, apply its fix from the Fix commands table in
 REFERENCE.md:
 
 - **Pin action** → resolve the tag to a commit SHA (see *Fix commands* in REFERENCE.md for

@@ -77,9 +77,12 @@ existing convention — no cross-repo targeting.
   - The full report always prints every check's result, pass or flagged — never a
     findings-only report — so a clean repo gets an explicit, confidence-giving "all clear."
 - **Fix phase:**
-  - Presented as an `AskUserQuestion` multi-select list, **one line per individual finding**
-    (not bundled by category) — e.g. each unpinned action gets its own line, each over-broad
-    trigger gets its own line. Only the selected lines are applied.
+  - Presented via `AskUserQuestion`, **one line per individual finding** (not bundled by
+    category) — e.g. each unpinned action gets its own line, each over-broad trigger gets its
+    own line. `AskUserQuestion` caps each question at 4 options and each call at 4 questions,
+    so more than 4 findings batch across multiple multi-select questions/calls, with the
+    selections combined into one set before anything is applied. Only the selected lines are
+    applied.
   - Rewrite triggers to exclude bot branches from self-hosted jobs (`branches-ignore`), or gate
     with an `environment:` requiring manual approval. Gating actually requires configuring the
     environment's reviewers via the Environments API — referencing an `environment:` name alone
