@@ -51,8 +51,10 @@ itself a plain "not protected" result to report.
   Finding, since enabling it would change every repo in the org at once, a larger blast
   radius than any other fix this skill offers. See *Checks table* in REFERENCE.md for both
   commands.
-- **Dependabot config** — does `.github/dependabot.yml` (or equivalent) exist, and do the
-  PRs it opens land in-repo on a branch pattern that would trigger a build.
+- **Dependabot config** — reported as **context, not a fixable Finding** (no fix-phase
+  option, same treatment as secrets exposure): does `.github/dependabot.yml` (or
+  equivalent) exist, and do the PRs it opens land in-repo on a branch pattern that would
+  trigger a build.
 - **Branch protection** — `gh api repos/{owner}/{repo}/branches/{branch}/protection` on the
   default branch: required status checks, PR requirement, force-push/delete restriction,
   admin enforcement. Report each sub-setting.
