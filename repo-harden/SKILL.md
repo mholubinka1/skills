@@ -95,18 +95,14 @@ REFERENCE.md:
 - **Pin action** → resolve the tag to a commit SHA (see *Fix commands* in REFERENCE.md for
   the exact command) and rewrite that `uses:` line to the SHA, keeping the original version
   as a trailing comment (`uses: actions/checkout@{sha} # v4`).
-- **Restrict trigger** → for `pull_request`/`pull_request_target`, `branches-ignore:`
-  doesn't work (it filters the PR's base branch, not the bot's head branch), so gate the job
-  behind a genuinely protected `environment:` requiring manual approval instead — the only
-  trigger-restricting option for those two events. Adding the `environment:` line to the
-  workflow is not enough by itself: an environment with no configured reviewers gates
-  nothing, since GitHub auto-creates an undefined one with no protection at all; see *Fix
-  commands* in REFERENCE.md for the check-then-configure-then-wire sequence. For a reachable
-  `push`: if it has no branch filter yet, add a fresh `branches-ignore:` naming the bot's
-  prefix; if it already has one, append the missing prefix to it; if it has a `branches:`
-  allowlist instead (`branches:` and `branches-ignore:` can never coexist on one event),
-  rewrite that allowlist in place with negation patterns (`!dependabot/**`) rather than
-  adding a second key. See *Fix commands* in REFERENCE.md for all three cases.
+- **Restrict trigger** → for `pull_request`/`pull_request_target`, branch filtering can't
+  exclude a bot (it matches the PR's *base* branch, not the bot's head branch), so gate the
+  job behind a genuinely protected `environment:` requiring manual approval instead — the
+  only trigger-restricting option for those two events, and adding the `environment:` line
+  alone is not enough on its own. See *Fix commands* in REFERENCE.md for the full
+  check-then-configure-then-wire sequence. For a reachable `push`, the rewrite depends on its
+  current filter (no filter, an existing `branches-ignore:`, or a `branches:` allowlist) —
+  see *Fix commands* in REFERENCE.md for all three cases.
 - **Enable SHA pinning** → the Actions permissions API; see *Fix commands* in REFERENCE.md
   for the exact command.
 - **Branch protection** → size the payload to the collaborator count from Step 1: a
