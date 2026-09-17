@@ -33,7 +33,7 @@ Step 6  review_round < 2? ──Yes──► review_round++; re-trigger Copilot 
 Step 7  Re-capture baseline; poll as in Step 3:
         threads or suppressed comments? ──► Step 4 | clean or exhausted? ──► Step 7b
 Step 7b Not exempt and ≥1 Fix applied this invocation? ──► generalise each fixed finding,
-        dedupe against .agent-docs/review.md, append, commit + push. Else ──► Step 8
+        dedupe against the Criteria gist, append via `gh gist edit`. Else ──► Step 8
 Step 8  Report PR link — PR is ready to merge
 ```
 
@@ -113,27 +113,29 @@ If `review_round >= 2`, skip to Step 7b. Otherwise increment to 2 and re-trigger
 
 Re-capture the baseline Copilot review ID, then poll as in Step 3. New unresolved threads or suppressed comments → return to Step 4. Neither (or clean review detected) → continue to Step 7b.
 
-## Step 7b — Distil review criteria into `.agent-docs/review.md`
+## Step 7b — Distil review criteria into the shared Criteria gist
 
-Turn what Copilot caught on this PR into repo review criteria the `code-review` skill will
-apply to the next one.
+Turn what Copilot caught on this PR into review criteria shared across every repo and
+machine, via the [Criteria gist](../code-review/CRITERIA-GIST.md), which the `code-review`
+skill reads on every future review.
 
 **Guard.** Run this step only if `review_round` was set at Step 2b **and** at least one
 Step 4 decision across the whole invocation was **Fix**. Otherwise skip to Step 8.
 
 **Collect.** Every finding this invocation whose decision was Fix — real threads replied to
 with "Fixed." and suppressed entries recorded "Fixed." in a Step 4d comment. Exclude every
-push-back: `.agent-docs/review.md` records only criteria accepted by changing code.
+push-back: the Criteria gist records only criteria accepted by changing code.
 
-**Generalise, dedupe, write.** For each fixed finding write one generalised bold-label + imperative criterion ending `(PR #<number>)`; two findings that generalise to the same rule become one entry. Drop any that a current `.agent-docs/review.md` entry already covers, and append the survivors — see the Distil Review Criteria section in [REFERENCE.md](REFERENCE.md) for the generalising technique and the append/header details. Then commit that file alone:
+**Generalise, dedupe, write.** For each fixed finding write one generalised bold-label +
+imperative criterion tagged `(repo#PR)`, e.g. `(acme-api#64)`; two findings that generalise to
+the same rule become one entry. Read the gist ID from `code-review/CRITERIA-GIST.md` (this
+skill's sibling `code-review` skill directory), fetch the gist's current content, drop any
+candidate a current entry already covers, and append the survivors — see the Distil Review
+Criteria section in [REFERENCE.md](REFERENCE.md) for the generalising technique, the repo-name
+derivation, and the exact `gh gist` commands. This is a live network write to the gist, not a
+local file change — there is nothing to commit or push in the target repo for this step.
 
-```bash
-git add .agent-docs/review.md
-git commit -m "docs: record <N> review criteria from Copilot review"
-git push
-```
-
-`<N>` is the count added; if dedupe removed every candidate, make no commit. Continue to
+`<N>` is the count added; if dedupe removed every candidate, make no gist write. Continue to
 Step 8.
 
 ## Step 8 — Report completion
