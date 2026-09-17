@@ -107,11 +107,13 @@ REFERENCE.md:
   allowlist instead (`branches:` and `branches-ignore:` can never coexist on one event),
   rewrite that allowlist in place with negation patterns (`!dependabot/**`) rather than
   adding a second key. See *Fix commands* in REFERENCE.md for all three cases.
-- **Enable SHA pinning** → the Actions permissions API.
+- **Enable SHA pinning** → the Actions permissions API; see *Fix commands* in REFERENCE.md
+  for the exact command.
 - **Branch protection** → size the payload to the collaborator count from Step 1: a
   solo-maintained repo skips requiring any approving review — the sole collaborator can't
   approve their own PR, so requiring even one would make every PR unmergeable — but still
-  requires status checks and blocks force-push/delete, same as a multi-maintainer repo.
+  requires status checks and blocks force-push/delete, same as a multi-maintainer repo. See
+  *Fix commands* in REFERENCE.md for the exact payloads.
 
 If the harness's own permission layer refuses a settings change (e.g. a tool-use denial),
 report the refusal on that finding's line and move to the next selected fix — never retry
