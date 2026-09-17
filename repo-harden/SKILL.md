@@ -29,11 +29,13 @@ on to the next check rather than aborting the run. A 404 from the branch-protect
 is not a permission failure — it means the branch has no protection configured, which is
 itself a plain "not protected" result to report.
 
-- **Visibility & collaborators** — `gh repo view --json visibility` and
-  `gh api repos/{owner}/{repo}/collaborators`. Reported as **context, not a fixable
-  Finding** — no fix-phase option, since changing a repo's visibility or a collaborator's
-  access isn't a call this skill makes on the user's behalf. Report visibility plainly, and
-  each collaborator with their permission level. A single collaborator marks this repo
+- **Visibility & collaborators** — one `gh repo view` call (see *Checks table* in
+  REFERENCE.md for its exact fields — it also resolves `{owner}`, `{repo}`, and
+  `{default_branch}` for every other check below) and `gh api
+  repos/{owner}/{repo}/collaborators`. Reported as **context, not a fixable Finding** — no
+  fix-phase option, since changing a repo's visibility or a collaborator's access isn't a
+  call this skill makes on the user's behalf. Report visibility plainly, and each
+  collaborator with their permission level. A single collaborator marks this repo
   **solo-maintained** — remember this for Step 2's branch-protection fix sizing.
 - **Reachable self-hosted jobs** — read every file under `.github/workflows/` with `Read`
   and reason per job (no YAML-parsing script): cross each job's `runs-on:` against the
