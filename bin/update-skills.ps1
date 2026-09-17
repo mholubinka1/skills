@@ -10,7 +10,7 @@
 # native command's stderr output into a terminating error under 'Stop',
 # which would crash the whole script the moment a probed interpreter (e.g.
 # the Windows Store `python3` alias stub) writes to stderr, instead of
-# letting the explicit $LASTEXITCODE checks below handle it gracefully —
+# letting the explicit $LASTEXITCODE checks below handle it gracefully -
 # the same "probe by running, check the exit code" contract as the bash
 # version's `>/dev/null 2>&1` probe.
 $BRANCH = 'main'
