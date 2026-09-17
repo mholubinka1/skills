@@ -46,6 +46,10 @@ itself a plain "not protected" result to report.
   doesn't name every bot prefix actually in play (e.g. only `['main']`, still letting
   `dependabot/**` through) — presence of the key proves nothing on its own. See *Trigger
   crossing* in REFERENCE.md for the exact rule and its two worked fixtures.
+- **Dependabot config** — reported as **context, not a fixable Finding** (no fix-phase
+  option, same treatment as secrets exposure): does `.github/dependabot.yml` (or
+  equivalent) exist, and do the PRs it opens land in-repo on a branch pattern that would
+  trigger a build.
 - **Actions pinning** — every `uses:` pinned to a tag or branch instead of a full commit SHA
   is a **Finding**, one per occurrence (same action pinned in two places is two findings,
   since each is rewritten at its own file/line). Separately check `sha_pinning_required`:
@@ -55,10 +59,6 @@ itself a plain "not protected" result to report.
   Finding, since enabling it would change every repo in the org at once, a larger blast
   radius than any other fix this skill offers. See *Checks table* in REFERENCE.md for both
   commands.
-- **Dependabot config** — reported as **context, not a fixable Finding** (no fix-phase
-  option, same treatment as secrets exposure): does `.github/dependabot.yml` (or
-  equivalent) exist, and do the PRs it opens land in-repo on a branch pattern that would
-  trigger a build.
 - **Branch protection** — the default branch's protection settings (see *Checks table* in
   REFERENCE.md for the exact command): required status checks, PR requirement, force-push/
   delete restriction, admin enforcement. Report each sub-setting on its own line; if any is
