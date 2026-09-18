@@ -173,7 +173,7 @@ The set of paths by which an untrusted contributor — a PR from a fork, or a bo
 _Avoid_: attack surface, security boundary
 
 **Reachable self-hosted job**:
-A workflow job whose `runs-on:` names a self-hosted or custom-label runner and whose trigger a bot or non-admin contributor can hit — `pull_request`, `pull_request_target`, or a `push` with no branch filter or one matching an arbitrary/bot-created branch (e.g. `['**']`). See `repo-harden/REFERENCE.md`'s Trigger crossing section for the exact rule.
+A workflow job whose `runs-on:` names a self-hosted or custom-label runner and whose trigger is one a bot or non-admin contributor can hit — `pull_request`, `pull_request_target`, or a `push` with no branch filter or one matching an arbitrary/bot-created branch (e.g. `['**']`). See `repo-harden/REFERENCE.md`'s Trigger crossing section for the exact rule.
 _Avoid_: exposed runner, vulnerable job
 
 **Finding** (repo-harden sense):

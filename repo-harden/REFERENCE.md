@@ -11,10 +11,10 @@ argument.
 
 | Check | Command | What to report |
 |---|---|---|
-| Visibility | `gh repo view --json visibility,owner,name,defaultBranchRef` | Always **context, not a Finding** — no fix-phase option; report `.visibility` verbatim (`PUBLIC` / `PRIVATE` / `INTERNAL`). This is the one `gh repo view` call the whole skill makes — `{owner}` is `.owner.login` (a nested object, not a bare string), `{repo}` is `.name`, and `{default_branch}` is `.defaultBranchRef.name`; resolve all three here and reuse them for every other check and fix below — nothing else re-fetches them. |
-| Collaborators | `gh api repos/{owner}/{repo}/collaborators --jq 'map({login, role_name})'` | Always **context, not a Finding** — no fix-phase option. One entry per collaborator: login + highest permission, report each as its own line. `role_name` is GitHub's own precomputed highest-permission string (`admin`/`maintain`/`write`/`triage`/`read`) — use it directly rather than reducing the raw `permissions` object (`{admin, maintain, push, pull, triage}`, five separate booleans) yourself. Count collaborators — exactly one marks the repo **solo-maintained**, used to size the branch-protection fix in Step 2. (`map(...)` avoids a raw pipe character in this table cell — GFM table parsing splits a cell on any pipe even inside a code span, so an escaped one leaks a literal backslash into the command if copied verbatim, and an unescaped one breaks the table itself.) |
+| Visibility | `gh repo view --json visibility,owner,name,defaultBranchRef` | Always **context, not a Finding** — no fix-phase option; report `.visibility` verbatim (`PUBLIC` / `PRIVATE` / `INTERNAL`). This is the one `gh repo view` call the whole skill makes — `{owner}` is `.owner.login` (a nested object, not a bare string), `{repo}` is `.name`, and `{default_branch}` is `.defaultBranchRef.name`; resolve all three here and reuse them for every other check and fix below — nothing else re-fetches them. Unlike every other check's `403`, this one can't be reported as "skipped — insufficient permission" and left at that: every later check depends on `{owner}`/`{repo}`/`{default_branch}`, which are never resolved without this call succeeding. A `403` here means the whole audit stops, reported plainly as "can't run — no read access to this repo," not folded into the per-check skip pattern. |
+| Collaborators | `gh api --paginate repos/{owner}/{repo}/collaborators --jq 'map({login, role_name})'` | Always **context, not a Finding** — no fix-phase option. One entry per collaborator: login + highest permission, report each as its own line. `role_name` is GitHub's own precomputed highest-permission string (`admin`/`maintain`/`write`/`triage`/`read`) — use it directly rather than reducing the raw `permissions` object (`{admin, maintain, push, pull, triage}`, five separate booleans) yourself. `--paginate` matters here: this endpoint pages at 30 by default, and without it a repo with more collaborators than one page would undercount — including, worst case, reporting a multi-maintainer repo as **solo-maintained** and sizing the branch-protection fix to require zero approvals. `--paginate` combined with `--jq` runs the filter once per page rather than once on the combined result, so this command prints one JSON array per page (up to 30 collaborators each), not a single merged array — read and count every printed array together, not just the first one. Count collaborators across every page — exactly one marks the repo **solo-maintained**, used to size the branch-protection fix in Step 2. (`map(...)` avoids a raw pipe character in this table cell — GFM table parsing splits a cell on any pipe even inside a code span, so an escaped one leaks a literal backslash into the command if copied verbatim, and an unescaped one breaks the table itself; this is also why this row doesn't use the two-command shell-pipe fix the gating fix's admin-only fetch below uses instead, since that fix needs a single `--argjson`-safe combined array and this row's per-page output is fine as several.) |
 | Reachable self-hosted jobs | Read each workflow file; for a job that already has an `environment:` key, also `gh api repos/{owner}/{repo}/environments/<env-name> --jq '.protection_rules'` (see *Trigger crossing* rule 3) | See *Trigger crossing* below for the exact rule and its two worked fixtures. Each matching job is a **Finding**, one per job. |
-| Dependabot config | 1. `gh api repos/{owner}/{repo}/contents/.github/dependabot.yml` 2. If that 404s, also try `gh api repos/{owner}/{repo}/contents/.github/dependabot.yaml` — GitHub accepts either extension | Always **context, not a Finding** — no fix-phase option either way. The Contents API returns the same 404 whether a file is genuinely absent or the token can't read repo contents (deliberately, to avoid leaking a private repo's existence) — there's no reliable way to tell those apart from this endpoint alone, so report both 404s as "no dependabot config found (or contents inaccessible to this token — GitHub returns an identical 404 for both)" rather than asserting a genuine absence. Either present → decode the base64 `content` field and report whether `updates[].target-branch` (or its default) names an in-repo branch matching a build-triggering pattern. This confirms the configured target, not the absence of a fork-based mirror/sync layered on top of it — no single API call verifies that, so report it as a known residual gap rather than implying it's covered. |
+| Dependabot config | 1. `gh api repos/{owner}/{repo}/contents/.github/dependabot.yml` 2. If that 404s, also try `gh api repos/{owner}/{repo}/contents/.github/dependabot.yaml` — GitHub accepts either extension | Always **context, not a Finding** — no fix-phase option either way. The Contents API returns the same 404 whether a file is genuinely absent or the token can't read repo contents (deliberately, to avoid leaking a private repo's existence) — there's no reliable way to tell those apart from this endpoint alone, so report both 404s as "no dependabot config found (or contents inaccessible to this token — GitHub returns an identical 404 for both)" rather than asserting a genuine absence. Either present → decode the base64 `content` field and report whether `updates[].target-branch` (or its default) names an in-repo branch matching a build-triggering pattern. This confirms the configured target, not the absence of a fork-based mirror/sync layered on top of it — no single API call verifies that, so report it as a known residual gap rather than implying it's covered. This check inspects only Dependabot's own config file — it doesn't look for an equivalent tool's config (a `renovate.json`/`.github/renovate.json`/`.renovaterc*` for Renovate, or any other bot), even though `dependabot/**`/`renovate/**` are both treated as known bot prefixes elsewhere in this document. A Renovate-only repo will report "no dependabot config found" here despite having an equivalent bot active — report this as a second known residual gap alongside the fork-mirror one, rather than implying every bot config is covered. |
 | Actions pinning | Read each workflow file; regex each `uses:` value | Skip entirely (not a Finding, out of scope for this check) any `./path/to/local-action` (an in-repo local action, already versioned with the workflow's own commit) and any `docker://...` value regardless of whether it has an `@` — a Docker action is pinned, if at all, by an image digest (`docker://image@sha256:<64-hex>`), a completely different mechanism from a git commit SHA, so it's never evaluated by this check either way (not flagged unpinned, not credited as pinned). For every remaining value, check the substring after its **last** `@`: 40 hex characters means pinned to a SHA — passes, and this correctly covers both a plain action ref (`owner/repo@<sha>`) and a reusable workflow ref with a path component (`owner/repo/.github/workflows/build.yml@<sha>`), since only the ref after the last `@` is checked, regardless of how many `/`-segments precede it. Anything else after that last `@` (`v4`, `main`, `latest`, a short SHA) is a **Finding**, one per occurrence, identified by file path + job name + the `uses:` value. |
 | `sha_pinning_required` | 1. `gh api repos/{owner}/{repo}/actions/permissions --jq '{enabled, sha_pinning_required}'` (repo-level) 2. If `{owner}` is an organization (not a user account — `gh api users/{owner} --jq .type` returns `Organization`), also try `gh api orgs/{owner}/actions/permissions --jq .sha_pinning_required` | Report the repo-level `sha_pinning_required` boolean; `false` **and** `enabled: true` together are a **Finding** (its fix is "Enable SHA pinning" from the Fix commands table below, which is repo-level only) — this keeps it reachable through the same Finding-driven multi-select as every other check, including in an otherwise-clean repo where it's the only thing to offer. `sha_pinning_required: true` is a pass regardless of `enabled`. `enabled: false` (Actions genuinely disabled repo-wide) is reported as **context, not a Finding** — see the Fix commands row for why this fix never turns Actions on as a side effect. If the org-level call succeeds, report its value too as **context, not a Finding** — enabling it org-wide would affect every repo in the org at once, a larger blast radius than any other fix this skill offers, so there is no fix-phase option for it (an org-enforced `true` can still mask/override a repo-level `false`, which is exactly why it's worth showing even though it isn't actionable here). A `403` on the org-level call is "skipped — insufficient permission" like any other org-admin-only read, not a run-aborting failure. |
 | Branch protection | `gh api repos/{owner}/{repo}/branches/{default_branch}/protection` | `404` with body `"message": "Branch not protected"` → report "not protected"; this is itself a **Finding** (missing protection entirely), fixed by the same payload below (expected result, not an error). `403` → report that check as "skipped — insufficient permission" (see *Permission handling*). `200` → report `required_status_checks`, `required_pull_request_reviews` (and its `required_approving_review_count`), `allow_force_pushes.enabled`, `allow_deletions.enabled`, `enforce_admins.enabled`, one line each; if any is missing or set to the unsafe value (force-push/deletion allowed, no status checks, no PR requirement, `enforce_admins.enabled: false`), that's one combined **Finding** for the branch as a whole — not one per sub-setting, since the Fix commands table's payload sets every sub-setting in a single atomic call. Keep this response around: *Applying the branch-protection fix* below reuses it rather than re-fetching. |
@@ -31,22 +31,49 @@ there is no parsing script in this repo's skills, by convention.
    - `pull_request_target` (any `types:` — this trigger runs with the base branch's
      secrets and is the highest-risk case, since it executes attacker-controlled PR code
      with trusted context)
-   - `push` with no `branches:`/`branches-ignore:` filter at all; a `branches:` allowlist
-     that matches an arbitrary or bot-created branch pattern (e.g. `['**']`, `['*']`, or one
-     that includes a known bot prefix like `dependabot/**`) **and doesn't also negate every
-     known bot prefix within that same list** (GitHub evaluates negation patterns like
-     `!dependabot/**` within `branches:` itself, so
+   - `push` with **neither** a `branches:`/`branches-ignore:` filter **nor** a
+     `tags:`/`tags-ignore:` filter — fully unfiltered, reachable by both branch and tag
+     pushes. A `push` scoped by `tags:`/`tags-ignore:` alone (no `branches:`/
+     `branches-ignore:` at all) is a tag-only trigger — GitHub only runs it on a tag push, and
+     bots don't push tags, so it's out of scope for this check regardless of the tags pattern,
+     even though it has "no branch filter" in the literal sense.
+   - a `branches:` allowlist that matches an arbitrary or bot-created branch pattern (e.g.
+     `['**']`, `['*']`, or one that includes a known bot prefix like `dependabot/**`) **and
+     doesn't also negate every known bot prefix within that same list** (GitHub evaluates
+     negation patterns like `!dependabot/**` within `branches:` itself, so
      `branches: ['**', '!dependabot/**', '!renovate/**']` is NOT reachable by those bots even
-     though `'**'` is still literally present); or a `branches-ignore:` denylist that doesn't
-     name every known bot prefix in play (cross-reference the repo's actual bot configs, e.g.
-     `dependabot.yml`/`dependabot.yaml` — `branches-ignore: ['main']` alone still lets
-     `dependabot/**`/`renovate/**` through). Either form of exclusion — a `branches-ignore:`
-     denylist, or negation patterns inside a `branches:` allowlist — naming every bot prefix
-     the repo actually uses clears the *bot* risk this check targets; neither can guarantee
-     exclusion of an arbitrary human-created branch the way a plain `branches:` allowlist
-     with no negations can — that residual is a non-admin-collaborator-push risk, not this
-     check's concern. Check what's actually excluded, not whether `'**'` or the key itself is
-     present.
+     though `'**'` is still literally present).
+   - a `branches-ignore:` denylist that doesn't **cover** every known bot prefix in play
+     (cross-reference the repo's actual bot configs, e.g. `dependabot.yml`/`dependabot.yaml`
+     — `branches-ignore: ['main']` alone still lets `dependabot/**`/`renovate/**` through).
+     "Cover" means semantically, not just literally: a catch-all entry like `'**'` denies
+     every branch, bot-created or not, even though no bot-prefix string appears in the list
+     — don't require a literal `dependabot/**`-shaped entry when a broader pattern already
+     excludes everything a narrower one would.
+
+   Either form of exclusion — a `branches-ignore:` denylist, or negation patterns inside a
+   `branches:` allowlist — covering every bot prefix the repo actually uses clears the *bot*
+   risk this check targets; neither can guarantee exclusion of an arbitrary human-created
+   branch the way a plain `branches:` allowlist with no negations can — that residual is a
+   non-admin-collaborator-push risk, not this check's concern. Check what's actually excluded,
+   not whether `'**'` or the key itself is present.
+
+   **`workflow_call` propagation**: a workflow declaring `on: workflow_call` (a reusable
+   workflow) has no bot-reachable trigger of its own by this rule — but every job inside it
+   still inherits reachability from whoever calls it, since the caller's trigger is what
+   actually runs it. Search every `.github/workflows/*.yml`/`*.yaml` file in this repo for a
+   `jobs.<id>.uses:` referencing this file. A `./`-relative reference (same-repo) is directly
+   readable — recursively apply this same rule 1 to the *caller* workflow's own `on:`; if the
+   caller is itself bot/non-admin-reachable, every job in the called workflow is reachable
+   too, regardless of the called workflow's own `on:`. Track the file paths already visited
+   in this traversal (starting with the workflow being audited) and stop descending into any
+   caller already on that list — GitHub only rejects a `workflow_call` cycle at run time, not
+   in the file on disk, so two files can statically reference each other (or one can
+   reference itself) with nothing to catch it before this rule would otherwise re-read the
+   same files indefinitely. A reference to a workflow in a *different* repo
+   (`owner/repo/.github/workflows/x.yml@ref`) is out of reach for this check — report
+   reachability for that reusable workflow's jobs as "unknown — called from another repo, not
+   traversed" rather than assuming it's safe.
 2. For each `jobs.<name>`, read `runs-on:`. It's **self-hosted or custom-label** unless
    every value in it is one of GitHub's hosted labels (`ubuntu-latest`, `ubuntu-22.04`,
    `windows-latest`, `macos-latest`, etc. — the `<os>-<version>`/`<os>-latest` hosted
@@ -130,9 +157,12 @@ alongside it, since GitHub rejects a workflow declaring both for the same event.
 
 A check's command returning `403` (or `gh`'s `HTTP 403`/"Resource not accessible") means
 the audit's own read lacks scope — report that single check as
-**"skipped — insufficient permission"** and continue to the next check. This is different
-from a `404` on the branch-protection endpoint, which is GitHub's normal signal for
-"no protection configured" and gets reported as a plain (not skipped, not erroring) result.
+**"skipped — insufficient permission"** and continue to the next check, with one exception:
+the Visibility check's own `403` (see the Checks table's Visibility row) can't be treated
+this way, since every later check depends on the `{owner}`/`{repo}`/`{default_branch}` it
+resolves — that one aborts the whole audit instead. This is also different from a `404` on
+the branch-protection endpoint, which is GitHub's normal signal for "no protection
+configured" and gets reported as a plain (not skipped, not erroring) result.
 
 A fix-phase write refused by the harness's own tool-permission layer (the user or their
 settings decline the underlying `gh`/`Write` call) is reported on that finding's line as
@@ -167,7 +197,12 @@ them.
    exactly why this step and step 5 go to this trouble).
    - If the reachable job **already has an `environment:` key**, take its `name` as
      `<env-name>` — whether the key's value is a bare string or a `{name: ..., url: ...}`
-     object; the object form's `url` never belongs in the API URL, only `name` does. Check
+     object; the object form's `url` never belongs in the API URL, only `name` does. If that
+     name isn't a plain literal string — it contains a GitHub Actions expression like
+     `${{ inputs.environment }}`, resolved only at run time — stop: report "can't gate
+     `<env-name-expression>` — environment name is a runtime expression, not a literal;
+     configure this job's environment manually" rather than sending the unresolved expression
+     text as an API path segment. Check
      whether any *other* job — in this workflow file or any other under
      `.github/workflows/` — also references that same environment name (read the files
      directly and reason; no parsing script). If so, it's a **shared environment**: don't
@@ -194,11 +229,24 @@ them.
    than replaces: a step-4 `PUT` that only sends `reviewers`/`prevent_self_review` leaves a
    pre-existing `wait_timer` or `deployment_branch_policy` untouched.
 2. **Fetch eligible reviewers once**, capped at GitHub's 6-reviewer limit, and reuse for step
-   3 too — never re-fetch: `ADMINS=$(gh api repos/{owner}/{repo}/collaborators --jq
-   '(map(if .role_name == "admin" then {type:"User", id} else empty end))[0:6]')`. If
-   `$ADMINS` is `[]`, stop and report "can't gate `<env-name>` — no eligible reviewer found":
-   an empty `reviewers` array creates zero protection rules, the exact no-op this fix exists
-   to avoid.
+   3 too — never re-fetch: `ADMINS=$(gh api --paginate repos/{owner}/{repo}/collaborators | jq
+   '[.[] | select(.role_name == "admin") | {type:"User", id}] | .[0:6]')`. This has to be two
+   separate commands joined by a shell pipe, not `--paginate` combined with `gh api`'s own
+   `--jq` flag — `gh api` outright rejects `--slurp` together with `--jq` (verified live:
+   "the `--slurp` option is not supported with `--jq`"), and `--paginate` without `--slurp`
+   runs `--jq` once *per page* rather than once on the combined result (verified live against
+   a real multi-page endpoint: four pages of a `--jq 'length'` count printed four separate
+   numbers, not one combined count) — so a repo with admins spread across more than one page
+   would end up with `$ADMINS` holding several concatenated JSON arrays instead of one, which
+   then fails outright feeding into step 3's `--argjson`, and separately lets `[0:6]` cap each
+   page rather than the true combined set. `gh api --paginate` with no `--jq` at all, though,
+   already concatenates every page's array into one single combined array on its own (verified
+   live) — piping *that* through a plain `jq` filter afterward runs the filter once, over the
+   whole combined set, correctly. Without `--paginate` at all, an admin beyond the first page
+   is silently missed, and `$ADMINS` could end up `[]` or an arbitrary subset even though
+   eligible admins exist. If `$ADMINS` is `[]`, stop and report "can't gate `<env-name>` — no
+   eligible reviewer found": an empty `reviewers` array creates zero protection rules, the
+   exact no-op this fix exists to avoid.
 3. **Build the request body** from `$ADMINS`, with `prevent_self_review` set based on whether
    there's a *second* admin collaborator — `true` if so (without it, the PR author could
    rubber-stamp their own gated run if they're in the reviewer list); `false` for exactly one
@@ -238,14 +286,22 @@ as GitHub adds fields; merging from the live response can't.
    `CURRENT=$(gh api repos/{owner}/{repo}/branches/{default_branch}/protection)`. A 404 here
    means "not protected at all" (the Checks table's own Finding condition) — treat it as
    `CURRENT='{}'`, since there's nothing existing to preserve.
-2. **Determine `required_status_checks`**: existing check-run names (see the literal command
-   in step 3) become `{strict: true, contexts: <that array>}` if any exist. If none exist (no
-   CI configured yet), there is nothing to name — `required_status_checks` becomes `null`
-   instead (status checks genuinely aren't required, an honest reflection of there being no
-   CI to check yet), and report "status checks not enabled — no CI workflow exists yet to
-   name; add one and re-run this fix," while still applying every other part of this fix
-   below. Either way this produces one JSON value, never two conflicting assignments to the
-   same key.
+2. **Determine `required_status_checks`**: if `CURRENT.required_status_checks` is already
+   non-null, **carry its `strict`/`contexts` values through unchanged** (reconstructed into
+   the PUT body's shape, since the GET response isn't valid PUT input as-is — see step 3 —
+   but not otherwise altered) — even if `contexts` looks incomplete, that's a different,
+   unflagged gap out of scope for this fix (this Finding is "status checks missing entirely,"
+   not "status checks incomplete"). Replacing an existing,
+   curated set with every check-run name from the default branch's most recent commit could
+   add a branch-specific check that never runs on a PR (making PRs permanently unmergeable)
+   or drop one intentionally scoped narrower than that snapshot. Only derive a fresh value —
+   from existing check-run names, via the literal command in step 3 — when
+   `required_status_checks` was genuinely `null` to begin with: if any check-run names exist,
+   the fresh value is `{strict: true, contexts: <that array>}`; if none exist (no CI
+   configured yet), it stays `null` (status checks genuinely aren't required, an honest
+   reflection of there being no CI to check yet), and report "status checks not enabled — no
+   CI workflow exists yet to name; add one and re-run this fix," while still applying every
+   other part of this fix below.
 3. **Merge and send** — build the full PUT body from `$CURRENT`, overriding only the four
    settings this fix's Finding actually covers (`required_status_checks` from step 2,
    `enforce_admins`, `required_pull_request_reviews.required_approving_review_count`,
@@ -253,13 +309,16 @@ as GitHub adds fields; merging from the live response can't.
    doesn't touch into the PUT body's shape (GitHub's GET wraps most booleans as
    `{enabled: bool}` and restriction/dismissal actors as `{login: ...}`/`{slug: ...}` objects;
    the PUT body wants bare booleans and bare login/slug strings) rather than sending them back
-   unreshaped, which the endpoint would reject:
+   unreshaped, which the endpoint would reject. `RC` is `0` for the solo-maintained fix, `1`
+   for multi-maintainer — set it from which of the two rows above applies before running this:
 
    ```bash
    CONTEXTS=$(gh api repos/{owner}/{repo}/commits/{default_branch}/check-runs --jq '[.check_runs[].name] | unique')
-   RSC=$(echo "$CONTEXTS" | jq 'if length == 0 then null else {strict: true, contexts: .} end')
-   BODY=$(echo "$CURRENT" | jq --argjson rsc "$RSC" --argjson rc <0 or 1> '{
-     required_status_checks: $rsc,
+   FRESH_RSC=$(echo "$CONTEXTS" | jq 'if length == 0 then null else {strict: true, contexts: .} end')
+   BODY=$(echo "$CURRENT" | jq --argjson fresh "$FRESH_RSC" --argjson rc "$RC" '{
+     required_status_checks: (if .required_status_checks != null then
+       {strict: .required_status_checks.strict, contexts: (.required_status_checks.contexts // [])}
+     else $fresh end),
      enforce_admins: true,
      required_pull_request_reviews: {
        dismiss_stale_reviews: (.required_pull_request_reviews.dismiss_stale_reviews // false),
@@ -267,7 +326,8 @@ as GitHub adds fields; merging from the live response can't.
        require_last_push_approval: (.required_pull_request_reviews.require_last_push_approval // false),
        dismissal_restrictions: {
          users: [(.required_pull_request_reviews.dismissal_restrictions.users // [])[].login],
-         teams: [(.required_pull_request_reviews.dismissal_restrictions.teams // [])[].slug]
+         teams: [(.required_pull_request_reviews.dismissal_restrictions.teams // [])[].slug],
+         apps: [(.required_pull_request_reviews.dismissal_restrictions.apps // [])[].slug]
        },
        bypass_pull_request_allowances: {
          users: [(.required_pull_request_reviews.bypass_pull_request_allowances.users // [])[].login],
@@ -294,8 +354,8 @@ as GitHub adds fields; merging from the live response can't.
 
    `required_pull_request_reviews` must stay a **non-null object** — sending JSON `null` there
    disables "require a pull request before merging" entirely, allowing direct pushes, which is
-   not what "skip requiring a second reviewer" (the solo-maintained case, `$rc=0`) asked for.
-   `$rc` is `0` for solo-maintained, `1` for multi-maintainer — the only value this fix ever
+   not what "skip requiring a second reviewer" (the solo-maintained case, `RC=0`) asked for.
+   `RC` is `0` for solo-maintained, `1` for multi-maintainer — the only value this fix ever
    varies by team size.
 
 `contexts` (a plain string array) is what's used above rather than GitHub's newer `checks`

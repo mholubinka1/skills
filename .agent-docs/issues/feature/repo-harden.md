@@ -75,7 +75,12 @@ together) and validated against the `create-a-skill` review checklist.
       when the audit runs, then that job is flagged as a Reachable self-hosted job finding.
       (This repo has no `.github/workflows/`, so verified against a scratch fixture built in
       the scratchpad, walked by hand against REFERENCE.md's Trigger crossing rule, then
-      deleted — never committed.)
+      deleted — never committed. Corrected on review: this only walked a job's own direct
+      `on:` trigger; the rule was later extended to also propagate reachability through
+      `workflow_call` — a reusable workflow's job inherits reachability from whichever
+      same-repo caller invokes it, tracked with a visited-file guard to avoid an infinite loop
+      on a cycle. Not separately re-verified against a fixture; covered by the fresh
+      REFERENCE.md text's own worked reasoning rather than a new scratch walkthrough.)
 - [x] Given a workflow with a `uses:` pinned to a mutable tag/branch, when the audit runs,
       then that action is flagged as an unpinned-action finding, and the report separately
       states whether `sha_pinning_required` is set org/repo-wide. (Fixture walkthrough for the
@@ -111,7 +116,12 @@ together) and validated against the `create-a-skill` review checklist.
       `multiSelect: true`. Corrected on review: the original text assumed a single
       `AskUserQuestion` call always suffices, but the tool caps each question at 4 options and
       each call at 4 questions — Findings beyond that batch across multiple questions/calls,
-      with the selections combined into one set before applying anything.)
+      with the selections combined into one set before applying anything. Corrected again on
+      review: the tool also requires *at least* 2 options per question, which the batching
+      logic could violate on its own — exactly one Finding overall, or exactly one left over
+      in a final batch. A non-Finding "Skip — apply nothing" option is now added to any
+      question that would otherwise carry only one real option, satisfying the tool's minimum
+      without ever being itself an applicable outcome.)
 - [x] Given a repo with a single collaborator/maintainer, when a branch-protection fix is
       offered, then it does not require a second reviewer, but still requires status checks
       and blocks force-push/delete. (This repo is itself the live solo-maintainer example —

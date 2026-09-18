@@ -14,10 +14,11 @@ only the findings the user picks. See the *Checks table* and *Fix commands* sect
 ## At a glance
 
 ```text
-1 Read-only audit   run every check in REFERENCE.md's Checks table; print one report line
-                    per check — pass, flagged (a Finding), or skipped — never omit a line
-2 Fix phase         findings only → one AskUserQuestion, multiSelect, one option per
-                    individual Finding; apply only what's picked
+1 Read-only audit   run every check in REFERENCE.md's Checks table; print at least one
+                    report line per check — pass, flagged (a Finding, one line per item
+                    when a check flags several), or skipped — never omit a check
+2 Fix phase         findings only → one or more AskUserQuestion calls, multiSelect, one
+                    option per individual Finding; apply only what's picked
 3 Summary           findings first, then which fixes were applied, refused, or unselected
 ```
 
@@ -78,8 +79,11 @@ itself a plain "not protected" result to report.
   exposure with no record it was ever flagged; reachability is what the separate Reachable
   self-hosted job finding is for.
 
-**Done** when every check above has printed exactly one report line — pass, flagged, or
-skipped — with no check silently omitted, whether or not any finding turned up.
+**Done** when every check above has printed at least one report line — pass, flagged, or
+skipped — with no check silently omitted, whether or not any finding turned up. A check that
+flags more than one item (a collaborator per line, a Reachable self-hosted job per job, an
+unpinned action per occurrence) prints one line per item, not a single combined line —
+"at least one," not "exactly one," is what every check owes the report.
 
 ## Step 2 — Run the fix phase
 
@@ -87,14 +91,18 @@ Skip this step entirely if Step 1 found zero Findings — say so and stop; nothi
 
 Otherwise, present one option per individual Finding from Step 1 (never grouped by
 category — one unpinned action is one option, one over-broad trigger is another) via
-`AskUserQuestion`, every question `multiSelect: true`. `AskUserQuestion` caps each question
-at 4 options and each call at 4 questions: 4 or fewer Findings fit in one question; more than
-4 need multiple questions (up to 4 per question, up to 16 Findings in one call); more than 16
-need further calls, until every Finding has been offered exactly once. Combine the selections
-from every question and call into a single set before applying anything. If that combined set
-is empty, report "no fixes selected — nothing changed" and stop; the repo is left exactly as
-audited. For each Finding the user did select, apply its fix from the Fix commands table in
-REFERENCE.md:
+`AskUserQuestion`, every question `multiSelect: true`. `AskUserQuestion` requires 2 to 4
+options per question and allows up to 4 questions per call: 2 to 4 Findings fit in one
+question; more than 4 need multiple questions (up to 4 per question, up to 16 Findings in one
+call); more than 16 need further calls, until every Finding has been offered exactly once. If
+a question would otherwise carry only **one** Finding-option — the whole audit found exactly
+one Finding, or a final batch has exactly one left over — add a second, non-Finding option to
+that question ("Skip — apply nothing") so it always has at least 2 real options; that option
+is never itself an outcome to apply, it only satisfies the tool's own minimum. Combine the
+selections from every question and call into a single set before applying anything. If that
+combined set is empty, report "no fixes selected — nothing changed" and stop; the repo is
+left exactly as audited. For each Finding the user did select, apply its fix from the Fix
+commands table in REFERENCE.md:
 
 - **Pin action** → resolve the tag to a commit SHA (see *Fix commands* in REFERENCE.md for
   the exact command) and rewrite that `uses:` line to the SHA, keeping the original version
