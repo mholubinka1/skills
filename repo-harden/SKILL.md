@@ -44,8 +44,9 @@ itself a plain "not protected" result to report.
   `pull_request`, `pull_request_target`, or an under-filtered `push` is a **Reachable
   self-hosted job** finding — one per job. "Under-filtered" covers an arbitrary-matching
   `branches:` allowlist (e.g. `['**']`) as well as a `branches-ignore:` that exists but
-  doesn't name every bot prefix actually in play (e.g. only `['main']`, still letting
-  `dependabot/**` through) — presence of the key proves nothing on its own. See *Trigger
+  doesn't name both known bot prefixes, `dependabot/**` and `renovate/**` (checked
+  unconditionally, not only when a matching config file is found — e.g. only `['main']`,
+  still letting them through) — presence of the key proves nothing on its own. See *Trigger
   crossing* in REFERENCE.md for the exact rule and its two worked fixtures.
 - **Dependabot config** — reported as **context, not a fixable Finding** (no fix-phase
   option, same treatment as secrets exposure): does `.github/dependabot.yml` (or
