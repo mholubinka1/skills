@@ -166,6 +166,20 @@ _Avoid_: dependency bump, package update, dependency refresh
 A language/package-manager combination detected in a target repo via marker files (e.g. `pyproject.toml` → Poetry, `uv.lock` → uv, `package.json` + lockfile → npm/yarn/pnpm, `*.csproj`/`*.sln` → dotnet/NuGet). A single repo may have more than one.
 _Avoid_: stack, toolchain, language target
 
+### Repo Hardening
+
+**Trust boundary** (repo-harden sense):
+The set of paths by which an untrusted contributor — a PR from a fork, or a bot like Dependabot/Renovate — can get code to execute with access to secrets or a self-hosted runner.
+_Avoid_: attack surface, security boundary
+
+**Reachable self-hosted job**:
+A workflow job whose `runs-on:` names a self-hosted or custom-label runner and whose trigger is one a bot or non-admin contributor can hit — `pull_request`, `pull_request_target`, or a `push` with no branch filter or one matching an arbitrary/bot-created branch (e.g. `['**']`). See `repo-harden/REFERENCE.md`'s Trigger crossing section for the exact rule.
+_Avoid_: exposed runner, vulnerable job
+
+**Finding** (repo-harden sense):
+A single named gap reported by the read-only audit phase — one trigger/runner crossing, one unpinned action, one branch-protection gap.
+_Avoid_: issue, flag, alert
+
 ### Diff Examination
 
 **In-scope diff**:
