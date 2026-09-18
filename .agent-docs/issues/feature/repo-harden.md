@@ -1,5 +1,7 @@
 # Issues: feature/repo-harden
 
+> Work complete — PR ready to merge.
+
 ## Add repo-harden skill (#107)
 
 **Blocked by**: None
