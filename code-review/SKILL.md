@@ -73,8 +73,9 @@ exists:
   report that it couldn't be parsed and leave it in place untouched. Never delete a file whose
   content you couldn't fully account for, and never salvage only the parts that happened to
   parse.
-- Retag each entry's `(PR #<number>)` as `(repo#PR)`, using the target repo's name and the
-  existing PR number. Get the repo name via `gh repo view --json name -q .name`, run in the
+- Rewrite each entry to the [Criteria style](CRITERIA-STYLE.md) rules — an entry covering
+  two defects becomes two — and retag its `(PR #<number>)` as `(repo#PR)` on every entry it
+  produces, using the target repo's name and the existing PR number. Get the repo name via `gh repo view --json name -q .name`, run in the
   target repo. **If that lookup fails** (no network, `gh` not authenticated) — stop here:
   there is no valid tag to retag with, so don't append untagged entries and don't delete the
   file. Leave `.agent-docs/review.md` in place, skip migration for this run, and continue
