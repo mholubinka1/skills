@@ -126,9 +126,9 @@ Step 4 decision across the whole invocation was **Fix**. Otherwise skip to Step 
 with "Fixed." and suppressed entries recorded "Fixed." in a Step 4d comment. Exclude every
 push-back: the Criteria gist records only criteria accepted by changing code.
 
-**Generalise, dedupe, write.** For each fixed finding write one generalised bold-label +
-imperative criterion tagged `(repo#PR)`, e.g. `(acme-api#64)`; two findings that generalise to
-the same rule become one entry. Read the gist ID from `code-review/CRITERIA-GIST.md` (this
+**Generalise, dedupe, write.** For each fixed finding write one generalised criterion that
+follows the [Criteria style](../code-review/CRITERIA-STYLE.md) rules, tagged `(repo#PR)`, e.g.
+`(acme-api#64)`; two findings that generalise to the same rule become one entry. Read the gist ID from `code-review/CRITERIA-GIST.md` (this
 skill's sibling `code-review` skill directory), fetch the gist's current content, drop any
 candidate a current entry already covers, and append the survivors — see the Distil Review
 Criteria section in [REFERENCE.md](REFERENCE.md) for the generalising technique, the repo-name

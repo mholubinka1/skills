@@ -306,15 +306,17 @@ gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
 A fixed finding names a specific mistake in a specific place. The criterion is the reusable
 shape of it. Strip, in order: the file path, the line number, the concrete identifier or
 literal value, and the specific tool or command — keep the failure mode and the check that
-catches it. Phrase every entry as a bold label + imperative rule matching the bullets in the
-`code-review` skill's `REVIEW-CRITERIA.md`, ending with `(repo#PR)` — the current repo's name
-(not the full `owner/repo`, just the repo name: `gh repo view --json name -q .name`) and the
-current PR number.
+catches it. Read the `code-review` skill's `CRITERIA-STYLE.md` and write every entry to its
+rules — one defect per entry, a label naming the defect, then trigger, consequence, and fix in
+30–60 words. The one exception is its "generic, not traceable to a source" rule: in the gist,
+end each entry with `(repo#PR)` — the current repo's name (not the full `owner/repo`, just the
+repo name: `gh repo view --json name -q .name`) and the current PR number. The tag is removed
+when the entry is collated.
 
 | Fixed finding (specific) | Criterion (general) |
 |---|---|
-| `install.sh` checked `hooks/pre-commit` only and missed a needed `hooks/post-commit` | `- **Partial checks for compound state**: flag a readiness check that inspects one artefact when the state it gates has several parts. (acme-api#58)` |
-| A `git pull` error message asserted "history has diverged" when a network failure hits the same path | `- **Single-cause error text**: flag an error message that names one cause when the same failure has several. (acme-api#58)` |
+| `install.sh` checked `hooks/pre-commit` only and missed a needed `hooks/post-commit` | `- **Partial checks for compound state**: flag a readiness check that inspects one artefact when the state it gates has several parts — the operation proceeds with the unchecked parts missing. Check every part the operation needs. (acme-api#58)` |
+| A `git pull` error message asserted "history has diverged" when a network failure hits the same path | `- **Single-cause error text**: flag an error message that names one cause when the same failure has several — the reader chases the named cause while the real one goes unfixed. Name every likely cause, or none. (acme-api#58)` |
 
 ### Dedupe
 
