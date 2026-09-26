@@ -7,11 +7,9 @@ All content here is passed verbatim to the Standards sub-agent. Two rule binding
 
 New criteria are not added here directly. `address-copilot-comments` stages them in the
 [Criteria gist](CRITERIA-GIST.md) — a live, cross-repo, cross-machine store — tagged
-`(repo#PR)`. Periodically, collate: read the gist, rewrite each durable entry to the
-[Criteria style](CRITERIA-STYLE.md) rules, add it to whichever section below fits it (Code
-Correctness, Code Quality, Security and Performance, Testing, or Documentation) via a normal PR
-to this repo, then delete that same line from the gist so it only ever holds entries not yet
-collated. Prune stale entries here by hand.
+`(repo#PR)`. Periodically, collate them into the sections below with the
+[collation prompt](../COLLATE-REVIEW-CRITERIA.md), which writes every entry to the
+[Criteria style](CRITERIA-STYLE.md) rules. Prune stale entries here by hand.
 
 ## Smell Baseline (Fowler, _Refactoring_ ch. 3 — via Matt Pocock)
 
