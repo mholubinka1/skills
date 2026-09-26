@@ -3,10 +3,14 @@
 Prompt for collating the review criteria staged in the Criteria gist into
 `code-review/REVIEW-CRITERIA.md`. Run it from this repo's root, on an up-to-date `main`.
 
+The aim is the **fewest criteria that still cover every gist entry**. Gist entries are raw
+findings, one per fixed Copilot comment; a collated criterion summarises the defect they share,
+so several entries often become one criterion or fold into one that already exists. Write each
+one fresh; paste no gist entry's wording.
+
 Collating means every gist entry ends in exactly one of four outcomes: **covered** by an
 existing criterion as written, **widened** into an existing criterion, a **new** criterion, or
-**dropped** with a stated reason. Every gist entry is accounted for; nothing is copied
-verbatim.
+**dropped** with a stated reason.
 
 ## Sources
 
@@ -29,16 +33,21 @@ Done when you hold the full text of all three and the list of gist labels.
 
 ### 2. Map
 
-Give each gist entry one outcome:
+Give each gist entry one outcome, trying them in this order and taking the first that fits:
 
-- **Covered** — an existing criterion already names the same defect. No edit.
-- **Widened** — an existing criterion names the same defect in a narrower case, and one added
-  word or clause covers the gist case while the line stays within the style rules.
-- **New** — a distinct defect. Group gist entries into one new criterion only when they are
-  the same defect; different defects stay separate, however related.
-- **Dropped** — tooling already enforces it, or it is not durable. State the reason.
+1. **Covered** — an existing criterion already names the same defect. No edit.
+2. **Widened** — an existing criterion names the same defect in a narrower case, and one added
+   word or clause covers the gist case while the line stays within the style rules.
+3. **New** — no existing criterion names the defect. Merge every gist entry that shares the
+   defect into one new criterion that summarises them all.
+4. **Dropped** — tooling already enforces it, or it is not durable. State the reason.
 
-Done when every gist label maps to exactly one outcome.
+The style rules set the limit on merging: one criterion names one defect. When entries look
+related but a single line would need two triggers or two fixes, they are two defects and
+become two criteria.
+
+Done when every gist label maps to exactly one outcome and no two new criteria name the same
+defect.
 
 ### 3. Draft
 
