@@ -5,31 +5,26 @@ Prompt for collating the review criteria staged in the Criteria gist into
 
 The aim is the **fewest criteria that still cover every gist entry**. Gist entries are raw
 findings, one per fixed Copilot comment; a collated criterion summarises the defect they share,
-so several entries often become one criterion or fold into one that already exists. Write each
-one fresh; paste no gist entry's wording.
-
-Collating means every gist entry ends in exactly one of four outcomes: **covered** by an
-existing criterion as written, **widened** into an existing criterion, a **new** criterion, or
-**dropped** with a stated reason.
-
-## Sources
-
-- [code-review/CRITERIA-GIST.md](code-review/CRITERIA-GIST.md) — the gist ID and the
-  fetch/write commands.
-- [code-review/REVIEW-CRITERIA.md](code-review/REVIEW-CRITERIA.md) — the durable criteria and
-  their sections.
-- [code-review/CRITERIA-STYLE.md](code-review/CRITERIA-STYLE.md) — the rules every new or
-  widened criterion follows.
+so several entries often become one criterion or fold into one that already exists. Each
+criterion is written fresh from that shared defect, in the voice of the style rules.
 
 ## Steps
 
 ### 1. Read
 
-Fetch the gist's `CRITERIA.md` and read every entry under `## Criteria`. Read
-`REVIEW-CRITERIA.md` and `CRITERIA-STYLE.md` in full. Record the exact label of every gist
-entry you read — step 5 removes only these.
+Read these in full:
 
-Done when you hold the full text of all three and the list of gist labels.
+- The gist's `CRITERIA.md` — its ID and fetch command are in
+  [code-review/CRITERIA-GIST.md](code-review/CRITERIA-GIST.md).
+- [code-review/REVIEW-CRITERIA.md](code-review/REVIEW-CRITERIA.md) — the existing criteria and
+  their sections.
+- [code-review/CRITERIA-STYLE.md](code-review/CRITERIA-STYLE.md) — the rules every new or
+  widened criterion follows.
+
+Record the exact label of every entry under the gist's `## Criteria` — step 5 removes only
+these. If there are none, report that there is nothing to collate and stop.
+
+Done when you hold all three in full and the list of gist labels.
 
 ### 2. Map
 
@@ -40,7 +35,8 @@ Give each gist entry one outcome, trying them in this order and taking the first
    word or clause covers the gist case while the line stays within the style rules.
 3. **New** — no existing criterion names the defect. Merge every gist entry that shares the
    defect into one new criterion that summarises them all.
-4. **Dropped** — tooling already enforces it, or it is not durable. State the reason.
+4. **Dropped** — tooling already enforces it, or it describes a one-off situation no other
+   change would repeat. State the reason.
 
 The style rules set the limit on merging: one criterion names one defect. When entries look
 related but a single line would need two triggers or two fixes, they are two defects and
@@ -52,20 +48,24 @@ defect.
 ### 3. Draft
 
 Write each new criterion, and the full replacement text of each widened one, to the style
-rules — generic, with the `(repo#PR)` tag removed. Place each new criterion in the section
-that fits it. When a widening changes a label, find every other reference to the old label in
-the repo.
+rules. Place each new criterion in the section that fits it. When a widening changes a label,
+find every other reference to the old label in the repo.
 
-Check every drafted line with a script: 30–60 words including the label, and a label of 3–8
-words. Revise any line outside the bounds until all pass.
+Check each drafted line against every style rule in turn. Check the word and label limits with
+a script rather than by eye.
 
-Done when every drafted line passes the script.
+Done when every drafted line meets every style rule and the script reports no line outside the
+limits.
 
 ### 4. Review with the user
 
-Present the full proposal: new criteria by section, widened criteria as full replacement
-text, covered and dropped entries with one line each on why. Refine it with the user until
-they approve.
+Present the full proposal:
+
+- New criteria by section, and widened criteria as full replacement text — each followed by
+  the gist labels it covers.
+- Covered and dropped entries, one line each on why.
+
+Refine it with the user until they approve.
 
 Done when the user approves the list.
 
@@ -83,8 +83,8 @@ Done when the user approves the list.
      and leave the gist untouched.
    - Remove exactly the labels recorded in step 1. Keep every other entry — it arrived after
      you read the gist.
-   - Write through a `mktemp` file, check the write command's exit code, and delete the
-     scratch file on every exit path.
+   - Write the result back with steps 3–5 of "Appending an entry" in `CRITERIA-GIST.md`, and
+     confirm the write command exits zero.
    - Fetch the gist once more and confirm the collated labels are gone and the kept entries
      remain.
 
