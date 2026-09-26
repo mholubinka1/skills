@@ -1,8 +1,7 @@
 # Criteria Gist
 
 The single GitHub gist that stages newly discovered review criteria across every repo and
-machine, before a human collates the durable ones into [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md)
-by hand. It's created as a *secret* gist (unlisted, not indexed or discoverable via search) —
+machine, before the durable ones are collated into [REVIEW-CRITERIA.md](REVIEW-CRITERIA.md). It's created as a *secret* gist (unlisted, not indexed or discoverable via search) —
 but its ID is committed below in this public repo, which already makes it readable by anyone
 who reads this file, so treat "secret" here as "not casually stumbled on," not as an actual
 confidentiality boundary. **Never record anything sensitive in it** — only generalised,
@@ -18,6 +17,13 @@ its own entries to.
 staged criteria live (`gh gist view`) alongside `REVIEW-CRITERIA.md`, and also appends —
 once per repo — when it migrates a legacy `.agent-docs/review.md` into the gist. Neither
 skill needs any other per-machine configuration to find it.
+
+## Collating
+
+New criteria reach `REVIEW-CRITERIA.md` only through collation: run the
+[collation prompt](../COLLATE-REVIEW-CRITERIA.md) periodically. It rewrites the staged entries
+to the [Criteria style](CRITERIA-STYLE.md) rules and clears them from the gist once the PR
+merges. Prune stale criteria in `REVIEW-CRITERIA.md` by hand.
 
 ## Appending an entry
 

@@ -129,7 +129,7 @@ A record in `.agent-docs/adr/` documenting a significant design choice and its r
 _Avoid_: decision log, design decision
 
 **Criteria gist**:
-A single secret GitHub gist that stages newly discovered review criteria shared across every repo and machine, before a human collates the durable ones into `REVIEW-CRITERIA.md` by hand. Superseded the old per-repo `.agent-docs/review.md`, which `code-review` migrates into the gist (after a successful write) and deletes.
+A single secret GitHub gist that stages newly discovered review criteria shared across every repo and machine, before the durable ones are collated into `REVIEW-CRITERIA.md` with `COLLATE-REVIEW-CRITERIA.md`. Superseded the old per-repo `.agent-docs/review.md`, which `code-review` migrates into the gist (after a successful write) and deletes.
 _Avoid_: review.md, staging file, shared criteria file, review notes
 
 ### Design and Implementation Process
