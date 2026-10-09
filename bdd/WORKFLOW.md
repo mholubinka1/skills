@@ -6,7 +6,7 @@ Full step-by-step workflow. The philosophy and scenario format are in [SKILL.md]
 
 Run the **branch-hygiene** skill with a one-line summary of the request (no `change_type` — it infers one), e.g. `/branch-hygiene "add CSV export to reports"`. Act on its `next:` line.
 
-This catches the most obvious problem before planning begins: being on a trunk branch (`main`, `master`, `develop`). Step 2 re-checks once planning confirms the change type; a mismatch that is only a `wip/` placeholder waits for Step 2. **Do not push or commit.**
+This catches the most obvious problem before planning begins: being on a trunk branch (`main`, `master`, `develop`). Step 2 re-checks once planning confirms the change type; a mismatch that is only a `wip/` or `worktree-wip+` placeholder waits for Step 2. **Do not push or commit.**
 
 ## Step 1 — Planning
 
@@ -43,7 +43,7 @@ Determine `change_type` from the Three Amigos output — or, when Step 1 reused 
 - **release**: version bump, changelog, release preparation
 - **chore**: refactor, tooling, dependency update, test-only change with no behaviour change
 
-Act on its `next:` line. A `wip/` placeholder branch always reports a mismatch, so this is where it gets its proper name. **Do not push or commit to any new branch.**
+Act on its `next:` line. A `wip/` or `worktree-wip+` placeholder branch always reports a mismatch, so this is where it gets its proper name. **Do not push or commit to any new branch.**
 
 ## Step 3 — Tracer Bullet Test (authoring phase)
 

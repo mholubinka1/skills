@@ -13,6 +13,7 @@ Validation tables and the create command. The step overview is in [SKILL.md](SKI
 | `release/*` | Release preparation |
 | `chore/*` | Maintenance, refactor, tooling |
 | `wip/*` | Temporary placeholder — must be renamed before code is written |
+| `worktree-wip+*` | Temporary placeholder — must be renamed before code is written (the form `EnterWorktree(name: "wip/<slug>")` creates; any other `worktree-*` is Unrecognised) |
 | Anything else | Unrecognised — flag and suggest |
 
 ## Change type inference heuristics (Step 3)
@@ -38,7 +39,7 @@ If `change_type` was not given, infer it from the work summary:
 A prefix mismatch occurs when:
 
 - The current branch is a trunk branch (`main`, `master`, `develop`)
-- The current branch is a `wip/` placeholder
+- The current branch is a `wip/` or `worktree-wip+` placeholder
 - The branch prefix doesn't match the change type (e.g. a feature on `bugfix/`)
 - The branch name is unrecognised (no valid prefix)
 

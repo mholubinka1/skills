@@ -45,8 +45,12 @@ _Avoid_: keyword, term, jargon
 ### Skill Distribution
 
 **`sync_claude_skills.py`**:
-The standard-library script that walks this repo and copies every directory containing a `SKILL.md` into `~/.claude/skills/`. Invoked by the `sync-claude-skills` hook and by `update-skills`.
+The standard-library script that walks this repo and replaces every directory containing a `SKILL.md` wholesale in `~/.claude/skills/`, then records them in the skill manifest. On the default branch it also removes manifest-listed skills the repo no longer has. Invoked by the `sync-claude-skills` hook and by `update-skills`.
 _Avoid_: sync script, copier
+
+**Skill manifest**:
+The file in `~/.claude/skills/` listing the skill names `sync_claude_skills.py` installed. Only skills it lists are ever pruned, so skills installed from elsewhere are never touched.
+_Avoid_: install list, registry
 
 **`sync-claude-skills` hook**:
 The `post-commit` pre-commit hook that runs `sync_claude_skills.py` after every commit in this repo. Fires only on the machine that commits — `update-skills` covers the pull-and-sync path for machines that only consume skills.
@@ -77,7 +81,7 @@ The isolated git worktree (created via the harness's `EnterWorktree` tool under 
 _Avoid_: sandbox, isolated checkout, workspace
 
 **Placeholder branch**:
-A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. `branch-hygiene` always reports it as a mismatch; once the caller acts on that report's `next:` line and switches to the real branch (confirmed from design-session output), `/implement` deletes the now-empty placeholder.
+The `worktree-wip+<slug>` branch `EnterWorktree(name: "wip/<slug>")` creates when a worktree session is first entered, before the real branch name is known (a hand-made `wip/<slug>` counts too). `branch-hygiene` always reports it as a mismatch; once the caller acts on that report's `next:` line and switches to the real branch (confirmed from design-session output), `/implement` deletes the now-empty placeholder.
 _Avoid_: temp branch, scratch branch
 
 **Worktree dependency bootstrap**:
