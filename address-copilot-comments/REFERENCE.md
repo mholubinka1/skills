@@ -175,6 +175,12 @@ polling is considered new.
 
 ### Poll loop (every 60 seconds, max 10 attempts)
 
+The baseline call, 10 polls and the final check are 12 script calls, too long for one Bash
+call (600000 ms limit). Run them in two Bash calls of at most 6 script calls each — baseline
+and 5 polls, then 5 polls and the final check — with `sleep 60` between script calls and at
+the start of the second Bash call, and a Bash timeout of 600000 ms. Stop early on any result
+other than `PENDING`. A Step 5b re-poll uses its given baseline and skips the capture call.
+
 Call the script again on each iteration, passing the baseline captured above:
 
 ```bash
@@ -242,7 +248,7 @@ gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
   --jq '[.[] | select((.user.login // "") | test("copilot";"i"))] | last | .body // empty'
 ```
 
-Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Treat each entry as its own finding — decide Fix or Push back exactly as for a thread (including the `.agent-docs/` push-back rule), and apply any code changes the same way.
+Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Treat each entry as its own finding — decide Fix or Push back exactly as for a thread (by the push-back rules in SKILL.md Step 4), and apply any code changes the same way.
 
 Suppressed entries have no `threadId` or `comment_id` — the reply and resolve steps below apply only to real threads. Skip straight to the "Acknowledge suppressed comments" section for these instead.
 
@@ -259,14 +265,6 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
 gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
   -X POST -f body="Ignored. <reason>"
 ```
-
-### Pre-commit hook (if the project uses .githooks)
-
-```bash
-bash .githooks/pre-commit
-```
-
-If it fails because a formatter modified files, stage the auto-formatted files and re-run.
 
 ### Resolve the thread — do this immediately after replying, one thread at a time
 
@@ -298,7 +296,7 @@ mutation {
 
 ### Acknowledge suppressed comments
 
-Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this invocation's suppressed entries once Fix/Push-back decisions have been made for the invocation — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
+Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this invocation's suppressed entries once Fix/Push-back decisions have been made for the invocation — same timing as Step 5's thread replies: after its commit and push succeed, or straight away when no fix was made:
 
 ```bash
 gh pr comment {number} --body "$(cat <<'EOF'
@@ -373,9 +371,18 @@ The loop (Steps 3–5) never starts at all if Step 2b judges the diff low-risk. 
 
 Otherwise, the loop is complete when **any** of these conditions is met:
 
-1. **All push-backs** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Step 5 and go to Step 5b.
-2. **Fixes pushed** — Step 5 committed and pushed the fixes. Copilot is never re-triggered; go to Step 5b.
-3. **Clean review or poll exhausted** — the Step 3 poll ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 6.
-4. **Catch-up done** — Step 5b polls at most once for a requested review that had not landed when Step 4 began (leftover threads made Step 3's baseline call actionable). Whatever it finds is handled by one more pass through Steps 4–5; then go to Step 6. Step 5b is never entered twice.
+1. **Step 5 done** — fixes (if any) committed and pushed, every thread replied to and
+   resolved, and any suppressed comments acknowledged in one PR comment. Copilot is never
+   re-triggered; go to Step 5b.
+2. **Clean review or poll exhausted** — the Step 3 poll ends with zero unresolved threads and
+   zero suppressed comments. Either a new Copilot review was detected with no comments, or
+   every attempt elapsed with no new review. Go to Step 6.
+3. **Catch-up done** — Step 5b polls at most once for a requested review that had not landed
+   when Step 4 began (leftover threads made Step 3's baseline call actionable). Whatever it
+   finds is handled by one more pass through Steps 4–5; then go to Step 6. Step 5b is never
+   entered twice.
+4. **Poll error** — a poll returned `ERROR`. Report it and go to Step 6 (a no-op unless a fix
+   was already made), then Step 7, which shares the PR link without calling it ready to
+   merge.
 
-Whenever a review was requested, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.
+Whenever a review was requested, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge, unless a poll errored.
