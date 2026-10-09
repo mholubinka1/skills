@@ -49,12 +49,12 @@ Copilot reviews at Balanced effort, so a review is spent only where the risk jus
 A diff is **low-risk (skip the review)** only if every changed file is one of these:
 
 - Prose, formatting or comment-only — wording or markdown formatting that doesn't alter what a step does.
-- A config value tweak (`*.json`, `*.yaml`, `*.toml`) that doesn't add or change a script.
-- A test-only addition that touches no production logic.
+- A config value tweak (any config format, e.g. `*.json`, `*.yaml`, `*.yml`, `*.toml`, `*.ini`) that doesn't add or change a script.
+- A test-only change (added or edited tests) that touches no production logic.
 - A rename or move with no content change.
 - A tiny isolated tweak — 10 or fewer lines in one file, such as a message string, constant or typo — that matches none of criteria 1–4.
 
-The low-risk list is exhaustive: anything not on it — including a logic change of 11–30 lines that hits none of criteria 1–5 — is review-required. **When unsure, trigger.** Doubt about whether a criterion applies counts as a hit.
+A file that hits criteria 1–5 is review-required even when it fits a category above (e.g. a CI workflow `*.yml` is config but also a trust boundary). The low-risk list is exhaustive: anything not on it — including a logic change of 11–30 lines that hits none of criteria 1–5 — is review-required. **When unsure, trigger.** Doubt about whether a criterion applies counts as a hit.
 
 ### Worked examples
 
@@ -71,7 +71,8 @@ The low-risk list is exhaustive: anything not on it — including a logic change
 | Logic changes spread across 3 files | Review (criterion 5) |
 | One `.agent-docs/` file plus a change hitting any criterion | Review (not every file is low-risk) |
 | Unsure whether a change touches a contract | Review (when unsure, trigger) |
-| Diff is empty (no files changed, or rename/binary-only with no content diff) | Skip — vacuously true that every changed file is low-risk |
+| Diff is empty (no files changed), or a rename with no content change | Skip — vacuously true that every changed file is low-risk |
+| A binary file was added, changed or deleted | Review (uninspectable; when unsure, trigger) |
 
 ### Trigger Copilot Review
 
@@ -372,8 +373,9 @@ The loop (Steps 3–5) never starts at all if Step 2b judges the diff low-risk. 
 
 Otherwise, the loop is complete when **any** of these conditions is met:
 
-1. **All push-backs** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Step 5, then go to Step 6.
-2. **Fixes pushed** — Step 5 committed and pushed the fixes. Copilot is not re-triggered and nothing is re-polled; go to Step 6.
+1. **All push-backs** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Step 5 and go to Step 5b.
+2. **Fixes pushed** — Step 5 committed and pushed the fixes. Copilot is never re-triggered; go to Step 5b.
 3. **Clean review or poll exhausted** — the Step 3 poll ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 6.
+4. **Catch-up done** — Step 5b polls at most once for a requested review that had not landed when Step 4 began (leftover threads made Step 3's baseline call actionable). Whatever it finds is handled by one more pass through Steps 4–5; then go to Step 6. Step 5b is never entered twice.
 
 Whenever a review was requested, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.

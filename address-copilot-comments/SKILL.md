@@ -26,8 +26,10 @@ Step 4  For each unresolved thread and each suppressed-comment entry: decide fix
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
 Step 4d Suppressed comments this invocation? ──Yes──► post one PR comment summarizing fix/ignore outcomes
-        All push-backs (threads + suppressed)? ──Yes──► Step 6 (skip Step 5)
-Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push ──► Step 6 (no re-trigger)
+        All push-backs (threads + suppressed)? ──Yes──► Step 5b (skip Step 5)
+Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push ──► Step 5b
+Step 5b Requested review not yet landed when Step 4 began (leftover threads)? ──Yes──► one catch-up poll;
+        findings → Step 4 and Step 5 once more, then Step 6. Never re-trigger. Else ──► Step 6
 Step 6  Review requested and ≥1 Fix applied this invocation? ──► generalise each fixed finding,
         dedupe against the Criteria gist, append via `gh gist edit`. Else ──► Step 7
 Step 7  Report PR link — PR is ready to merge
@@ -73,7 +75,7 @@ See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFE
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 
-The thread-count and suppressed-comments checks (a poll can return both) run via one bundled script — see the status-check script section in [REFERENCE.md](REFERENCE.md). Before polling, capture the latest Copilot review ID as a baseline by calling the script once with no baseline argument (empty if no review exists yet; if this call already reports something actionable, skip straight to Step 4).
+The thread-count and suppressed-comments checks (a poll can return both) run via one bundled script — see the status-check script section in [REFERENCE.md](REFERENCE.md). Before polling, capture the latest Copilot review ID as a baseline by calling the script once with no baseline argument (empty if no review exists yet; if this call already reports something actionable, those are leftovers from before the requested review: handle them in Step 4, and Step 5b then catches the requested review).
 
 Poll every 60 seconds, max 10 attempts, calling the script again each time: an actionable result exits to Step 4; a clean result (a new review with nothing to address) goes to Step 6 immediately; a failed `gh api` call is reported distinctly and must not be treated as "wait and retry"; otherwise wait and repeat. After 10 attempts with no new clean review, call the script one final time, same branching.
 
@@ -93,13 +95,17 @@ Reply to each **thread** ("Fixed. ..." or "Ignored. ...") and immediately resolv
 
 ## Step 4d — Acknowledge suppressed comments
 
-If any suppressed-comment entries were found in Step 3 this invocation, post a single PR-level comment summarizing the fix/ignore outcome for every one of them — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `gh pr comment` command. Post it even if every decision this invocation was a push-back — it's the only record of a suppressed comment's outcome. Skip this step if there were no suppressed comments this invocation.
+If any suppressed-comment entries were found in Step 3 or Step 5b this invocation, post a single PR-level comment summarizing the fix/ignore outcome for every one of them — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `gh pr comment` command. Post it even if every decision this invocation was a push-back — it's the only record of a suppressed comment's outcome. Skip this step if there were no suppressed comments this invocation.
 
-All push-backs across both threads and suppressed comments, and zero files modified → skip to Step 6 (skip Step 5). At least one fix → continue to Step 5.
+All push-backs across both threads and suppressed comments, and zero files modified → skip to Step 5b (skip Step 5; or to Step 6 if this is already the Step 5b pass). At least one fix → continue to Step 5.
 
 ## Step 5 — Commit and push
 
-Stage files explicitly (`git add <file1> <file2> ...`), commit with `"address Copilot review: <summary>"`, push, confirm with `git log --oneline -3`. See the Staging Rules section in [REFERENCE.md](REFERENCE.md) for staging rules. Do not re-trigger Copilot or re-poll — the single review is done; continue to Step 6.
+Stage files explicitly (`git add <file1> <file2> ...`), commit with `"address Copilot review: <summary>"`, push, confirm with `git log --oneline -3`. See the Staging Rules section in [REFERENCE.md](REFERENCE.md) for staging rules. Never re-trigger Copilot. Continue to Step 5b (or to Step 6 if this is already the Step 5b pass).
+
+## Step 5b — Catch the requested review (once)
+
+Reached from Step 5, or from Step 4d when every decision was a push-back. If Step 3's baseline call was already actionable, the requested review may not have landed yet, so what Step 4 handled could be leftovers from before it. In that case poll once, as in Step 3, using the review ID captured there as the baseline (no new capture, no re-trigger). New threads or suppressed comments → Step 4, Step 4b–4d and Step 5 once more for them, then Step 6; this is the only catch-up — never return here a second time. A clean review, an exhausted poll, or Step 3's baseline call not having been actionable → Step 6.
 
 ## Step 6 — Distil review criteria into the shared Criteria gist
 
