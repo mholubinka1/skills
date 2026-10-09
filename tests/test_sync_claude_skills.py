@@ -1,10 +1,12 @@
 import os
+import runpy
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 SCRIPT = Path(__file__).resolve().parent.parent / "sync_claude_skills.py"
 
@@ -156,19 +158,54 @@ class SyncClaudeSkillsTest(unittest.TestCase):
         self.assertTrue((self.installed / "alpha" / "SKILL.md").exists())
         self.assertTrue((target / "KEEP.md").exists())
 
+    def sync_with_copy_failing_for(self, failing):
+        """Run the script in-process with the filesystem copy failing for one skill."""
+        real_copytree = shutil.copytree
+
+        def copytree(src, dst, *args, **kwargs):
+            if os.path.basename(src) == failing:
+                raise OSError("injected copy failure")
+            return real_copytree(src, dst, *args, **kwargs)
+
+        home = {"HOME": str(self.home), "USERPROFILE": str(self.home)}
+        cwd = os.getcwd()
+        os.chdir(self.repo)
+        self.addCleanup(os.chdir, cwd)
+        with mock.patch("shutil.copytree", copytree), mock.patch.dict(os.environ, home):
+            with self.assertRaises(OSError):
+                runpy.run_path(str(SCRIPT), run_name="__main__")
+
     def test_failed_copy_keeps_the_previous_install(self):
         self.add_skill("alpha", "OLD.md")
         self.sync()
         (self.repo / "alpha" / "OLD.md").unlink()
-        unreadable = self.repo / "alpha" / "LOCKED.md"
-        unreadable.write_text("locked")
-        unreadable.chmod(0)
-        self.addCleanup(unreadable.chmod, 0o644)
 
-        with self.assertRaises(subprocess.CalledProcessError):
-            self.sync()
+        self.sync_with_copy_failing_for("alpha")
 
         self.assertTrue((self.installed / "alpha" / "OLD.md").exists())
+        self.assertFalse(
+            [p for p in self.installed.iterdir() if p.name.startswith(".alpha")]
+        )
+
+    def test_aborted_sync_still_records_the_skills_it_installed(self):
+        self.add_skill("alpha")
+        self.add_skill("beta")
+
+        self.sync_with_copy_failing_for("beta")
+
+        self.assertTrue((self.installed / "alpha").exists())
+        self.assertEqual(self.manifest(), ["alpha"])
+
+    def test_aborted_sync_on_default_branch_prunes_nothing_and_keeps_the_manifest(self):
+        self.add_skill("alpha")
+        self.add_skill("gone")
+        self.sync()
+        shutil.rmtree(self.repo / "gone")
+
+        self.sync_with_copy_failing_for("alpha")
+
+        self.assertTrue((self.installed / "gone").exists())
+        self.assertEqual(self.manifest(), ["alpha", "gone"])
 
     def test_plain_file_at_the_install_path_is_replaced(self):
         self.installed.mkdir(parents=True)
