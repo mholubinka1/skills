@@ -8,14 +8,14 @@ Work through the steps below in order.
 
 > **Prerequisite skills**: all skills referenced in this workflow live in this same skills
 > repo and are installed automatically via the post-commit sync hook:
-> `create-worktrees`, `init-agent-docs`, `grill`, `write-spec`, `create-issues`, `branch-hygiene`,
+> `create-worktrees`, `init-agent-docs`, `design`, `write-spec`, `create-issues`, `branch-hygiene`,
 > `bdd`, `pre-commit-check`, `code-review`,
 > `address-copilot-comments`, `pr-cleanup`.
 
 ## Step 0 — Enter an isolated worktree
 
 Run the `create-worktrees` skill. This must happen before anything else — later steps
-(`init-agent-docs`, `grill`) can write to the repo, and the main checkout must stay
+(`init-agent-docs`, `design`) can write to the repo, and the main checkout must stay
 untouched. Whether `create-worktrees` created a new worktree, resumed an existing one, or
 found the session already isolated, continue to Step 1 as normal — `init-agent-docs` is
 idempotent, so re-running it against an already-bootstrapped worktree is harmless.
@@ -40,17 +40,17 @@ git branch --show-current
 | `.agent-docs/specs/<branch-name>.md` exists only | Resume at `/create-issues` (Step 5) |
 | Neither exists | Continue to Step 2 below |
 
-## Step 2 — Grill
+## Step 2 — Design
 
-Run the `grill` skill. Use the trigger context as the starting point — you already know what to build, so the grilling session sharpens and validates it rather than starting from scratch.
+Run the `design` skill. Use the trigger context as the starting point — you already know what to build, so the design session sharpens and validates it rather than starting from scratch.
 
 ## Step 3 — Branch hygiene
 
-Before running `branch-hygiene`, note the current branch name (`git branch --show-current`). Run the `branch-hygiene` skill with the change type and a one-line summary taken from the grill output, e.g. `/branch-hygiene feature "add CSV export to reports"`, and act on its `next:` line — on a mismatch that creates the correct branch from the remote default. If the noted branch was a `wip/` placeholder (Step 0 created a fresh worktree this session), delete it once the switch is done (`git branch -D <noted-branch>`) — nothing is ever committed to it before this point, so it's always safe to discard. If Step 0 instead resumed an existing worktree or found the session already isolated, the noted branch may be real work — do not delete it even if `branch-hygiene` flags and resolves a mismatch for some other reason.
+Before running `branch-hygiene`, note the current branch name (`git branch --show-current`). Run the `branch-hygiene` skill with the change type and a one-line summary taken from the design output, e.g. `/branch-hygiene feature "add CSV export to reports"`, and act on its `next:` line — on a mismatch that creates the correct branch from the remote default. If the noted branch was a `wip/` placeholder (Step 0 created a fresh worktree this session), delete it once the switch is done (`git branch -D <noted-branch>`) — nothing is ever committed to it before this point, so it's always safe to discard. If Step 0 instead resumed an existing worktree or found the session already isolated, the noted branch may be real work — do not delete it even if `branch-hygiene` flags and resolves a mismatch for some other reason.
 
 ## Step 4 — Write spec
 
-Run the `write-spec` skill. It will synthesise the grill output into `.agent-docs/specs/<branch-name>.md`.
+Run the `write-spec` skill. It will synthesise the design output into `.agent-docs/specs/<branch-name>.md`.
 
 ## Step 5 — Create issues
 

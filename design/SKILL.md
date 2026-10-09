@@ -6,7 +6,7 @@ attribution: Combines grilling and grill-with-docs disciplines (Matt Pocock, mat
 
 # Design
 
-Run a structured two-axis grilling session before any implementation begins. Complete both phases before writing a single line of code.
+Run a structured two-axis design session before any implementation begins. Complete both phases before writing a single line of code.
 
 ## Interview discipline
 
@@ -20,7 +20,7 @@ Do not enact the plan until the user confirms a shared understanding across **bo
 
 ## Phase 1 — Business axis
 
-Grill on the *what* and *why* before thinking about the *how*. Open with the first question every change must survive — **does this need to exist at all?** Push back on any part of the request the need does not justify. Then explore:
+Probe the *what* and *why* before thinking about the *how*. Open with the first question every change must survive — **does this need to exist at all?** Push back on any part of the request the need does not justify. Then explore:
 
 - **Desired behaviour**: What should the system do differently? What does success look like?
 - **Motivation**: What pain point or opportunity drives this? Who benefits?
@@ -35,7 +35,7 @@ Do not move to Phase 2 until the business picture is complete and agreed.
 
 ## Phase 2 — Engineering axis
 
-Now that the *what* is pinned, grill on the *how*. Explore:
+Now that the *what* is pinned, probe the *how*. Explore:
 
 - **Approach**: What is the minimal, correct technical solution? Climb the ladder and stop at the first rung that holds: already in this codebase → standard library or platform feature → an installed dependency → one line → only then new code.
 - **Affected surfaces**: What parts of the codebase change? What depends on them?
