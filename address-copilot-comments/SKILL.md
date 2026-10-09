@@ -81,9 +81,10 @@ Polling is mechanical, so it runs in a Haiku sub-agent with an empty context. Di
 Read <this skill's base directory>/REFERENCE.md, sections "Step 3 — Poll for Copilot review
 threads and suppressed comments" and "Step 4 — Address each comment and suppressed entry"
 (only its two fetch subsections). PR #<number> in <owner>/<repo>. The status-check script is
-<this skill's base directory>/scripts/check-review-status.sh. Wait between polls inside one
-Bash call that loops (sleep 60 between script calls, Bash timeout 600000 ms) — never poll
-back to back.
+<this skill's base directory>/scripts/check-review-status.sh. Poll in two Bash calls of at
+most 6 script calls each (baseline and 5 polls; then 5 polls and the final check), with
+sleep 60 between script calls and at the start of the second Bash call, and a Bash timeout
+of 600000 ms. Stop early on any result other than PENDING.
 Capture the baseline Copilot review ID, then poll as that section says (every 60s, max 10,
 one final check). On ACTIONABLE, fetch every unresolved Copilot thread and every
 suppressed-comment entry. Change nothing.
