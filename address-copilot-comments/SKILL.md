@@ -116,6 +116,13 @@ Fix everything else. For each decision, note one line of reasoning: it becomes t
 Read suppressed-comment entries as the Suppressed comments section of
 [REFERENCE.md](REFERENCE.md) describes.
 
+Apply the fixes as `code-review` Step 5 describes: inline when they fit together in one file
+and roughly 20 lines of production code or fewer, otherwise one Sonnet fixer briefed by
+[`code-review/FIXER.md`](../code-review/FIXER.md) — every Fix, threads and suppressed entries
+alike, labelled `logic` or `non-logic` — followed by reading the actual `git diff`.
+A fix the fixer reports blocked is fixed inline, re-dispatched, or turned into a push-back —
+a defect that does not reproduce is always a push-back.
+
 ## Step 4b — Validate changes with code-review
 
 > **MUST NOT SKIP.** The only valid reason to skip is every Step 4 decision being a push-back with zero files modified. Run it synchronously in the foreground to full completion — including any fixes it applies — before Step 5's commit-and-reply dispatch. Never run it as a background agent while the main thread moves on: both would edit the same files mid-review.

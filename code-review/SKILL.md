@@ -133,6 +133,8 @@ Every finding needs a concrete case: "this input or situation leads to this wron
 No case, no finding. Re-read the lines to confirm before you report.
 Each finding: file:line, blocking or advisory, the problem, the smallest fix.
 End with one line, "Skipped / risk:", naming anything you could not check.
+Already decided, do not report: <each finding rejected in an earlier pass, with its reason —
+or "none">
 ```
 
 **Standards sub-agent** — the handover, plus:
@@ -171,9 +173,35 @@ Address findings in this order: blocking first, then advisory.
 
 The loop does not exit until two consecutive passes return zero findings on both axes.
 
-- Use the `bdd` skill when changing or adding logic (write tests first).
-- Use the `design` skill if the fix involves design decisions against the existing domain model.
-- Apply fixes, then re-run pre-commit hooks.
+Decide each finding in the main context: fix it, or reject it — code-review's push-back —
+with a one-line reason reported to the user. Carry every rejected finding and its reason
+into the next pass's "Already decided" line, so fresh reviewers do not raise it again; drop
+an entry once the lines it cites have changed. A finding that needs new behaviour goes to the `bdd` skill; one that
+needs a design decision against the existing domain model goes to the `design` skill.
+
+Then apply the accepted fixes:
+
+- **Small change**: when they fit together in one file and roughly 20 lines of production
+  code or fewer (tests do not count), apply them inline, writing a failing test first for
+  any logic fix.
+- **Otherwise** dispatch one `Agent` call, `subagent_type: general-purpose`,
+  `model: sonnet`, `run_in_background: false`, and wait for its report. Its standing rules
+  live in [FIXER.md](FIXER.md), so the prompt is a short handover. Label each finding
+  `logic` or `non-logic`, and write each fix instruction yourself, specific enough to apply
+  without judgement:
+
+  ```text
+  Read <code-review skill's base directory>/FIXER.md and follow it.
+  Findings, one per line:
+    <n>. <file:line> — <logic|non-logic> — <the defect> — <the fix to apply>
+  Test command: <command, or "none">
+  ```
+
+  Read the actual `git diff` and check it against the accepted findings. For each finding
+  reported blocked, fix it inline, re-dispatch a narrower brief, or reject it — a defect
+  that does not reproduce is always rejected. There is no automatic retry.
+
+Then re-run pre-commit hooks.
 
 Once all findings are addressed, return to **Step 4** with brand new agents (fresh context windows).
 

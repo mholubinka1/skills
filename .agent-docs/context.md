@@ -150,6 +150,10 @@ _Avoid_: TDD cycle, test loop, test-first loop
 The fresh-context `general-purpose` agent the `bdd` skill spawns to run the red-green-refactor loop, after the test-authoring context has agreed the scenarios and written the failing tracer bullet test. Receives the agreed scenario list and interface changes inline in its prompt, then grinds the vertical loop — one scenario → test → minimal implementation → repeat — then refactors. Told not to re-invoke the `bdd` skill, so the loop does not recurse. On the normal path it writes every line of production code.
 _Avoid_: impl agent, worker agent, coding subagent
 
+**Fixer subagent**:
+The fresh-context Sonnet agent `code-review` Step 5 and `address-copilot-comments` Step 4 dispatch to apply accepted review findings when they exceed the small-change threshold. Briefed by `code-review/FIXER.md`: applies each finding as instructed (logic fixes red-then-green), reports each as applied or blocked, and never decides whether a finding is valid — the main context does.
+_Avoid_: fix agent, patcher, review subagent
+
 **Pre-commit check**:
 Validation driven by `.pre-commit-config.yaml` or `.githooks/pre-commit`, run by the `pre-commit-check` skill after every code change. Runs in two sequential passes: changed files first, then a full-repo pass (`--all-files`) that autofixes drift repo-wide and reports what it cannot fix, keeping changed-file failures apart from pre-existing ones.
 _Avoid_: lint check, pre-commit hook run, validation step
