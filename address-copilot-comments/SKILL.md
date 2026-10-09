@@ -16,8 +16,8 @@ Step 0  gh available?
 Step 1  PR exists? ──No──► Step 2: create PR ──► Step 2b
         PR exists? ──Yes──► Step 2b
 Step 2b Read PR diff (`gh pr diff`); review-required?
-        No (exempt: docs/config/trivial only) ──► Step 7 (no trigger, no poll)
-        Yes (functional code or skill step-logic) ──► trigger Copilot once ──► Step 3
+        No (low-risk: prose/config/test-only/rename/tiny tweak only) ──► Step 7 (no trigger, no poll)
+        Yes (any risk criterion hit; when unsure, yes) ──► trigger Copilot once ──► Step 3
 Step 3  Record baseline Copilot review ID; poll every 60s, max 10:
         threads or suppressed comments > 0? ─────────► Step 4
         new review, nothing actionable? ────────────► Step 6 (reviewed clean)
@@ -28,7 +28,7 @@ Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediat
 Step 4d Suppressed comments this round? ──Yes──► post one PR comment summarizing fix/ignore outcomes
         All push-backs (threads + suppressed)? ──Yes──► Step 6 (skip Step 5)
 Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push ──► Step 6 (no re-trigger)
-Step 6  Not exempt and ≥1 Fix applied this invocation? ──► generalise each fixed finding,
+Step 6  Review requested and ≥1 Fix applied this invocation? ──► generalise each fixed finding,
         dedupe against the Criteria gist, append via `gh gist edit`. Else ──► Step 7
 Step 7  Report PR link — PR is ready to merge
 ```
@@ -60,7 +60,7 @@ Note the PR number. Continue to Step 2b.
 
 ## Step 2b — Decide whether Copilot review is required
 
-GitHub no longer auto-triggers a Copilot review on PR creation, so this step decides whether the PR needs one and requests it explicitly. Fetch the full diff content — the decision depends on what changed, not the file extension:
+GitHub no longer auto-triggers a Copilot review on PR creation, so this step decides whether the PR is risky enough to spend one Balanced review on, and requests it explicitly. Fetch the full diff content — the decision depends on what changed, not the file extension:
 
 ```bash
 gh pr diff {number}
@@ -68,8 +68,8 @@ gh pr diff {number}
 
 See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFERENCE.md) for the classification rule and worked examples.
 
-**Review-required** → trigger once (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)); continue to Step 3. This is the only time Copilot is requested — it is never re-triggered.
-**Exempt** → skip straight to Step 7. Do not trigger, do not poll.
+**Review-required** (any risk criterion hit; when unsure) → trigger once (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)); continue to Step 3. This is the only time Copilot is requested — it is never re-triggered.
+**Low-risk** → skip straight to Step 7. Do not trigger, do not poll.
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 

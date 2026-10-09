@@ -38,26 +38,39 @@ Reads the full diff content of every changed file, in one call — the classific
 
 ### Classification rule
 
-A diff is **review-required** if any changed file contains either of these:
+Copilot reviews at Balanced effort, so a review is spent only where the risk justifies it. A diff is **review-required** if it hits **any** of these:
 
-- A functional code change — new or modified logic, control flow, or scripts.
-- A step-logic edit to `SKILL.md`, `REFERENCE.md`, or `WORKFLOW.md` — a new or changed bash/GraphQL command, a decisioning rule, a branching condition, or a mutation. Skill files in this repo are markdown, but their step logic is the executable behavior the harness runs — extension alone does not make them documentation.
+1. **Trust-boundary change** — auth, permissions, secrets handling, CI workflows, dependency manifests or lockfiles, or anything that executes input in a shell.
+2. **External mutation** — a new or changed command that writes outside the working tree: `gh api` writes, GraphQL mutations, `git push`, `gh gist edit`, file deletion.
+3. **Control-flow change** — new or changed branching, guards, loop termination, step ordering, or error handling. In `SKILL.md`, `REFERENCE.md` and `WORKFLOW.md` this includes decisioning rules and branching conditions: their step logic is the executable behaviour the harness runs, so extension alone does not make them documentation.
+4. **Contract change** — an interface, flag, output format or path that other files or callers depend on.
+5. **Non-trivial scope** — more than about 30 changed logic lines, or logic changes across 3 or more files.
 
-A diff is **exempt** only if every changed file is one of these:
+A diff is **low-risk (skip the review)** only if every changed file is one of these:
 
-- Prose-only documentation — wording, explanation, or narrative changes that don't alter what a step does (e.g. `.agent-docs/context.md`, `README.md`, a clarifying sentence added to a skill file's prose without touching its commands or branching).
-- No-logic config — value or formatting changes to config files (`*.json`, `*.yaml`, `*.toml`) that don't add or change a script.
-- Formatting-only — whitespace, comment wording, or markdown formatting with no semantic change.
+- Prose, formatting or comment-only — wording or markdown formatting that doesn't alter what a step does.
+- A config value tweak (`*.json`, `*.yaml`, `*.toml`) that doesn't add or change a script.
+- A test-only addition that touches no production logic.
+- A rename or move with no content change.
+- A tiny isolated tweak — 10 or fewer lines in one file, such as a message string, constant or typo — that matches none of criteria 1–4.
+
+**When unsure, trigger.** Doubt about whether a criterion applies counts as a hit.
 
 ### Worked examples
 
 | Diff | Classification |
 |---|---|
-| Only `.agent-docs/specs/*.md` and `.agent-docs/issues/*.md` changed | Exempt |
-| `SKILL.md` changed, but only a step's prose explanation was reworded | Exempt |
-| `SKILL.md` changed: a new `gh api` command added to a step | Review-required |
-| One `.agent-docs/` file and one `*.py` script changed | Review-required (not every file is exempt) |
-| Diff is empty (no files changed, or rename/binary-only with no content diff) | Exempt — vacuously true that every changed file is exempt |
+| Only `.agent-docs/specs/*.md` and `.agent-docs/issues/*.md` changed | Skip |
+| `SKILL.md` changed, but only a step's prose explanation was reworded | Skip |
+| One-line typo or message-string fix in a script | Skip |
+| `SKILL.md` changed: a new `gh api` write added to a step | Review (criterion 2) |
+| A guard or termination condition changed in a step | Review (criterion 3) |
+| `uv.lock` or a dependency manifest changed | Review (criterion 1) |
+| A script's output format changed that another skill parses | Review (criterion 4) |
+| 40 changed logic lines in a single file | Review (criterion 5) |
+| One `.agent-docs/` file plus a change hitting any criterion | Review (not every file is low-risk) |
+| Unsure whether a change touches a contract | Review (when unsure, trigger) |
+| Diff is empty (no files changed, or rename/binary-only with no content diff) | Skip — vacuously true that every changed file is low-risk |
 
 ### Trigger Copilot Review
 
@@ -354,7 +367,7 @@ unrecorded rather than being lost from something that already existed.
 
 ## Loop termination conditions
 
-The loop (Steps 3–5) never starts at all if Step 2b judges the diff exempt — docs-only, config-only, or trivial. No review requested, no poll. Step 6 is also skipped (nothing was reviewed). PR is ready to merge.
+The loop (Steps 3–5) never starts at all if Step 2b judges the diff low-risk. No review requested, no poll. Step 6 is also skipped (nothing was reviewed). PR is ready to merge.
 
 Otherwise, the loop is complete when **any** of these conditions is met:
 
@@ -362,4 +375,4 @@ Otherwise, the loop is complete when **any** of these conditions is met:
 2. **Fixes pushed** — Step 5 committed and pushed this round's fixes. Copilot is not re-triggered and nothing is re-polled; go to Step 6.
 3. **Clean review or poll exhausted** — the Step 3 poll ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 6.
 
-In every non-exempt case, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.
+Whenever a review was requested, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.
