@@ -10,9 +10,16 @@ Run a structured two-axis design session before any implementation begins. Compl
 
 ## Interview discipline
 
-Ask questions **one at a time**, waiting for feedback before continuing. Asking multiple questions at once is bewildering.
+Ask questions **one at a time**, waiting for feedback before continuing. Asking multiple questions at once is bewildering, and each answer should shape the next question.
 
-For each question, provide your recommended answer.
+Ask every question through `AskUserQuestion`, with exactly one question per call, so the user can step through the session by picking options:
+
+- Give 2–4 options. Put your recommended answer first, with " (Recommended)" at the end of its label.
+- Fill the remaining slots with genuine alternatives — directions a reasonable user might actually choose, not filler. Do this even for open questions.
+- Do not add an "Other" option; the tool provides one for free-text answers.
+- Put whatever context the user needs to decide — what you found in the codebase, the trade-off at stake — in the question text and option descriptions.
+
+If `AskUserQuestion` is unavailable, ask the question in plain text with your recommended answer.
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
 
@@ -29,7 +36,11 @@ Probe the *what* and *why* before thinking about the *how*. Open with the first 
 - **Failure modes**: What does broken look like from a user's perspective?
 - **Edge cases**: Probe boundaries — empty states, concurrent users, partial failure.
 
-**Example exchange** — Q: "What does success look like for the user?" → Recommended answer: "A developer can run `/implement` and get a merged PR without writing any git commands manually."
+**Example question** — "What does success look like for the user?", with options:
+
+1. **Merged PR, no manual git (Recommended)** — a developer runs `/implement` and gets a merged PR without writing any git commands.
+2. **Reviewed PR, user merges** — the workflow stops at an approved PR and leaves the merge to the user.
+3. **Local commits only** — the workflow commits locally; pushing and the PR stay manual.
 
 Do not move to Phase 2 until the business picture is complete and agreed.
 
