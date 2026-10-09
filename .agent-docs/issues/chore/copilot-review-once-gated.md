@@ -1,5 +1,7 @@
 # Issues: chore/copilot-review-once-gated
 
+> Work complete — PR ready to merge.
+
 ## Copilot reviews once per invocation
 
 **GitHub issue**: #113
@@ -14,11 +16,11 @@ Make `address-copilot-comments` request Copilot at most once per invocation. Rem
 
 ### Acceptance criteria
 
-- [ ] Given a review-required PR whose first review yields fixes, when Step 5 completes, then the skill goes to Step 6/7 without re-triggering or re-polling.
-- [ ] Given a clean first review, then the skill goes to Step 6/7 as before.
-- [ ] No reference to `review_round`, the 2-review cap, or "Re-trigger" remains in the skill, REFERENCE.md, or other skills.
-- [ ] The trigger command (with PowerShell and GraphQL fallback notes) is documented once, under Step 2b.
-- [ ] The loop-at-a-glance diagram and Loop termination conditions match the single-review flow.
+- [x] Given a review-required PR whose first review yields fixes, when Step 5 completes, then the skill goes to Step 6/7 without re-triggering or re-polling.
+- [x] Given a clean first review, then the skill goes to Step 6/7 as before.
+- [x] No reference to `review_round`, the 2-review cap, or "Re-trigger" remains in the skill, REFERENCE.md, or other skills.
+- [x] The trigger command (with PowerShell and GraphQL fallback notes) is documented once, under Step 2b.
+- [x] The loop-at-a-glance diagram and Loop termination conditions match the single-review flow.
 
 ---
 
@@ -36,11 +38,11 @@ Replace Step 2b's classification rule (SKILL.md summary and REFERENCE.md section
 
 ### Acceptance criteria
 
-- [ ] Given a docs-only diff, or a one-line message-string typo, when Step 2b runs, then it skips the review.
-- [ ] Given a new `gh api` write, a changed guard condition, or a lockfile change, then it triggers a review.
-- [ ] Given a 40-line logic change in one file, or logic changes across 3 files, then it triggers a review.
-- [ ] Given a mixed diff with docs plus one criterion hit, then it triggers a review.
-- [ ] Given doubt about a criterion, then it triggers.
-- [ ] The worked-examples table covers each of the above.
+- [x] Given a docs-only diff, or a one-line message-string typo, when Step 2b runs, then it skips the review.
+- [x] Given a new `gh api` write, a changed guard condition, or a lockfile change, then it triggers a review.
+- [x] Given a 40-line logic change in one file, or logic changes across 3 files, then it triggers a review.
+- [x] Given a mixed diff with docs plus one criterion hit, then it triggers a review.
+- [x] Given doubt about a criterion, then it triggers.
+- [x] The worked-examples table covers each of the above.
 
 ---
