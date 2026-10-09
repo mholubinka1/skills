@@ -38,26 +38,77 @@ Reads the full diff content of every changed file, in one call — the classific
 
 ### Classification rule
 
-A diff is **review-required** if any changed file contains either of these:
+Copilot reviews at Balanced effort, so a review is spent only where the risk justifies it. A diff is **review-required** if it hits **any** of these:
 
-- A functional code change — new or modified logic, control flow, or scripts.
-- A step-logic edit to `SKILL.md`, `REFERENCE.md`, or `WORKFLOW.md` — a new or changed bash/GraphQL command, a decisioning rule, a branching condition, or a mutation. Skill files in this repo are markdown, but their step logic is the executable behavior the harness runs — extension alone does not make them documentation.
+1. **Trust-boundary change** — auth, permissions, secrets handling, CI workflows, dependency manifests or lockfiles, or anything that executes input in a shell.
+2. **External mutation** — a new or changed command that writes outside the working tree: `gh api` writes, GraphQL mutations, `git push`, `gh gist edit`, file deletion.
+3. **Control-flow change** — new or changed branching, guards, loop termination, step ordering, or error handling. In `SKILL.md`, `REFERENCE.md` and `WORKFLOW.md` this includes decisioning rules and branching conditions: their step logic is the executable behaviour the harness runs, so extension alone does not make them documentation.
+4. **Contract change** — an interface, flag, output format or path that other files or callers depend on.
+5. **Non-trivial scope** — more than about 30 changed logic lines, or logic changes across 3 or more files.
 
-A diff is **exempt** only if every changed file is one of these:
+A diff is **low-risk (skip the review)** only if every changed file is one of these:
 
-- Prose-only documentation — wording, explanation, or narrative changes that don't alter what a step does (e.g. `.agent-docs/context.md`, `README.md`, a clarifying sentence added to a skill file's prose without touching its commands or branching).
-- No-logic config — value or formatting changes to config files (`*.json`, `*.yaml`, `*.toml`) that don't add or change a script.
-- Formatting-only — whitespace, comment wording, or markdown formatting with no semantic change.
+- Prose, formatting or comment-only — wording or markdown formatting that doesn't alter what a step does.
+- A config value tweak (any config format, e.g. `*.json`, `*.yaml`, `*.yml`, `*.toml`, `*.ini`) that doesn't add or change a script.
+- A test-only change (added or edited tests) that touches no production logic.
+- A rename or move with no content change.
+- A tiny isolated tweak — 10 or fewer lines in one file, such as a message string, constant or typo — that matches none of criteria 1–4.
+
+A file that hits criteria 1–5 is review-required even when it fits a category above (e.g. a CI workflow `*.yml` is config but also a trust boundary). The low-risk list is exhaustive: anything not on it — including a logic change of 11–30 lines that hits none of criteria 1–5 — is review-required. **When unsure, trigger.** Doubt about whether a criterion applies counts as a hit.
 
 ### Worked examples
 
 | Diff | Classification |
 |---|---|
-| Only `.agent-docs/specs/*.md` and `.agent-docs/issues/*.md` changed | Exempt |
-| `SKILL.md` changed, but only a step's prose explanation was reworded | Exempt |
-| `SKILL.md` changed: a new `gh api` command added to a step | Review-required |
-| One `.agent-docs/` file and one `*.py` script changed | Review-required (not every file is exempt) |
-| Diff is empty (no files changed, or rename/binary-only with no content diff) | Exempt — vacuously true that every changed file is exempt |
+| Only `.agent-docs/specs/*.md` and `.agent-docs/issues/*.md` changed | Skip |
+| `SKILL.md` changed, but only a step's prose explanation was reworded | Skip |
+| One-line typo or message-string fix in a script | Skip |
+| `SKILL.md` changed: a new `gh api` write added to a step | Review (criterion 2) |
+| A guard or termination condition changed in a step | Review (criterion 3) |
+| `uv.lock` or a dependency manifest changed | Review (criterion 1) |
+| A script's output format changed that another skill parses | Review (criterion 4) |
+| 40 changed logic lines in a single file | Review (criterion 5) |
+| Logic changes spread across 3 files | Review (criterion 5) |
+| One `.agent-docs/` file plus a change hitting any criterion | Review (not every file is low-risk) |
+| Unsure whether a change touches a contract | Review (when unsure, trigger) |
+| Diff is empty (no files changed), or a rename with no content change | Skip — vacuously true that every changed file is low-risk |
+| A binary file was added, changed or deleted | Review (uninspectable; when unsure, trigger) |
+
+### Trigger Copilot Review
+
+The only place Copilot is requested — once per invocation, when the diff is review-required. Copilot reviews at the repository's default effort (Balanced); this skill never selects an effort level.
+
+#### Option A — `gh pr edit` (most plans)
+
+```bash
+gh pr edit {number} --add-reviewer '@copilot'
+```
+
+> In PowerShell, bare `@copilot` is parsed as a splat operator and consumed before arguments are passed to `gh`, so `gh` never receives the reviewer value and errors with `flag needs an argument: --add-reviewer`. Single-quote `'@copilot'` to prevent this.
+
+#### Option B — GraphQL `requestReviews` mutation (fallback if `gh pr edit` is unavailable)
+
+```bash
+gh api graphql -f query='
+mutation {
+  requestReviews(input: {
+    pullRequestId: "{pr_node_id}",
+    userIds: [],
+    union: false
+  }) {
+    pullRequest { title }
+  }
+}'
+```
+
+Get the PR node ID with:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
+```
+
+> Copilot reviewer availability depends on your GitHub plan and org settings.
+> If neither option works, manually request a review from the GitHub UI.
 
 ---
 
@@ -71,8 +122,8 @@ gh repo view --json nameWithOwner --jq '.nameWithOwner'
 
 ### The status-check script
 
-Steps 3 and 7 both need the same three checks — unresolved Copilot threads, suppressed
-comments folded into the review body, and whether a new review has landed — so both call one
+Step 3 needs the same three checks — unresolved Copilot threads, suppressed
+comments folded into the review body, and whether a new review has landed — so it calls one
 bundled script rather than repeating the `gh api`/GraphQL/jq logic inline:
 `scripts/check-review-status.sh`, resolved relative to **this skill's own base directory**
 (the path shown as "Base directory for this skill" when `address-copilot-comments` was
@@ -96,7 +147,7 @@ DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
 - **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied at all (even
   if that argument was itself an empty string, meaning no prior review existed at capture
   time): `CURRENT_REVIEW_ID` is non-empty and differs from the baseline, with nothing
-  actionable. Copilot has reviewed and left nothing to address — go to Step 7b immediately.
+  actionable. Copilot has reviewed and left nothing to address — go to Step 6 immediately.
 - **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
   nothing already actionable. Wait 60 seconds and call again.
 - **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do
@@ -111,7 +162,7 @@ charset).
 ### Capture baseline Copilot review ID (before the poll loop)
 
 Run the script once before polling begins, with no `baseline_review_id` argument, and take
-`CURRENT_REVIEW_ID` from its output as the baseline for every later call in this round:
+`CURRENT_REVIEW_ID` from its output as the baseline for every later call in this invocation:
 
 ```bash
 bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number}
@@ -131,20 +182,20 @@ bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} {
 ```
 
 `DECISION=ACTIONABLE` → exit the poll loop and continue to Step 4. `DECISION=CLEAN` → go to
-Step 7b immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
+Step 6 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
 polling immediately and report the failure to the user — do not count it as a `PENDING`
 attempt or keep retrying silently.
 
 After 10 `PENDING` attempts, call the script one final time with the same arguments. If that
 final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable —
-continue to Step 7b.
+continue to Step 6.
 
 Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the
 review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings
 there instead of posting them as real review comments), not real PR review comments, so they
 never appear as `reviewThreads` and `THREAD_COUNT` reads 0 even when these exist. That's why
 the script checks both counts on every call rather than treating one as a fallback for the
-other — a round can have both real threads and suppressed comments at once.
+other — a poll can return both real threads and suppressed comments at once.
 
 ---
 
@@ -209,6 +260,14 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
   -X POST -f body="Ignored. <reason>"
 ```
 
+### Pre-commit hook (if the project uses .githooks)
+
+```bash
+bash .githooks/pre-commit
+```
+
+If it fails because a formatter modified files, stage the auto-formatted files and re-run.
+
 ### Resolve the thread — do this immediately after replying, one thread at a time
 
 **Get unresolved thread node IDs:**
@@ -239,11 +298,11 @@ mutation {
 
 ### Acknowledge suppressed comments
 
-Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies — after its commit and push succeed, or straight away in a round with no fixes:
+Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this invocation's suppressed entries once Fix/Push-back decisions have been made for the invocation — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
 
 ```bash
 gh pr comment {number} --body "$(cat <<'EOF'
-Addressed this round's suppressed Copilot comments:
+Addressed this invocation's suppressed Copilot comments:
 
 - path/to/file.md:158 — Fixed. <one-line explanation>
 - path/to/other.json:1021 — Ignored. <reason>
@@ -251,47 +310,11 @@ EOF
 )"
 ```
 
-One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread replies. Post this whenever suppressed comments existed this round, even if every decision (threads and suppressed comments together) was a push-back — see Loop termination conditions below.
+One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread replies. Post this whenever suppressed comments existed this invocation, even if every decision (threads and suppressed comments together) was a push-back — see Loop termination conditions below.
 
 ---
 
-## Step 6 — Re-trigger Copilot review
-
-### Option A — `gh pr edit` (most plans)
-
-```bash
-gh pr edit {number} --add-reviewer '@copilot'
-```
-
-> In PowerShell, bare `@copilot` is parsed as a splat operator and consumed before arguments are passed to `gh`, so `gh` never receives the reviewer value and errors with `flag needs an argument: --add-reviewer`. Single-quote `'@copilot'` to prevent this.
-
-### Option B — GraphQL `requestReviews` mutation (fallback if `gh pr edit` is unavailable)
-
-```bash
-gh api graphql -f query='
-mutation {
-  requestReviews(input: {
-    pullRequestId: "{pr_node_id}",
-    userIds: [],
-    union: false
-  }) {
-    pullRequest { title }
-  }
-}'
-```
-
-Get the PR node ID with:
-
-```bash
-gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
-```
-
-> Copilot reviewer availability depends on your GitHub plan and org settings.
-> If neither option works, manually request a review from the GitHub UI.
-
----
-
-## Distil review criteria (Step 7b)
+## Distil review criteria (Step 6)
 
 ### What generalising looks like
 
@@ -329,7 +352,7 @@ using the "Appending an entry" procedure documented there.
 If dedupe removed every candidate, skip this step entirely — make no gist write. This is a
 live network write to a resource outside the target repo; there is nothing to `git add`,
 commit, or push for it. If the fetch or the write fails — no network, `gh` not authenticated,
-the gist unreachable — report the failure plainly and continue to Step 8 regardless; there is
+the gist unreachable — report the failure plainly and continue to Step 7 regardless; there is
 no local file at risk here, so a failed write simply means this run's criteria go
 unrecorded rather than being lost from something that already existed.
 
@@ -346,12 +369,13 @@ unrecorded rather than being lost from something that already existed.
 
 ## Loop termination conditions
 
-The loop (Steps 3–7) never starts at all if Step 2b judges the diff exempt — docs-only, config-only, or trivial. No review requested, no poll, no `review_round` set. Step 7b is also skipped (nothing was reviewed). PR is ready to merge.
+The loop (Steps 3–5) never starts at all if Step 2b judges the diff low-risk. No review requested, no poll. Step 6 is also skipped (nothing was reviewed). PR is ready to merge.
 
 Otherwise, the loop is complete when **any** of these conditions is met:
 
-1. **All push-backs in a round** — no code changes were made this round. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment, also posted in Step 4c. Skip Steps 6–7 and do not re-trigger Copilot, then go to Step 7b.
-2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger; go to Step 7b.
-3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 7b.
+1. **All push-backs** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Step 5 and go to Step 5b.
+2. **Fixes pushed** — Step 5 committed and pushed the fixes. Copilot is never re-triggered; go to Step 5b.
+3. **Clean review or poll exhausted** — the Step 3 poll ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 6.
+4. **Catch-up done** — Step 5b polls at most once for a requested review that had not landed when Step 4 began (leftover threads made Step 3's baseline call actionable). Whatever it finds is handled by one more pass through Steps 4–5; then go to Step 6. Step 5b is never entered twice.
 
-In every non-exempt case, Step 7b runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.
+Whenever a review was requested, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.

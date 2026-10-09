@@ -86,12 +86,12 @@ _Avoid_: dependency sync, env setup, provisioning
 
 ### PR Review Loop
 
-**Review round**:
-In `address-copilot-comments`, a counter tracking how many times Copilot has been requested to review a PR. Capped at 2; incrementing past the cap skips re-triggering.
-_Avoid_: review iteration, Copilot attempt, pass
+**Single review**:
+In `address-copilot-comments`, the rule that Copilot is requested at most once per invocation and never re-triggered. Review effort stays at the repository default (Balanced); the skill decides only whether to request a review.
+_Avoid_: review round, review iteration, re-review, Lite review
 
 **Review-required diff**:
-The judgment `address-copilot-comments` Step 2b makes about whether a PR's diff needs an initial Copilot review — based on diff content, not file extension. Functional code changes and skill step-logic edits (commands, decisioning, mutations in `SKILL.md`/`REFERENCE.md`/`WORKFLOW.md`) require review; prose-only documentation, no-logic config, and formatting-only diffs are exempt.
+The judgment `address-copilot-comments` Step 2b makes about whether a PR's diff is risky enough to warrant the one Copilot review, based on diff content rather than file extension. The criteria live in the Classification rule of that skill's `REFERENCE.md`; when unsure, the diff is review-required.
 _Avoid_: complex change, non-trivial diff, code change
 
 **Unresolved thread**:
