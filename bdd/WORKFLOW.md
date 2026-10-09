@@ -75,7 +75,7 @@ Interface changes: <the confirmed changes, one line each>
 Failing test: <path from Step 3>   Run: <test command from Step 3>
 ```
 
-If the subagent reports a scenario as blocked, the main context decides what to do next — fix it inline, or re-dispatch a fresh subagent with a narrower brief. There is no automatic retry loop.
+If the subagent reports a scenario as blocked, the main context decides what to do next — fix it inline, or re-dispatch a fresh subagent with a narrower brief, dispatched as above (`model: sonnet`, `run_in_background: false`). There is no automatic retry loop.
 
 ## Step 5 — Verify the returned work
 
@@ -86,6 +86,6 @@ Back in the main context, read the actual change, not just the report: `git diff
 - [ ] The code takes the first rung of [IMPLEMENTER.md](IMPLEMENTER.md)'s ladder that works, and adds nothing beyond the agreed scenarios
 - [ ] Every item on the report's **Skipped / risk** line is acceptable or resolved
 
-If anything fails the check, address it in the main context or re-dispatch a subagent.
+If anything fails the check, address it in the main context or re-dispatch a subagent as in Step 4 (`model: sonnet`, `run_in_background: false`).
 
 `pre-commit-check` and the commit are the caller's responsibility — under `/implement` they are Step 6's next actions, run once this skill returns.
