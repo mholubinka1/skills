@@ -1,5 +1,7 @@
 # Issues: chore/design-askuserquestion
 
+> Work complete — PR ready to merge.
+
 <!-- markdownlint-configure-file {"MD024": {"siblings_only": true}} -->
 
 ## Retire grill; run design directly — #122
@@ -20,9 +22,9 @@ Rename the glossary term **Grill** to **Design session** (with grill under _Avoi
 
 ### Acceptance criteria
 
-- [ ] Given `/implement` reaches its design step, when WORKFLOW.md is followed, then it runs `design` directly
-- [ ] Given the repo, when grepped for `grill` outside historical specs/issues/ADRs, `uv.lock`, design's attribution and the Design session `_Avoid_` line, then nothing matches, and `grill/` does not exist
-- [ ] Given `context.md`, when an agent looks up the session term, then it finds **Design session** with grill under _Avoid_
+- [x] Given `/implement` reaches its design step, when WORKFLOW.md is followed, then it runs `design` directly
+- [x] Given the repo, when grepped for `grill` outside historical specs/issues/ADRs, `uv.lock`, design's attribution and the Design session `_Avoid_` line, then nothing matches, and `grill/` does not exist
+- [x] Given `context.md`, when an agent looks up the session term, then it finds **Design session** with grill under _Avoid_
 
 ---
 
@@ -44,8 +46,8 @@ Keep a plain-text fallback with a recommendation for when the tool isn't availab
 
 ### Acceptance criteria
 
-- [ ] Given a design question, when it is asked, then it is a single `AskUserQuestion` call with 2–4 options and the first option labelled "(Recommended)"
-- [ ] Given an open question, when it is asked, then it still offers options, and free text goes through the built-in "Other"
-- [ ] Given `AskUserQuestion` is unavailable, when a question is asked, then it is asked in plain text with the recommended answer
+- [x] Given a design question, when it is asked, then it is a single `AskUserQuestion` call with 2–4 options and the first option labelled "(Recommended)"
+- [x] Given an open question, when it is asked, then it still offers options, and free text goes through the built-in "Other"
+- [x] Given `AskUserQuestion` is unavailable, when a question is asked, then it is asked in plain text with the recommended answer
 
 ---
