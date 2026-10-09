@@ -156,6 +156,29 @@ class SyncClaudeSkillsTest(unittest.TestCase):
         self.assertTrue((self.installed / "alpha" / "SKILL.md").exists())
         self.assertTrue((target / "KEEP.md").exists())
 
+    def test_failed_copy_keeps_the_previous_install(self):
+        self.add_skill("alpha", "OLD.md")
+        self.sync()
+        (self.repo / "alpha" / "OLD.md").unlink()
+        unreadable = self.repo / "alpha" / "LOCKED.md"
+        unreadable.write_text("locked")
+        unreadable.chmod(0)
+        self.addCleanup(unreadable.chmod, 0o644)
+
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.sync()
+
+        self.assertTrue((self.installed / "alpha" / "OLD.md").exists())
+
+    def test_plain_file_at_the_install_path_is_replaced(self):
+        self.installed.mkdir(parents=True)
+        (self.installed / "alpha").write_text("not a dir")
+        self.add_skill("alpha")
+
+        self.sync()
+
+        self.assertTrue((self.installed / "alpha" / "SKILL.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

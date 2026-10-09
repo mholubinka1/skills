@@ -39,10 +39,10 @@ if os.path.exists(manifest):
 
 
 def remove(path):
-    if os.path.islink(path):
-        os.unlink(path)
-    elif os.path.exists(path):
+    if os.path.isdir(path) and not os.path.islink(path):
         shutil.rmtree(path)
+    elif os.path.lexists(path):
+        os.unlink(path)
 
 
 current = []
@@ -52,8 +52,16 @@ for dirpath, dirs, files in os.walk(repo):
         name = os.path.basename(dirpath)
         current.append(name)
         dst = os.path.join(dest, name)
+        # Copy beside the install first, so a failed copy keeps the previous one.
+        tmp = os.path.join(dest, f".{name}.new")
+        remove(tmp)
+        try:
+            shutil.copytree(dirpath, tmp)
+        except BaseException:
+            remove(tmp)
+            raise
         remove(dst)
-        shutil.copytree(dirpath, dst)
+        os.rename(tmp, dst)
 
 if branch == default_branch:
     for name in old:

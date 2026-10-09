@@ -95,7 +95,7 @@ repos:
     hooks:
       - id: pip-audit
         # Audit the repo's pinned deps, not pip-audit's own hook environment.
-        args: [-r, requirements.txt]
+        args: [-r, requirements.txt, --no-deps]
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
