@@ -24,7 +24,7 @@ Copilot reviews at most once per invocation, and only when the diff is risky eno
 - **Low-risk (skip)** only if every changed file is one of: prose / formatting / comment-only; config value tweak with no new script; test-only addition touching no production logic; rename or move with no content change; tiny isolated tweak (10 or fewer lines in one file, e.g. message string, constant, typo) matching none of criteria 1–4.
 - **When unsure, trigger.**
 - Worked-examples table in REFERENCE.md updated to match.
-- **Single review**: remove `review_round` entirely; remove Step 6 (re-trigger) and Step 7 (re-poll). After Step 5 (commit and push) go to Step 7b. Renumber nothing else — retire Steps 6 and 7 cleanly, keeping Step 7b and Step 8 labels stable, or renumber consistently throughout; the loop-at-a-glance diagram, Step 7b guard (now keyed on "a review was requested at Step 2b" rather than `review_round`), and Loop termination conditions (drop "Max reviews reached") all updated.
+- **Single review**: remove `review_round` entirely; remove Step 6 (re-trigger) and Step 7 (re-poll). After Step 5 (commit and push) go to the criteria step (Step 7b, renumbered to Step 6). Renumber nothing else — retire Steps 6 and 7 cleanly, keeping Step 7b and Step 8 labels stable, or renumber consistently throughout; the loop-at-a-glance diagram, Step 7b guard (now keyed on "a review was requested at Step 2b" rather than `review_round`), and Loop termination conditions (drop "Max reviews reached") all updated.
 - The trigger command and its PowerShell/GraphQL notes in REFERENCE.md move from "Step 6 — Re-trigger" to Step 2b's own section (the trigger is now used only once).
 - No effort selection: the trigger stays `gh pr edit {number} --add-reviewer '@copilot'`; effort is the repository default (Balanced). Lite is out of the skill.
 - Domain docs already updated: `.agent-docs/context.md` (**Single review** replaces **Review round**; **Review-required diff** sharpened) and an amendment to ADR 0004.
@@ -32,7 +32,7 @@ Copilot reviews at most once per invocation, and only when the diff is risky eno
 
 ## Testing Decisions
 
-- No automated tests exist for these markdown skills. Seam: a dry-run trace of Step 2b against representative diffs, plus a trace of the post-fix path to confirm it ends at Step 7b/8 with no re-trigger.
+- No automated tests exist for these markdown skills. Seam: a dry-run trace of Step 2b against representative diffs, plus a trace of the post-fix path to confirm it ends at Step 6/7 (renumbered from 7b/8) with no re-trigger.
 - Representative diffs: docs-only (skip); typo in one SKILL.md string (skip); new `gh api` write (review); changed guard condition in a step (review); lockfile change (review); 40-line logic change in one file (review); mixed docs plus one criterion hit (review).
 - A `code-review` pass over the change before merge.
 
