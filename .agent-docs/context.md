@@ -77,7 +77,7 @@ The isolated git worktree (created via the harness's `EnterWorktree` tool under 
 _Avoid_: sandbox, isolated checkout, workspace
 
 **Placeholder branch**:
-A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. `branch-hygiene` always reports it as a mismatch; once the caller acts on that report's `next:` line and switches to the real branch (confirmed from grill output), `/implement` deletes the now-empty placeholder.
+A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. `branch-hygiene` always reports it as a mismatch; once the caller acts on that report's `next:` line and switches to the real branch (confirmed from design-session output), `/implement` deletes the now-empty placeholder.
 _Avoid_: temp branch, scratch branch
 
 **Worktree dependency bootstrap**:
@@ -117,7 +117,7 @@ The domain glossary file (`context.md`) that defines bounded language for a proj
 _Avoid_: glossary, dictionary, vocabulary file
 
 **Spec**:
-A PRD-style document written to `.agent-docs/specs/<branch-name>.md` after a grill session, capturing what to build and why before any code is written.
+A PRD-style document written to `.agent-docs/specs/<branch-name>.md` after a design session, capturing what to build and why before any code is written.
 _Avoid_: PRD, requirements document, design document
 
 **Issue** (agent-docs sense):
@@ -134,9 +134,9 @@ _Avoid_: review.md, staging file, shared criteria file, review notes
 
 ### Design and Implementation Process
 
-**Grill**:
-A two-axis design session (business angle then engineering angle) that sharpens scope and surfaces constraints before implementation. Produces material for a spec.
-_Avoid_: design session, planning session, interview
+**Design session**:
+The two-axis session `design` runs (business angle then engineering angle) that sharpens scope and surfaces constraints before implementation. Produces material for a spec.
+_Avoid_: grill, planning session, interview
 
 **Vertical slice**:
 A unit of work that delivers end-to-end value, used by `create-issues` to break a spec into independent, shippable issues.

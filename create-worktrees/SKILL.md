@@ -71,7 +71,7 @@ Slugify the current task's trigger message (see [REFERENCE.md](REFERENCE.md) for
 EnterWorktree(name: "wip/<slug>")
 ```
 
-The `wip/` prefix is deliberate — `branch-hygiene` already classifies `wip/*` as a placeholder that "must be renamed before code is written," so it always reports a mismatch there and its `next:` line moves work off this branch once the real name is known from later work (e.g. a `/implement` grill session). No new mismatch-detection logic is needed here.
+The `wip/` prefix is deliberate — `branch-hygiene` already classifies `wip/*` as a placeholder that "must be renamed before code is written," so it always reports a mismatch there and its `next:` line moves work off this branch once the real name is known from later work (e.g. a `/implement` design session). No new mismatch-detection logic is needed here.
 
 If `EnterWorktree` errors because a branch of that name already exists (e.g. a leftover `wip/<slug>` from an earlier aborted run that was never cleaned up), append a short disambiguating suffix to the slug and retry.
 
