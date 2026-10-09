@@ -6,3 +6,7 @@
 
 - **Create the worktree after `init-agent-docs`, before grill.** Rejected: `init-agent-docs` can still write to the main checkout (bootstrapping `.agent-docs/agent.md`, updating `CLAUDE.md`), which is exactly the kind of write isolation is meant to prevent.
 - **Reorder the workflow so branch-hygiene's naming runs first**, in the main checkout, using just the raw trigger message, then create the worktree with the real name directly. Rejected: naming decisions would happen outside the isolation boundary the worktree is meant to provide, and it fragments `branch-hygiene`'s job (name inference) away from where it currently lives (after grill, using grill's richer output).
+
+## Update — real placeholder name
+
+`EnterWorktree(name: "wip/<slug>")` actually creates the branch `worktree-wip+<slug>`, not `wip/<slug>`: the tool adds a `worktree-` prefix and replaces `/` with `+`. The decision is unchanged, but `branch-hygiene` now classifies `worktree-wip+*` as the placeholder alongside `wip/*`, which adds the one rule the original "no new mismatch-detection logic" assumed away (#121). Creating the branch by hand with `git worktree add -b wip/<slug>` was rejected: `ExitWorktree` will not remove a worktree entered by `path`, which would break `/implement`'s post-merge auto-cleanup.
