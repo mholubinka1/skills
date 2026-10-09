@@ -39,8 +39,8 @@ Inference Heuristics, and mark it `inferred`.
 
 ## Step 4 — Prefix
 
-Check the branch prefix against the Branch Prefix Validation Table. A trunk branch, a `wip/`
-placeholder, a prefix that doesn't match, or an unrecognised prefix is a mismatch.
+Check the branch prefix against the Branch Prefix Validation Table. A trunk branch, a `wip/` or
+`worktree-wip+` placeholder, a prefix that doesn't match, or an unrecognised prefix is a mismatch.
 
 ## Step 5 — Name relevance
 

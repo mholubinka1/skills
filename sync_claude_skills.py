@@ -30,7 +30,20 @@ branch = (
 old = []
 if os.path.exists(manifest):
     with open(manifest) as f:
-        old = f.read().split()
+        # Only plain directory names: never let a manifest line reach outside dest.
+        old = [
+            n
+            for n in f.read().split()
+            if os.path.basename(n) == n and n not in (".", "..")
+        ]
+
+
+def remove(path):
+    if os.path.islink(path):
+        os.unlink(path)
+    elif os.path.exists(path):
+        shutil.rmtree(path)
+
 
 current = []
 for dirpath, dirs, files in os.walk(repo):
@@ -39,13 +52,13 @@ for dirpath, dirs, files in os.walk(repo):
         name = os.path.basename(dirpath)
         current.append(name)
         dst = os.path.join(dest, name)
-        shutil.rmtree(dst, ignore_errors=True)
+        remove(dst)
         shutil.copytree(dirpath, dst)
 
 if branch == default_branch:
     for name in old:
         if name not in current:
-            shutil.rmtree(os.path.join(dest, name), ignore_errors=True)
+            remove(os.path.join(dest, name))
     keep = current
 else:
     keep = sorted(set(old) | set(current))
