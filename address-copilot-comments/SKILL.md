@@ -86,7 +86,9 @@ their decide/apply instructions. Only run the script, fetch, and report.
 <Step 3: Capture the baseline Copilot review ID, then poll as that section says.>
 <Step 5b: Use baseline review ID "<id>" as the script's 4th argument — pass "" when it is
 empty, never drop it — capture no new baseline, and poll as that section says.>
-On ACTIONABLE, fetch every unresolved Copilot thread and every suppressed-comment entry.
+On ACTIONABLE, fetch every unresolved Copilot thread and every suppressed-comment entry. If
+any of those fetches fails, or returns fewer items than the script's THREAD_COUNT plus
+SUPPRESSED_COUNT, return DECISION=ERROR instead.
 Change nothing.
 Return: BASELINE=<review ID used>, BASELINE_ACTIONABLE=yes|no (Step 3 only: whether the
 capture call itself was already ACTIONABLE), DECISION=ACTIONABLE|CLEAN|PENDING|ERROR (with
@@ -105,6 +107,8 @@ For each item returned in Step 3 or Step 5b, decide **Fix** or **Push back**, th
 fixes. This judgement stays in the main context. Push back when:
 
 - the comment names no concrete case — no input or situation that produces a wrong result;
+- the case it names does not hold when checked against the code (it does not reproduce, or
+  rests on a wrong assumption);
 - the suggestion adds code, abstraction, options or config the change does not need;
 - the file is inside `.agent-docs/` — Copilot is not a domain expert there.
 
@@ -135,16 +139,20 @@ Step 4b has fully finished. Dispatch one `Agent` call, `subagent_type: general-p
 Read <this skill's base directory>/REFERENCE.md, sections "Step 4 — Address each comment and
 suppressed entry" (reply, resolve and acknowledge subsections) and "Staging rules".
 PR #<number> in <owner>/<repo>.
-Decisions, one per line:  <threadId> <comment_id> | suppressed <path:line> — Fixed|Ignored — <reason>
+Decisions, one per line:  <threadId> <comment_id> | suppressed <path:line> — Fixed|Ignored|resolve-only — <reason>
 1. If any decision is Fixed: stage exactly <files changed this round> — never files
    pre-commit-check reported as autofixed outside the change — commit
    "address Copilot review: <summary>", push, and show git log --oneline -3. If a commit
    hook or the push fails: stop here and report it, posting nothing.
 2. For each thread: reply "Fixed. <reason>" or "Ignored. <reason>", then resolve it at once.
+   A resolve-only thread gets no reply, only the resolve. If a thread's reply fails, skip
+   its resolve.
 3. If any suppressed entries: post one PR comment summarising each one's outcome.
-If a reply, resolve or comment fails after the push, carry on with the rest.
-Return: commit hash and push result, threads replied and resolved, any that failed
-(threadId and error), comment posted (yes/no), and one line "Skipped / risk:".
+If a reply, resolve or comment fails after step 1 (or when step 1 was skipped), carry on
+with the rest.
+Return: commit hash and push result, threads replied and resolved, each failed operation
+(threadId, which of reply or resolve, and the error), comment posted (yes/no), and one line
+"Skipped / risk:".
 ```
 
 Retries, all from the main context:
@@ -152,8 +160,10 @@ Retries, all from the main context:
 - A commit-hook or push failure: fix it, then re-dispatch the whole handover — nothing was
   posted yet. When the commit already exists and only the push failed, say so: step 1 then
   starts at the push.
-- Failed replies or a failed suppressed-entry comment after a successful push: re-dispatch
-  for those threads and/or that comment only, with step 1 left out.
+- Failed operations after step 1 (or when it was skipped): re-dispatch only those, with
+  step 1 left out — threads whose reply failed keep their Fixed/Ignored decision, threads
+  whose reply posted but resolve failed are marked `resolve-only`, plus the
+  suppressed-entry comment if it failed.
 
 All push-backs (no file changed) still run this handover, with step 1 skipped. Then continue
 to Step 5b, or to Step 6 if this is already the Step 5b pass.
