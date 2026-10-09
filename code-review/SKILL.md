@@ -166,7 +166,7 @@ Always report aggregated findings to the user. If there are zero findings on bot
 
 ## Step 6 — Copilot PR review
 
-Invoke the `address-copilot-comments` skill to push the branch, create a PR if needed, and run the full Copilot review loop until clean. Once the loop is clean, continue to Step 7.
+Invoke the `address-copilot-comments` skill to push the branch, create a PR if needed, and request a single Copilot review (only when the diff warrants one) and address its comments. Once that is done, continue to Step 7.
 
 ## Step 7 — PR cleanup
 

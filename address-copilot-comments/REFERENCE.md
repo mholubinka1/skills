@@ -68,6 +68,7 @@ A diff is **low-risk (skip the review)** only if every changed file is one of th
 | `uv.lock` or a dependency manifest changed | Review (criterion 1) |
 | A script's output format changed that another skill parses | Review (criterion 4) |
 | 40 changed logic lines in a single file | Review (criterion 5) |
+| Logic changes spread across 3 files | Review (criterion 5) |
 | One `.agent-docs/` file plus a change hitting any criterion | Review (not every file is low-risk) |
 | Unsure whether a change touches a contract | Review (when unsure, trigger) |
 | Diff is empty (no files changed, or rename/binary-only with no content diff) | Skip — vacuously true that every changed file is low-risk |
@@ -120,8 +121,8 @@ gh repo view --json nameWithOwner --jq '.nameWithOwner'
 
 ### The status-check script
 
-Steps 3 and 7 both need the same three checks — unresolved Copilot threads, suppressed
-comments folded into the review body, and whether a new review has landed — so both call one
+Step 3 needs the same three checks — unresolved Copilot threads, suppressed
+comments folded into the review body, and whether a new review has landed — so it calls one
 bundled script rather than repeating the `gh api`/GraphQL/jq logic inline:
 `scripts/check-review-status.sh`, resolved relative to **this skill's own base directory**
 (the path shown as "Base directory for this skill" when `address-copilot-comments` was
@@ -145,7 +146,7 @@ DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
 - **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied at all (even
   if that argument was itself an empty string, meaning no prior review existed at capture
   time): `CURRENT_REVIEW_ID` is non-empty and differs from the baseline, with nothing
-  actionable. Copilot has reviewed and left nothing to address — go to Step 7 immediately.
+  actionable. Copilot has reviewed and left nothing to address — go to Step 6 immediately.
 - **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
   nothing already actionable. Wait 60 seconds and call again.
 - **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do
@@ -160,7 +161,7 @@ charset).
 ### Capture baseline Copilot review ID (before the poll loop)
 
 Run the script once before polling begins, with no `baseline_review_id` argument, and take
-`CURRENT_REVIEW_ID` from its output as the baseline for every later call in this round:
+`CURRENT_REVIEW_ID` from its output as the baseline for every later call in this invocation:
 
 ```bash
 bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number}
@@ -180,20 +181,20 @@ bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} {
 ```
 
 `DECISION=ACTIONABLE` → exit the poll loop and continue to Step 4. `DECISION=CLEAN` → go to
-Step 7 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
+Step 6 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
 polling immediately and report the failure to the user — do not count it as a `PENDING`
 attempt or keep retrying silently.
 
 After 10 `PENDING` attempts, call the script one final time with the same arguments. If that
 final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable —
-continue to Step 7.
+continue to Step 6.
 
 Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the
 review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings
 there instead of posting them as real review comments), not real PR review comments, so they
 never appear as `reviewThreads` and `THREAD_COUNT` reads 0 even when these exist. That's why
 the script checks both counts on every call rather than treating one as a fallback for the
-other — a round can have both real threads and suppressed comments at once.
+other — a poll can return both real threads and suppressed comments at once.
 
 ---
 
@@ -296,11 +297,11 @@ mutation {
 
 ### Acknowledge suppressed comments
 
-Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
+Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this invocation's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
 
 ```bash
 gh pr comment {number} --body "$(cat <<'EOF'
-Addressed this round's suppressed Copilot comments:
+Addressed this invocation's suppressed Copilot comments:
 
 - path/to/file.md:158 — Fixed. <one-line explanation>
 - path/to/other.json:1021 — Ignored. <reason>
@@ -371,8 +372,8 @@ The loop (Steps 3–5) never starts at all if Step 2b judges the diff low-risk. 
 
 Otherwise, the loop is complete when **any** of these conditions is met:
 
-1. **All push-backs in a round** — no code changes were made this round. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Step 5, then go to Step 6.
-2. **Fixes pushed** — Step 5 committed and pushed this round's fixes. Copilot is not re-triggered and nothing is re-polled; go to Step 6.
+1. **All push-backs** — no code changes were made. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Step 5, then go to Step 6.
+2. **Fixes pushed** — Step 5 committed and pushed the fixes. Copilot is not re-triggered and nothing is re-polled; go to Step 6.
 3. **Clean review or poll exhausted** — the Step 3 poll ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 6.
 
 Whenever a review was requested, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.

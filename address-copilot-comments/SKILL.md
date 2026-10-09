@@ -25,7 +25,7 @@ Step 3  Record baseline Copilot review ID; poll every 60s, max 10:
 Step 4  For each unresolved thread and each suppressed-comment entry: decide fix or push-back; apply code changes
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
 Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
-Step 4d Suppressed comments this round? ──Yes──► post one PR comment summarizing fix/ignore outcomes
+Step 4d Suppressed comments this invocation? ──Yes──► post one PR comment summarizing fix/ignore outcomes
         All push-backs (threads + suppressed)? ──Yes──► Step 6 (skip Step 5)
 Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push ──► Step 6 (no re-trigger)
 Step 6  Review requested and ≥1 Fix applied this invocation? ──► generalise each fixed finding,
@@ -73,7 +73,7 @@ See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFE
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 
-The thread-count and suppressed-comments checks (a round can have both) run via one bundled script — see the status-check script section in [REFERENCE.md](REFERENCE.md). Before polling, capture the latest Copilot review ID as a baseline by calling the script once with no baseline argument (empty if no review exists yet; if this call already reports something actionable, skip straight to Step 4).
+The thread-count and suppressed-comments checks (a poll can return both) run via one bundled script — see the status-check script section in [REFERENCE.md](REFERENCE.md). Before polling, capture the latest Copilot review ID as a baseline by calling the script once with no baseline argument (empty if no review exists yet; if this call already reports something actionable, skip straight to Step 4).
 
 Poll every 60 seconds, max 10 attempts, calling the script again each time: an actionable result exits to Step 4; a clean result (a new review with nothing to address) goes to Step 6 immediately; a failed `gh api` call is reported distinctly and must not be treated as "wait and retry"; otherwise wait and repeat. After 10 attempts with no new clean review, call the script one final time, same branching.
 
@@ -83,7 +83,7 @@ For each unresolved thread, and each suppressed-comment entry found in Step 3, d
 
 ## Step 4b — Validate changes with code-review
 
-> **MUST NOT SKIP.** The only valid reason to skip is every Step 4 decision being a push-back with zero files modified. Run it synchronously in the foreground to full completion — including any fixes it applies — before Step 4c and this round's Step 5 commit. Never run it as a background agent while the main thread moves on: both would edit the same files mid-review.
+> **MUST NOT SKIP.** The only valid reason to skip is every Step 4 decision being a push-back with zero files modified. Run it synchronously in the foreground to full completion — including any fixes it applies — before Step 4c and the Step 5 commit. Never run it as a background agent while the main thread moves on: both would edit the same files mid-review.
 
 If at least one fix was applied, run `code-review` Steps 1–5 only. Pass the explicit instruction to stop after Step 5 to avoid re-invoking this skill. Markdown, documentation, and `.agent-docs/` files get the same validation as code — file type is not a skip condition.
 
@@ -93,7 +93,7 @@ Reply to each **thread** ("Fixed. ..." or "Ignored. ...") and immediately resolv
 
 ## Step 4d — Acknowledge suppressed comments
 
-If any suppressed-comment entries were found in Step 3 this round, post a single PR-level comment summarizing the fix/ignore outcome for every one of them — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `gh pr comment` command. Post it even if every decision this round was a push-back — it's the only record of a suppressed comment's outcome. Skip this step if there were no suppressed comments this round.
+If any suppressed-comment entries were found in Step 3 this invocation, post a single PR-level comment summarizing the fix/ignore outcome for every one of them — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `gh pr comment` command. Post it even if every decision this invocation was a push-back — it's the only record of a suppressed comment's outcome. Skip this step if there were no suppressed comments this invocation.
 
 All push-backs across both threads and suppressed comments, and zero files modified → skip to Step 6 (skip Step 5). At least one fix → continue to Step 5.
 
