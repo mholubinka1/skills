@@ -21,7 +21,7 @@ Rename the glossary term **Grill** to **Design session** (with grill under _Avoi
 ### Acceptance criteria
 
 - [ ] Given `/implement` reaches its design step, when WORKFLOW.md is followed, then it runs `design` directly
-- [ ] Given the repo, when grepped for `grill` outside historical specs/issues/ADRs, `uv.lock` and design's attribution, then nothing matches, and `grill/` does not exist
+- [ ] Given the repo, when grepped for `grill` outside historical specs/issues/ADRs, `uv.lock`, design's attribution and the Design session `_Avoid_` line, then nothing matches, and `grill/` does not exist
 - [ ] Given `context.md`, when an agent looks up the session term, then it finds **Design session** with grill under _Avoid_
 
 ---

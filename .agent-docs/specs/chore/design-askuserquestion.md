@@ -41,7 +41,7 @@ Delete `grill`. `/implement` and every other live reference call `design` direct
 
 ## Testing Decisions
 
-- One repo-wide grep (excluding `.agent-docs/specs/`, `.agent-docs/issues/`, `.agent-docs/adr/`, `uv.lock`, and design's attribution line) returns no `grill` references.
+- One repo-wide grep (excluding `.agent-docs/specs/`, `.agent-docs/issues/`, `.agent-docs/adr/`, `uv.lock`, design's attribution line, and the Design session `_Avoid_` line in `context.md`) returns no `grill` references.
 - Read the edited `design`, `implement`, `write-spec` and `create-worktrees` skills against the acceptance criteria above.
 - `pre-commit-check` passes on the changed files.
 
