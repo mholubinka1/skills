@@ -54,7 +54,7 @@ A diff is **low-risk (skip the review)** only if every changed file is one of th
 - A rename or move with no content change.
 - A tiny isolated tweak — 10 or fewer lines in one file, such as a message string, constant or typo — that matches none of criteria 1–4.
 
-**When unsure, trigger.** Doubt about whether a criterion applies counts as a hit.
+The low-risk list is exhaustive: anything not on it — including a logic change of 11–30 lines that hits none of criteria 1–5 — is review-required. **When unsure, trigger.** Doubt about whether a criterion applies counts as a hit.
 
 ### Worked examples
 
@@ -297,7 +297,7 @@ mutation {
 
 ### Acknowledge suppressed comments
 
-Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this invocation's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
+Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this invocation's suppressed entries once Fix/Push-back decisions have been made for the invocation — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
 
 ```bash
 gh pr comment {number} --body "$(cat <<'EOF'
@@ -309,7 +309,7 @@ EOF
 )"
 ```
 
-One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread replies. Post this whenever suppressed comments existed this round, even if every decision (threads and suppressed comments together) was a push-back — see Loop termination conditions below.
+One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread replies. Post this whenever suppressed comments existed this invocation, even if every decision (threads and suppressed comments together) was a push-back — see Loop termination conditions below.
 
 ---
 

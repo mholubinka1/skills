@@ -10,12 +10,12 @@
 
 ### What to build
 
-Make `address-copilot-comments` request Copilot at most once per invocation. Remove `review_round`, Step 6 (re-trigger) and Step 7 (re-poll). After fixes are committed and pushed (Step 5) the flow goes to Step 7b then Step 8. Step 7b's guard keys on "a review was requested at Step 2b". Move the trigger command and its PowerShell/GraphQL notes into Step 2b's own REFERENCE.md section. Update the loop-at-a-glance diagram and Loop termination conditions. Check other skills and README for mentions of the two-round cap.
+Make `address-copilot-comments` request Copilot at most once per invocation. Remove `review_round`, Step 6 (re-trigger) and Step 7 (re-poll). After fixes are committed and pushed (Step 5) the flow goes to Step 6 (distil criteria, formerly 7b) then Step 7 (report, formerly 8). Step 6's guard keys on "a review was requested at Step 2b". Move the trigger command and its PowerShell/GraphQL notes into Step 2b's own REFERENCE.md section. Update the loop-at-a-glance diagram and Loop termination conditions. Check other skills and README for mentions of the two-round cap.
 
 ### Acceptance criteria
 
-- [ ] Given a review-required PR whose first review yields fixes, when Step 5 completes, then the skill goes to Step 7b/8 without re-triggering or re-polling.
-- [ ] Given a clean first review, then the skill goes to Step 7b/8 as before.
+- [ ] Given a review-required PR whose first review yields fixes, when Step 5 completes, then the skill goes to Step 6/7 without re-triggering or re-polling.
+- [ ] Given a clean first review, then the skill goes to Step 6/7 as before.
 - [ ] No reference to `review_round`, the 2-review cap, or "Re-trigger" remains in the skill, REFERENCE.md, or other skills.
 - [ ] The trigger command (with PowerShell and GraphQL fallback notes) is documented once, under Step 2b.
 - [ ] The loop-at-a-glance diagram and Loop termination conditions match the single-review flow.
