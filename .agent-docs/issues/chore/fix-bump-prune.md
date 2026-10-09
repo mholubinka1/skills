@@ -2,71 +2,64 @@
 
 <!-- markdownlint-configure-file {"MD024": {"siblings_only": true}} -->
 
-> Work complete — PR ready to merge.
-
-## Real worktree placeholder name — #126 (closes #121)
+## Recognise the real worktree placeholder branch — #126
 
 **Blocked by**: None
 
+**User stories**: 1, 2, 3
+
 ### What to build
 
-Establish consistent naming for the placeholder worktree form created by `EnterWorktree`:
-
-- `EnterWorktree(name: "wip/<slug>")` creates `worktree-wip+<slug>`
-- `branch-hygiene` classifies `worktree-wip+*` (and `wip/*`) as the placeholder form
-- Update create-worktrees, implement Step 3, bdd, ADR 0003, and glossary to name the real form
+`EnterWorktree(name: "wip/<slug>")` creates `worktree-wip+<slug>`. Make `branch-hygiene` classify `worktree-wip+*`, as well as `wip/*`, as the temporary placeholder. Make `create-worktrees` Step 4 and `implement/WORKFLOW.md` Step 3 name the real form, and append a note to ADR 0003 recording it. Closes #121.
 
 ### Acceptance criteria
 
-- [x] `EnterWorktree` creates worktrees named `worktree-wip+<slug>`
-- [x] `branch-hygiene` recognizes `worktree-wip+*` and `wip/*` as placeholder names
-- [x] create-worktrees, implement Step 3, bdd, ADR 0003, and glossary reference the real form consistently
-- [x] Issue #121 is resolved as part of this change
+- [x] Given the branch `worktree-wip+foo`, when `branch-hygiene` runs, then it classifies it as a temporary placeholder and reports a mismatch
+- [x] Given a user-named branch `worktree-bar`, when `branch-hygiene` runs, then it is not classified as a placeholder
+- [x] Given `/implement` Step 3 after a fresh worktree, when the switch is done, then the `worktree-wip+…` branch is the one deleted
+- [x] Given `create-worktrees`, WORKFLOW.md and ADR 0003, when read, then they name `worktree-wip+<slug>` as the branch `EnterWorktree` creates
 
 ---
 
-## pip-audit audits the repo — #127
+## pip-audit audits requirements.txt — #127
 
 **Blocked by**: None
 
+**User stories**: 4, 5
+
 ### What to build
 
-Fix pip-audit hook to audit the repo's pinned dependencies instead of its own environment:
-
-- Change hook to audit `requirements.txt` using `-r requirements.txt --no-deps`
-- Expose and fix real advisories in pinned **virtualenv 21.7.10** (PYSEC-2026-4011–4014)
-- Bump virtualenv to 21.14.6
+Give the `pip-audit` hook `args: [-r, requirements.txt]`, so it audits the repo's pinned dependency export instead of its own hook environment. Then rebuild the local hook environments once with `pre-commit clean` (not committed).
 
 ### Acceptance criteria
 
-- [x] pip-audit hook runs with `-r requirements.txt --no-deps`
-- [x] Hook result is independent of the interpreter's per-environment state
-- [x] virtualenv is bumped to 21.14.6 to fix exposed advisories
-- [x] `pre-commit run pip-audit --all-files` passes
+- [x] Given the pip-audit hook, when it runs, then it audits `requirements.txt`, not pip-audit's own environment
+- [x] Given `pre-commit run pip-audit --all-files`, when it runs, then it passes
 
 ---
 
-## Sync prunes stale installs — #128
+## Sync prunes stale installed skills — #128
 
 **Blocked by**: None
 
+**User stories**: 6, 7, 8, 9
+
 ### What to build
 
-Enhance `sync_claude_skills.py` to clean up stale skill installs:
+`sync_claude_skills.py` replaces each repo skill wholesale in `~/.claude/skills` and records installed skill names in a skill manifest there.
 
-- Copy each skill beside its install, then swap it in atomically
-- Record installed skill names in `~/.claude/skills/.skills-repo-manifest`
-- On default branch only, remove manifest-listed skills the repo no longer has
-- Never touch unlisted skills, symlink targets, or names outside the install dir
+- On the default branch, it removes skills that are in the old manifest but no longer in the repo, then rewrites the manifest.
+- On any other branch, it never prunes, and the manifest becomes a union.
+- Skills not in the manifest are never touched, and a missing manifest means no prune.
+
+A stdlib `unittest` module covers this through the script's real entry point, against a temp `HOME` and a temp git repo.
 
 ### Acceptance criteria
 
-- [x] Skills are copied atomically with swap to prevent partial updates
-- [x] `~/.claude/skills/.skills-repo-manifest` is written with installed skill names
-- [x] Default branch removes manifest-listed skills that repo no longer has
-- [x] Unlisted skills, symlinks, and out-of-dir names are preserved
-- [x] `python3 -m unittest discover -s tests` passes (11 tests)
-- [x] Real post-commit sync wrote the manifest correctly
-- [x] Stale `init-agent-docs/REVIEW-TEMPLATE.md` was removed
+- [x] Given a skill whose repo copy lost a file, when sync runs, then the installed copy no longer has that file
+- [x] Given a manifest-listed skill deleted from the repo on the default branch, when sync runs, then it is uninstalled
+- [x] Given a manifest-listed skill deleted on a feature branch, when sync runs, then it stays installed
+- [x] Given an installed skill not in the manifest, when sync runs on the default branch, then it is never removed
+- [x] Given no manifest exists, when sync runs on the default branch, then nothing is pruned and a manifest is written
 
 ---
