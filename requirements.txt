@@ -19,5 +19,5 @@ python-discovery==1.6.0
     # via virtualenv
 pyyaml==6.0.3
     # via pre-commit
-virtualenv==21.7.13
+virtualenv==21.7.10
     # via pre-commit
