@@ -188,7 +188,8 @@ Then apply the accepted fixes:
   `model: sonnet`, `run_in_background: false`, and wait for its report. Its standing rules
   live in [FIXER.md](FIXER.md), so the prompt is a short handover. Label each finding
   `logic` or `non-logic`, and write each fix instruction yourself, specific enough to apply
-  without judgement:
+  without judgement. Pass `none` as the test command only once you have confirmed the repo
+  has no test suite; if a suite exists but you cannot find its command, ask the user:
 
   ```text
   Read <code-review skill's base directory>/FIXER.md and follow it.

@@ -15,6 +15,8 @@ scope for that finding.
 
 ## Per finding, in order
 
+- **Snapshot first**: before starting each finding, save `git diff > <scratch file>` (a
+  scratch path outside the repo, one per finding).
 - **`logic`**: red, then green. Write a test that fails on the defect (an assertion, not an
   import or syntax error), run it, then apply the fix and run the full suite: it passes. A
   suite failure that predates your change goes on the Skipped / risk line; it does not block
@@ -26,7 +28,10 @@ scope for that finding.
   works.
 - **Blocked**: when a fix needs a design choice or behaviour beyond what its instruction
   describes, breaks other tests in a way the finding did not foresee, or the defect does not
-  reproduce, leave that finding unapplied, note why, and move on to the next.
+  reproduce, leave that finding unapplied, note why, and move on to the next. Before moving
+  on, undo only the delta since that finding's snapshot (its new test and any partial fix),
+  keeping changes that predate the handover and other findings' edits. Never restore by
+  checking out whole files.
 
 Leave committing and pushing to the caller.
 
