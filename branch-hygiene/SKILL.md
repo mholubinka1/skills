@@ -1,39 +1,69 @@
 ---
 name: branch-hygiene
 description: Validates the current git branch before work begins — autoSetupRemote, trunk-branch detection, prefix-vs-change-type, and name relevance. Use at the start of a work session, or from another skill passing a known change_type.
+context: fork
+agent: general-purpose
+model: haiku
+effort: low
+background: false
+argument-hint: "[change_type] <one-line summary of the work>"
 ---
 
 # Branch Hygiene
 
-Validates that you are on the right branch before work begins. Can be run in two modes:
+A read-only check: report whether the current branch fits the work, and what the caller
+should do about it. Change nothing — no config, no branches, no commits.
 
-- **Fast mode** (no `change_type`): checks `autoSetupRemote` and warns if on a trunk branch. Infers change type from the user's request using heuristics.
-- **Full mode** (`change_type` provided): performs all checks including prefix validation against the confirmed change type.
+Input: `$ARGUMENTS`. When the first word is one of `feature`, `bugfix`, `hotfix`,
+`release`, `chore`, it is the confirmed `change_type`; the rest is a one-line summary of the
+work. Otherwise the whole input is the summary. An empty input means no summary: run Steps 1–2,
+skip Steps 3–5, and say so in the report.
 
-See [REFERENCE.md](REFERENCE.md) for classification tables, inference heuristics, and the full mismatch resolution procedure.
+Tables and rules for each step are in [REFERENCE.md](REFERENCE.md).
 
-## Step 1 — Check autoSetupRemote
+## Step 1 — autoSetupRemote
 
-Run `git config push.autoSetupRemote`. If the output is not `true`, warn the user and ask if they want it set before continuing.
+Run `git config push.autoSetupRemote`. Record whether it is `true`.
 
-## Step 2 — Detect current branch
+## Step 2 — Current branch
 
-Run `git branch --show-current`. Classify the branch using the Branch Classification Table in [REFERENCE.md](REFERENCE.md). Flag trunk branches (`main`, `master`, `develop`) and unrecognised prefixes.
+Run `git branch --show-current`. Classify it with the Branch Classification Table.
 
-## Step 3 — Determine change type
+## Step 3 — Change type
 
-If called from within `/implement`, derive the change type and branch slug from the grill session output already in context. If `change_type` was passed explicitly, use it. Otherwise infer from the user's request — see the Change Type Inference Heuristics section in [REFERENCE.md](REFERENCE.md).
+Use the given `change_type`; otherwise infer one from the summary with the Change Type
+Inference Heuristics, and mark it `inferred`.
 
-## Step 4 — Validate branch prefix against change type
+## Step 4 — Prefix
 
-Check the branch prefix against the valid prefixes for the change type — see the Branch Prefix Validation Table in [REFERENCE.md](REFERENCE.md). Flag trunk branches, `wip/` placeholders, prefix mismatches, and unrecognised prefixes.
+Check the branch prefix against the Branch Prefix Validation Table. A trunk branch, a `wip/`
+placeholder, a prefix that doesn't match, or an unrecognised prefix is a mismatch.
 
-## Step 5 — Validate branch name relevance
+## Step 5 — Name relevance
 
-Extract the descriptive slug and assess whether it relates to the current work. Flag when the slug clearly describes different work — see the Branch Name Relevance Rules section in [REFERENCE.md](REFERENCE.md) for signal criteria.
+Judge the branch slug against the summary with the Branch Name Relevance Rules.
 
-## Step 6 — Resolve mismatch
+## Step 6 — Suggestion
 
-On any mismatch, suggest a well-formed branch name and offer to create it from the remote default branch. See the Mismatch Resolution section in [REFERENCE.md](REFERENCE.md) for the full procedure. **Do not push or commit to the new branch.**
+On any mismatch, build a suggested name `<change_type>/<slug-from-summary>` and the
+command that creates it, using the Create Command section of REFERENCE.md.
 
-If there is no mismatch, confirm the branch is appropriate and continue.
+## Report
+
+Done when every step above has a line. Reply with exactly this block:
+
+```text
+autoSetupRemote: true | false
+branch: <name> (<classification>)
+change_type: <type> (given | inferred | unknown)
+verdict: ok | mismatch — <reason>
+suggested: <branch>                        (mismatch only)
+next: <see below>
+Skipped / risk: <one line>
+```
+
+`next:` tells the caller what to do, one clause per problem found:
+
+- autoSetupRemote not `true` → `ask the user "Set push.autoSetupRemote to true?"; on yes run: git config push.autoSetupRemote true`
+- mismatch → `ask the user "You're on <branch> but this work is <summary>. Create <suggested> and move the work there?"; on yes run: <create command>. Never push or commit to the new branch.`
+- neither → `none — the branch fits.`

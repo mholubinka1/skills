@@ -1,6 +1,6 @@
 # Branch Hygiene — Reference
 
-Full validation tables and resolution logic. The step overview is in [SKILL.md](SKILL.md).
+Validation tables and the create command. The step overview is in [SKILL.md](SKILL.md).
 
 ## Branch classification table (Step 2)
 
@@ -17,7 +17,7 @@ Full validation tables and resolution logic. The step overview is in [SKILL.md](
 
 ## Change type inference heuristics (Step 3)
 
-If `change_type` was not passed explicitly and the call is not from within `/implement`, infer from the user's request:
+If `change_type` was not given, infer it from the work summary:
 
 - **feature**: new capability or behaviour — "add X", "implement Y", "as a user I want"
 - **bugfix**: restoring broken behaviour — "fix X", "broken", "not working", "wrong result"
@@ -57,40 +57,22 @@ Do **not** flag a name mismatch when:
 
 When in doubt, flag it — a stale branch name causes confusion in PRs and git history.
 
-## Mismatch resolution (Step 6)
+## Create command (Step 6)
 
-On any mismatch (prefix or name), suggest a well-formed branch name derived from the work description:
-
-> You're on `feature/config-reload` but this work is adding a CI pipeline. Suggested branch: `chore/add-ci-checks`. Create it and move your work there? (yes/no)
-
-If the user confirms, first detect the default branch and fetch it:
+Detect the default branch (read-only):
 
 ```bash
 git symbolic-ref refs/remotes/origin/HEAD --short
 ```
 
-This returns something like `origin/main`. Strip the `origin/` prefix to get the default branch name.
-
-If the command succeeds, fetch it:
-
-```bash
-git fetch origin <default-branch>
-```
-
-Then create the new branch from the fetched remote ref:
+This returns something like `origin/main`; strip `origin/` to get `<default-branch>`. The
+create command for the report is then:
 
 ```bash
-git checkout -b <suggested-branch> origin/<default-branch>
+git fetch origin <default-branch> && git checkout -b <suggested-branch> origin/<default-branch>
 ```
 
-If `git symbolic-ref` fails (no remote, or `origin/HEAD` not set), warn the user:
-
-> Could not detect default branch — no remote or `origin/HEAD` not set. Creating branch from local HEAD instead. Run `git remote set-head origin --auto` to fix this.
-
-Then fall back to:
-
-```bash
-git checkout -b <suggested-branch>
-```
-
-Any uncommitted changes carry over automatically. **Do not push or commit to the new branch.**
+If `git symbolic-ref` fails (no remote, or `origin/HEAD` not set), the create command is
+`git checkout -b <suggested-branch>` (from local HEAD), and the report's `Skipped / risk`
+line says: "Could not detect the default branch; run `git remote set-head origin --auto` to
+fix." Uncommitted changes carry over to the new branch either way.

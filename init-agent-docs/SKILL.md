@@ -1,6 +1,11 @@
 ---
 name: init-agent-docs
 description: Bootstraps AI-agent documentation in the current repository — .agent-docs/ layout, agent.md, context.md, ADR migration, and a CLAUDE.md reference — idempotently. Use at the start of an implementation workflow to ensure agent standards are in place before work begins.
+context: fork
+agent: general-purpose
+model: haiku
+effort: low
+background: false
 ---
 
 # init-agent-docs
@@ -25,4 +30,4 @@ See [REFERENCE.md](REFERENCE.md) for the full per-step detail.
 7. **Migrate ADR files** — search `docs/`, `docs/adr/`, `agent-docs/docs/adr/`, and `.agent-docs/docs/adr/` for ADR files matching `[0-9]*-*.md`; move them to `.agent-docs/adr/`, resolving conflicts by git date.
 8. **Check CLAUDE.md** — if `CLAUDE.md` already references `.agent-docs/agent.md`, skip to Step 10; if it references the old path, update it.
 9. **Create or append CLAUDE.md** — append the Agent Standards reference block to `CLAUDE.md` (create if missing).
-10. **Summary** — report every action taken and every step skipped with a reason.
+10. **Summary** — report every action taken and every step skipped with a reason, ending with one line, `Skipped / risk:`, naming anything the caller must resolve.

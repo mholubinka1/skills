@@ -18,20 +18,17 @@ Step 1  PR exists? ──No──► Step 2: create PR ──► Step 2b
 Step 2b Read PR diff (`gh pr diff`); review-required?
         No (exempt: docs/config/trivial only) ──► Step 8 (no trigger, no poll)
         Yes (functional code or skill step-logic) ──► trigger Copilot; review_round = 1 ──► Step 3
-Step 3  Record baseline Copilot review ID; poll every 60s, max 10:
-        threads or suppressed comments > 0? ─────────► Step 4
-        new review, nothing actionable? ────────────► Step 7b (reviewed clean)
-        exhausted? one final check, same branching ──► Step 4 or Step 7b
-Step 4  For each unresolved thread and each suppressed-comment entry: decide fix or push-back; apply code changes
+Step 3  Haiku sub-agent: capture baseline, poll every 60s (max 10), fetch items:
+        ACTIONABLE ──► Step 4 | CLEAN or still PENDING ──► Step 7b | ERROR ──► report
+Step 4  Main context: for each thread and suppressed entry decide fix or push-back; apply fixes
 Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
-Step 4c Reply to each thread ("Fixed." / "Ignored.") → resolve thread immediately
-Step 4d Suppressed comments this round? ──Yes──► post one PR comment summarizing fix/ignore outcomes
-        All push-backs (threads + suppressed)? ──Yes──► Step 7b (skip Steps 5–7)
-Step 5  Execute pre-commit-checks or .git/hooks/pre-commit (if any) → commit → push
+Step 4c Haiku sub-agent: reply + resolve each thread; one PR comment for suppressed entries;
+        if any fix: pre-commit → commit → push
+        All push-backs (threads + suppressed)? ──Yes──► Step 7b (skip Steps 6–7)
 Step 6  review_round < 2? ──Yes──► review_round++; re-trigger Copilot → Step 7
                           ──No ──► Step 7b (max 2 reviews; do not re-trigger)
-Step 7  Re-capture baseline; poll as in Step 3:
-        threads or suppressed comments? ──► Step 4 | clean or exhausted? ──► Step 7b
+Step 7  Re-dispatch the Step 3 polling sub-agent:
+        ACTIONABLE ──► Step 4 | otherwise ──► Step 7b
 Step 7b Not exempt and ≥1 Fix applied this invocation? ──► generalise each fixed finding,
         dedupe against the Criteria gist, append via `gh gist edit`. Else ──► Step 8
 Step 8  Report PR link — PR is ready to merge
@@ -77,33 +74,62 @@ See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFE
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 
-The thread-count and suppressed-comments checks (a round can have both) run via one bundled script — see the status-check script section in [REFERENCE.md](REFERENCE.md). Before polling, capture the latest Copilot review ID as a baseline by calling the script once with no baseline argument (empty if no review exists yet; if this call already reports something actionable, skip straight to Step 4).
+Polling is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one
+`Agent` call, `subagent_type: general-purpose`, `model: haiku`, with this handover:
 
-Poll every 60 seconds, max 10 attempts, calling the script again each time: an actionable result exits to Step 4; a clean result (a new review with nothing to address) goes to Step 7b immediately; a failed `gh api` call is reported distinctly and must not be treated as "wait and retry"; otherwise wait and repeat. After 10 attempts with no new clean review, call the script one final time, same branching.
+```text
+Read <this skill's base directory>/REFERENCE.md, sections "Step 3 — Poll for Copilot review
+threads and suppressed comments" and "Step 4 — Address each comment and suppressed entry"
+(only its two fetch subsections). PR #<number>.
+Capture the baseline Copilot review ID, then poll as that section says (every 60s, max 10,
+one final check). On ACTIONABLE, fetch every unresolved Copilot thread and every
+suppressed-comment entry. Change nothing.
+Return: DECISION=ACTIONABLE|CLEAN|PENDING|ERROR (with the gh error if ERROR), then one block
+per item: threadId and comment_id (or "suppressed"), path:line, the comment body verbatim.
+```
+
+`ACTIONABLE` → Step 4 with the returned items. `CLEAN`, or `PENDING` after the final check →
+Step 7b. `ERROR` → report the failure to the user; it is not a "wait and retry".
 
 ## Step 4 — Decide and apply changes
 
-For each unresolved thread, and each suppressed-comment entry found in Step 3/7, decide **Fix** or **Push back** (push back on any file contained within `.agent-docs/` — Copilot is not a domain expert there); apply code changes; see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for fetch query, reply commands, and how to read suppressed-comment entries out of the review body.
+For each item returned in Step 3/7, decide **Fix** or **Push back**, then apply the fixes. This judgement stays in the main context. Push back when:
+
+- the comment names no concrete case — no input or situation that produces a wrong result;
+- the suggestion adds code, abstraction, options or config the change does not need;
+- the file is inside `.agent-docs/` — Copilot is not a domain expert there.
+
+Fix everything else. For each decision, note one line of reasoning: it becomes the reply.
 
 ## Step 4b — Validate changes with code-review
 
-> **MUST NOT SKIP.** The only valid reason to skip is every Step 4 decision being a push-back with zero files modified. Run it synchronously in the foreground to full completion — including any fixes it applies — before Step 4c and this round's Step 5 commit. Never run it as a background agent while the main thread moves on: both would edit the same files mid-review.
+> **MUST NOT SKIP.** The only valid reason to skip is every Step 4 decision being a push-back with zero files modified. Run it synchronously in the foreground to full completion — including any fixes it applies — before Step 4c's reply-and-commit dispatch. Never run it as a background agent while the main thread moves on: both would edit the same files mid-review.
 
 If at least one fix was applied, run `code-review` Steps 1–5 only. Pass the explicit instruction to stop after Step 5 to avoid re-invoking this skill. Markdown, documentation, and `.agent-docs/` files get the same validation as code — file type is not a skip condition.
 
-## Step 4c — Reply and resolve threads
+## Step 4c — Reply, acknowledge, commit and push
 
-Reply to each **thread** ("Fixed. ..." or "Ignored. ...") and immediately resolve via GraphQL — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `resolveReviewThread` mutation. Real threads only — suppressed entries have no ID and are acknowledged in Step 4d instead.
+These steps are mechanical, so they run in one Haiku sub-agent with an empty context, after
+Step 4b has fully finished. Dispatch one `Agent` call, `subagent_type: general-purpose`,
+`model: haiku`, with this handover:
 
-## Step 4d — Acknowledge suppressed comments
+```text
+Read <this skill's base directory>/REFERENCE.md, sections "Step 4 — Address each comment and
+suppressed entry" (reply, resolve and acknowledge subsections) and "Staging rules". PR #<number>.
+Decisions, one per line:  <threadId> <comment_id> | suppressed <path:line> — Fixed|Ignored — <reason>
+1. For each thread: reply "Fixed. <reason>" or "Ignored. <reason>", then resolve it at once.
+2. If any suppressed entries: post one PR comment summarising each one's outcome.
+3. If any decision is Fixed: run the repo's pre-commit hooks (or .git/hooks/pre-commit) on
+   <files changed>, stage exactly those files, commit "address Copilot review: <summary>",
+   push, and show git log --oneline -3. A hook failure that needs a code change: stop and
+   report it.
+Return: threads replied and resolved, comment posted (yes/no), commit hash and push result,
+and one line "Skipped / risk:".
+```
 
-If any suppressed-comment entries were found in Step 3/7 this round, post a single PR-level comment summarizing the fix/ignore outcome for every one of them — see the Address Each Comment and Suppressed Entry section in [REFERENCE.md](REFERENCE.md) for the `gh pr comment` command. Post it even if every decision this round was a push-back — it's the only record of a suppressed comment's outcome. Skip this step if there were no suppressed comments this round.
-
-All push-backs across both threads and suppressed comments, and zero files modified → skip to Step 7b (skip Steps 5–7). At least one fix → continue to Step 5.
-
-## Step 5 — Commit and push
-
-Stage files explicitly (`git add <file1> <file2> ...`), commit with `"address Copilot review: <summary>"`, push, confirm with `git log --oneline -3`. See the Staging Rules section in [REFERENCE.md](REFERENCE.md) for staging rules.
+A reported hook failure is fixed in the main context and the commit step re-dispatched.
+All push-backs across threads and suppressed comments, and zero files modified → skip to
+Step 7b (skip Steps 6–7). At least one fix → continue to Step 6.
 
 ## Step 6 — Re-trigger Copilot (if within limit)
 
@@ -111,7 +137,7 @@ If `review_round >= 2`, skip to Step 7b. Otherwise increment to 2 and re-trigger
 
 ## Step 7 — Check for new threads and suppressed comments
 
-Re-capture the baseline Copilot review ID, then poll as in Step 3. New unresolved threads or suppressed comments → return to Step 4. Neither (or clean review detected) → continue to Step 7b.
+Dispatch the Step 3 polling sub-agent again (it captures a fresh baseline). `ACTIONABLE` → return to Step 4. Anything else → continue to Step 7b, reporting an `ERROR` to the user.
 
 ## Step 7b — Distil review criteria into the shared Criteria gist
 
@@ -123,7 +149,7 @@ skill reads on every future review.
 Step 4 decision across the whole invocation was **Fix**. Otherwise skip to Step 8.
 
 **Collect.** Every finding this invocation whose decision was Fix — real threads replied to
-with "Fixed." and suppressed entries recorded "Fixed." in a Step 4d comment. Exclude every
+with "Fixed." and suppressed entries recorded "Fixed." in the Step 4c PR comment. Exclude every
 push-back: the Criteria gist records only criteria accepted by changing code.
 
 **Generalise, dedupe, write.** For each fixed finding write one generalised criterion that

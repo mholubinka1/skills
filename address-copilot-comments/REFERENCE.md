@@ -247,7 +247,7 @@ mutation {
 
 ### Acknowledge suppressed comments
 
-Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before Step 5 commits and pushes:
+Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before its commit and push:
 
 ```bash
 gh pr comment {number} --body "$(cat <<'EOF'
@@ -358,7 +358,7 @@ The loop (Steps 3–7) never starts at all if Step 2b judges the diff exempt —
 
 Otherwise, the loop is complete when **any** of these conditions is met:
 
-1. **All push-backs in a round** — no code changes were made this round. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Steps 5–7 and do not re-trigger Copilot, then go to Step 7b.
+1. **All push-backs in a round** — no code changes were made this round. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment, also posted in Step 4c. Skip Steps 6–7 and do not re-trigger Copilot, then go to Step 7b.
 2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger; go to Step 7b.
 3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 7b.
 

@@ -71,6 +71,18 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 
 ---
 
-## 7. Environment Notes
+## 7. Delegation
+
+Match each piece of work to the cheapest model that does it well:
+
+- **Plan** on Opus, in the main session: design, specs, acceptance criteria, test cases, and judging review feedback.
+- **Build** on Sonnet: implementation, via a sub-agent.
+- **Ship** on Haiku: mechanical, repeatable steps — commits, pushes, PRs, hooks, branch checks, polling.
+
+A sub-agent starts with an empty context. Hand it over in a few lines: the goal, inputs as file paths and git refs (it reads them itself), the rules it cannot find in the repo, and the exact shape of its report — ending with one line naming what it skipped and any risk. Keep a job inline when the handover would cost more than the work: a change of a few lines stays in the main session. Before anything a sub-agent built ships, the main session reads the actual `git diff` and checks it against the acceptance criteria.
+
+---
+
+## 8. Environment Notes
 
 - On Windows, via a Bash-tool-style shell: a multi-line `python -c "<script>"` can silently produce no output — no error, just nothing. Write the script to a scratch file and run it directly instead of inlining multi-line Python.

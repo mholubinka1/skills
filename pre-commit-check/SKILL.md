@@ -1,93 +1,69 @@
 ---
 name: pre-commit-check
 description: Runs pre-commit hooks after code is written or changed. Use whenever code has just been written or edited, or the user asks to lint or format it.
-allowed-tools: Bash, Read, Write
+allowed-tools: Bash, Read, Write, Edit
+context: fork
+agent: general-purpose
+model: haiku
+effort: low
+background: false
+argument-hint: "[changed files…]"
 ---
 
 # Pre-Commit Hook Runner
 
-After writing or modifying any code files, automatically run pre-commit hooks
-and fix any issues found.
+Run the repo's pre-commit hooks in two passes — changed files, then the full repo — and fix
+what they report.
 
-## Workflow
+Input: `$ARGUMENTS` — the changed files, if the caller named them. Otherwise collect them
+yourself: `git diff --name-only HEAD` plus `git ls-files --others --exclude-standard`.
 
-1. **Identify changed files** — Determine which files were just created or modified.
-2. **Run pre-commit on those files**:
+If `pre-commit` is not installed or `.pre-commit-config.yaml` is missing, stop and say which
+in the report. If the project uses `poetry`, run every command below through `poetry run`.
 
-   ```bash
-   pre-commit run --files <changed_files>
-   ```
+## Pass 1 — Changed files
 
-   If no specific files are known, run against all staged files:
+```bash
+pre-commit run --files <changed files>
+```
 
-   ```bash
-   pre-commit run --all-files
-   ```
+## Pass 2 — Full repo
 
-3. **Parse the output** — Check each hook's result for PASSED, FAILED, or
-   SKIPPED.
-4. **If any hooks fail**:
-   - Read the failing file(s) to see what changed (some hooks like `black`,
-     `isort`, or `prettier` auto-fix in place).
-   - If auto-fixed: re-run `pre-commit run --files <fixed_files>` to confirm
-     they now pass.
-   - If not auto-fixed: read the error output, apply the necessary fix
-     manually, then re-run.
-   - Repeat until all hooks pass.
-5. **Run a full-repo check** — Once the changed-files pass is clean, run:
+Once pass 1 is clean, always run:
 
-   ```bash
-   pre-commit run --all-files
-   ```
+```bash
+pre-commit run --all-files
+```
 
-   This catches drift in files the current session didn't touch. Treat
-   failures here exactly like changed-files failures: auto-fix in place where
-   the hook supports it, otherwise read the error and fix manually — even in
-   files outside the current change set — then re-run `--all-files` until
-   clean. Do not go back and re-check the changed-files pass afterward; the
-   two passes are sequential, not a combined loop.
-6. **Report results** — Summarize both passes separately: which hooks ran,
-   what failed, what was fixed, and confirm all checks pass.
+This catches drift in files the current change did not touch; fixes here are in scope even
+for those files. The passes are sequential: pass 2 never sends you back to pass 1.
 
-## Important Rules
+## Fixing failures (both passes)
 
-- Never skip or bypass failing hooks unless the user explicitly asks.
-- Do not use `--no-verify` on commits.
-- If the project is using `poetry` as the environment and package manager,
-  modify any `pre-commit` commands accordingly.
-- If `pre-commit` is not installed, inform the user and ask how they'd like
-  to proceed.
-- If `.pre-commit-config.yaml` does not exist, inform the user and ask how
-  they'd like to proceed.
-- Always re-run hooks after making fixes to confirm clean output.
-- Always recommend additional or missing hooks that would usefully verify code if applicable
-- The full-repo pass (step 5) always runs, with no skip option — it is the
-  guarantee that changed-files-only checks don't let repo-wide drift slip
-  through.
-- Fixes made during the full-repo pass are in scope even for files the
-  current session didn't touch, since the pass exists specifically to catch
-  that drift.
+- A hook that auto-fixes in place (`black`, `isort`, `prettier`, …): re-run the same pass to
+  confirm it now passes.
+- Otherwise: read the error, fix the code, re-run.
+- Repeat until the pass is clean. Every hook runs; leave `--no-verify` and skipping hooks to
+  an explicit user request.
+- A failure you cannot fix without changing behaviour or making a design choice: leave it
+  and report it — the caller fixes it.
 
-## Output Format
+## Report
 
-After both passes pass, report like this:
+Done when both passes are clean or every remaining failure is reported. Reply with:
 
 ```text
-✅ Pre-commit results:
+Pre-commit results:
 
 Changed files:
   - ruff ............. Passed
   - black ............ Fixed → Passed
-  - isort ............ Fixed → Passed
-  - trailing-whitespace Passed
-  - end-of-file-fixer  Passed
 
 Full repo:
   - ruff ............. Passed
-  - black ............ Fixed → Passed
-  - isort ............ Passed
-  - trailing-whitespace Passed
-  - end-of-file-fixer  Passed
+  - isort ............ Fixed → Passed
 
-All hooks passed on both passes. Files are ready to commit.
+Unfixed: <hook — file:line — error> per line, or "none"
+Missing hooks worth adding: <one line, or "none">
+Skipped / risk: <one line>
 ```

@@ -1,6 +1,11 @@
 ---
 name: pr-cleanup
 description: Pre-merge cleanup — check off acceptance criteria in .agent-docs/issues/<branch-name>.md, commit to the PR branch, close GitHub issues, and share the PR link for merging. Use when a branch has passed review and its PR is ready to merge, or as the final step of /code-review after the Copilot review loop.
+context: fork
+agent: general-purpose
+model: haiku
+effort: low
+background: false
 ---
 
 # PR Cleanup
@@ -44,4 +49,7 @@ gh issue close <number> --comment "Closed: implementation complete, see PR for r
 gh pr view <PR-number> --json url --jq '.url'
 ```
 
-Share the URL. The PR is ready to merge.
+## Report
+
+Reply with the PR URL, the issues closed, and one line, `Skipped / risk:`, naming anything
+that failed (an issue that would not close, a push that was rejected).
