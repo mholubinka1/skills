@@ -57,7 +57,7 @@ echo '.claude' >> .gitignore
 git add .gitignore
 ```
 
-Run the `pre-commit-check` skill. If it surfaces an error, stop and resolve it before continuing. Once clean, commit:
+Run the `pre-commit-check` skill and act on its `next:` line. Commit only when it reads `none — ready to commit.` or lists only pre-existing failures or outside-the-change autofixes; otherwise stop and report. Then commit:
 
 ```bash
 git commit -m "chore: gitignore .claude"
@@ -71,7 +71,7 @@ Slugify the current task's trigger message (see [REFERENCE.md](REFERENCE.md) for
 EnterWorktree(name: "wip/<slug>")
 ```
 
-The `wip/` prefix is deliberate — `branch-hygiene` already classifies `wip/*` as a placeholder that "must be renamed before code is written," so its existing mismatch-resolution step already moves work off this branch automatically once the real name is known from later work (e.g. a `/implement` grill session). No new mismatch-detection logic is needed here.
+The `wip/` prefix is deliberate — `branch-hygiene` already classifies `wip/*` as a placeholder that "must be renamed before code is written," so it always reports a mismatch there and its `next:` line moves work off this branch once the real name is known from later work (e.g. a `/implement` grill session). No new mismatch-detection logic is needed here.
 
 If `EnterWorktree` errors because a branch of that name already exists (e.g. a leftover `wip/<slug>` from an earlier aborted run that was never cleaned up), append a short disambiguating suffix to the slug and retry.
 
@@ -87,7 +87,16 @@ Both prompts in this step go through `AskUserQuestion`. In a non-interactive run
 2. **Nothing detected** — do nothing; continue to the caller.
 3. **One or more first-class ecosystems detected** — print each one and its exact install command(s), then ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*. No interactive user → **Skip**, per the note above; likewise any answer that is not a clear *Install*.
    - **Skip** — leave the printed commands as a copy-paste hint; continue.
-   - **Install** — run each detected ecosystem's install command, recording pass/fail per ecosystem. An install that fails — tool not on `PATH`, no network, unsatisfiable lockfile, venv creation unavailable, compile error — is reported on one line (the failing command and its first error line) and does **not** abort: the worktree is created and is usable for work that doesn't execute the code.
+   - **Install** — installing is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one `Agent` call, `subagent_type: general-purpose`, `model: haiku`, `run_in_background: false`, and wait for its report. Handover:
+
+     ```text
+     In <worktree path>, run these install commands, one ecosystem at a time:
+     <ecosystem>: <command(s) printed above>, one line each
+     A failing install does not stop the others.
+     Return per ecosystem: pass, or fail with the failing command and its first error line.
+     ```
+
+     Report its result. A failed install does **not** abort: the worktree is created and is usable for work that doesn't execute the code.
 4. **Uncovered ecosystem(s)** — any marker from step 1 that is not a first-class Detection Table ecosystem:
    - If it is on the courtesy list in REFERENCE.md, attempt that conventional install — best-effort, non-fatal, reported as in step 3. Otherwise attempt nothing.
    - Then print once, covering every uncovered ecosystem found:

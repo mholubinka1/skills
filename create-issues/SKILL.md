@@ -51,4 +51,12 @@ Create `.agent-docs/issues/<branch-name>.md` using the Local Issues File Templat
 
 ### 6. Push to GitHub
 
-Verify `gh` is available (`gh --version`). Publish issues in dependency order using the GitHub Issue Creation Command in [REFERENCE.md](REFERENCE.md). Update the local file with real issue numbers.
+Publishing is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one `Agent` call, `subagent_type: general-purpose`, `model: haiku`, `run_in_background: false`, and wait for its report. Handover:
+
+```text
+Read <this skill's base directory>/REFERENCE.md, section "GitHub issue creation command".
+Verify gh is available (gh --version). Publish every slice in .agent-docs/issues/<branch-name>.md
+to GitHub in dependency order (blockers first), then write the real issue numbers back into
+that file. Change no other wording in it.
+Return: slice title → issue number, one per line, and one line "Skipped / risk:".
+```

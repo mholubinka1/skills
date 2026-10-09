@@ -286,6 +286,7 @@ init-agent-docs complete:
   - Created `.agent-docs/context.md` from codebase analysis.
   - no ADRs found — skipped
   - Created `CLAUDE.md` with Agent Standards reference.
+Skipped / risk: none
 ```
 
 Example (existing repo where context.md needed improvement):
@@ -298,6 +299,7 @@ init-agent-docs complete:
   - Improved `.agent-docs/context.md` — tightened 2 definitions, added avoid-lists for 3 terms.
   - no ADRs found — skipped
   - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
+Skipped / risk: none
 ```
 
 Or if nothing needed doing:
@@ -309,4 +311,5 @@ init-agent-docs complete (nothing to do):
   - `.agent-docs/context.md` reviewed — no improvements needed.
   - no ADRs found — skipped
   - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
+Skipped / risk: none
 ```

@@ -20,7 +20,7 @@ Do not enact the plan until the user confirms a shared understanding across **bo
 
 ## Phase 1 — Business axis
 
-Grill on the *what* and *why* before thinking about the *how*. Explore:
+Grill on the *what* and *why* before thinking about the *how*. Open with the first question every change must survive — **does this need to exist at all?** Push back on any part of the request the need does not justify. Then explore:
 
 - **Desired behaviour**: What should the system do differently? What does success look like?
 - **Motivation**: What pain point or opportunity drives this? Who benefits?
@@ -37,7 +37,7 @@ Do not move to Phase 2 until the business picture is complete and agreed.
 
 Now that the *what* is pinned, grill on the *how*. Explore:
 
-- **Approach**: What is the minimal, correct technical solution?
+- **Approach**: What is the minimal, correct technical solution? Climb the ladder and stop at the first rung that holds: already in this codebase → standard library or platform feature → an installed dependency → one line → only then new code.
 - **Affected surfaces**: What parts of the codebase change? What depends on them?
 - **Trade-offs**: What are the genuine alternatives and why is this one preferred?
 - **Technical edge cases**: What can go wrong in the implementation that the business view missed?

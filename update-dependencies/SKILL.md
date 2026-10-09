@@ -1,6 +1,11 @@
 ---
 name: update-dependencies
 description: Syncs the current repo with main/master, then updates dependencies to their latest patch/minor versions across detected ecosystems (Python, .NET/C#, Node/TypeScript/React) and bumps pre-commit hook versions, committing the result locally. Use when the user asks to update dependencies or refresh pre-commit hooks.
+context: fork
+agent: general-purpose
+model: haiku
+effort: low
+background: false
 ---
 
 # Update Dependencies
@@ -15,7 +20,7 @@ See [REFERENCE.md](REFERENCE.md) for per-ecosystem detection rules and commands.
 2. Run `git fetch origin`.
 3. If the current branch is `main`/`master`: pull latest (`git pull`), then create a fresh branch off it, e.g. `git checkout -b chore/update-dependencies`.
 4. Otherwise (already on a feature/dev branch): merge latest main/master into it, e.g. `git merge origin/main` (or `origin/master`), to absorb anything Dependabot already merged.
-5. On merge conflicts: stop immediately. Do not auto-resolve. Leave any stash in place and point the user at the `resolving-merge-conflicts` skill.
+5. On merge conflicts: stop immediately and leave any stash in place. Report the conflicted files (`git diff --name-only --diff-filter=U`) — resolving them is the caller's job.
 6. If a stash was created in step 1 and the sync succeeded cleanly, pop it: `git stash pop`. On a conflict popping the stash, stop and hand off to the user — do not auto-resolve.
 
 ## Step 2: Detect ecosystems
@@ -71,11 +76,4 @@ Summarize:
 - Pre-commit: hooks bumped, and the `--all-files` result.
 - Validation: build/test result per ecosystem, if run.
 - The commit created (hash + message summary), and an explicit note that it was not pushed — the next step (review, test, push/PR) is up to the user, or a follow-on skill like `code-review`.
-
-## Important rules
-
-- Never apply major version bumps automatically.
-- Never push, and never open a PR — this skill commits locally only.
-- Only stage files this run touched; never `git add -A`/`git add .`.
-- Never auto-resolve merge or stash conflicts — stop and hand off.
-- If a package manager isn't installed for a detected ecosystem, report and skip it rather than failing the whole run.
+- `Skipped / risk:` one line naming any ecosystem skipped and any failure the user must act on.

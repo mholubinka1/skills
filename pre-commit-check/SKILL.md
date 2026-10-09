@@ -1,93 +1,96 @@
 ---
 name: pre-commit-check
 description: Runs pre-commit hooks after code is written or changed. Use whenever code has just been written or edited, or the user asks to lint or format it.
-allowed-tools: Bash, Read, Write
+allowed-tools: Bash, Read
+context: fork
+agent: general-purpose
+model: haiku
+effort: low
+background: false
+argument-hint: "[changed files…]"
 ---
 
 # Pre-Commit Hook Runner
 
-After writing or modifying any code files, automatically run pre-commit hooks
-and fix any issues found.
+Run the repo's pre-commit hooks in two passes — changed files, then the full repo — keep the
+hooks' own autofixes, and report everything else to the caller.
 
-## Workflow
+Input: `$ARGUMENTS` — the changed files, if the caller named them. Otherwise collect them
+yourself: `git diff --name-only HEAD` plus `git ls-files --others --exclude-standard`; if that
+is empty (the work is already committed), use `git diff --name-only <base>...HEAD`, where
+`<base>` is the output of `git symbolic-ref refs/remotes/origin/HEAD --short`. If that lookup
+fails, skip pass 1, say "changed set unknown" on the Skipped / risk line, and list every
+pass 2 failure under `Unclassified:` instead of the two failure lines.
 
-1. **Identify changed files** — Determine which files were just created or modified.
-2. **Run pre-commit on those files**:
+Find the runner, first match wins: `pre-commit` on `PATH`; the repo's virtualenv
+(`.venv/bin/pre-commit`, or `.venv/Scripts/pre-commit` on Windows); `poetry run pre-commit`
+when the project uses Poetry; `uv run pre-commit` when it uses uv. Use that runner for every
+command below. With no `.pre-commit-config.yaml`, run the repo's hook script instead
+(`.githooks/pre-commit`, else `.git/hooks/pre-commit`) once, apply the same autofix rule
+below, and list every remaining failure under `Unclassified:`. If there is neither, or no runner works, stop and say which in the report.
 
-   ```bash
-   pre-commit run --files <changed_files>
-   ```
+## Pass 1 — Changed files
 
-   If no specific files are known, run against all staged files:
+```bash
+pre-commit run --files <changed files>
+```
 
-   ```bash
-   pre-commit run --all-files
-   ```
+## Pass 2 — Full repo
 
-3. **Parse the output** — Check each hook's result for PASSED, FAILED, or
-   SKIPPED.
-4. **If any hooks fail**:
-   - Read the failing file(s) to see what changed (some hooks like `black`,
-     `isort`, or `prettier` auto-fix in place).
-   - If auto-fixed: re-run `pre-commit run --files <fixed_files>` to confirm
-     they now pass.
-   - If not auto-fixed: read the error output, apply the necessary fix
-     manually, then re-run.
-   - Repeat until all hooks pass.
-5. **Run a full-repo check** — Once the changed-files pass is clean, run:
+Always run it after pass 1, whatever pass 1 left unfixed:
 
-   ```bash
-   pre-commit run --all-files
-   ```
+```bash
+pre-commit run --all-files
+```
 
-   This catches drift in files the current session didn't touch. Treat
-   failures here exactly like changed-files failures: auto-fix in place where
-   the hook supports it, otherwise read the error and fix manually — even in
-   files outside the current change set — then re-run `--all-files` until
-   clean. Do not go back and re-check the changed-files pass afterward; the
-   two passes are sequential, not a combined loop.
-6. **Report results** — Summarize both passes separately: which hooks ran,
-   what failed, what was fixed, and confirm all checks pass.
+This catches drift in files the current change did not touch. The passes are sequential:
+pass 2 never sends you back to pass 1.
 
-## Important Rules
+## Handling failures (both passes)
 
-- Never skip or bypass failing hooks unless the user explicitly asks.
-- Do not use `--no-verify` on commits.
-- If the project is using `poetry` as the environment and package manager,
-  modify any `pre-commit` commands accordingly.
-- If `pre-commit` is not installed, inform the user and ask how they'd like
-  to proceed.
-- If `.pre-commit-config.yaml` does not exist, inform the user and ask how
-  they'd like to proceed.
-- Always re-run hooks after making fixes to confirm clean output.
-- Always recommend additional or missing hooks that would usefully verify code if applicable
-- The full-repo pass (step 5) always runs, with no skip option — it is the
-  guarantee that changed-files-only checks don't let repo-wide drift slip
-  through.
-- Fixes made during the full-repo pass are in scope even for files the
-  current session didn't touch, since the pass exists specifically to catch
-  that drift.
+Before each pass, record `git diff --name-only`; after it, diff again. Files that appear only
+afterwards were autofixed by the hooks — that difference is the autofixed set.
 
-## Output Format
+- A hook that autofixes in place (`black`, `isort`, `prettier`, end-of-file, …): keep the
+  fix, in any file, and re-run the same pass once to confirm it now passes. A hook still
+  changing files on that re-run is a failure: list it like any other failure below. These autofixes are
+  the only edits you make.
+- Any other failure (type errors, lint findings, failing checks): leave the code as it is
+  and list it — under **changed** when the file is in the changed set, otherwise under
+  **pre-existing**.
+- A hook already listed from pass 1 is not listed again from pass 2.
+- Every hook runs; leave `--no-verify` and skipping hooks to an explicit user request.
 
-After both passes pass, report like this:
+## Report
+
+Done when both passes have run and every failure is listed. Reply with:
 
 ```text
-✅ Pre-commit results:
+Pre-commit results:
 
 Changed files:
   - ruff ............. Passed
   - black ............ Fixed → Passed
-  - isort ............ Fixed → Passed
-  - trailing-whitespace Passed
-  - end-of-file-fixer  Passed
 
 Full repo:
   - ruff ............. Passed
-  - black ............ Fixed → Passed
-  - isort ............ Passed
-  - trailing-whitespace Passed
-  - end-of-file-fixer  Passed
+  - isort ............ Fixed → Passed
 
-All hooks passed on both passes. Files are ready to commit.
+Files autofixed (changed set): <paths>, or "none"
+Files autofixed (outside the change): <paths>, or "none"
+Unfixed (changed files): <hook — file:line — error> per line, or "none"
+Pre-existing (untouched files): <hook — file:line — error> per line, or "none"
+Unclassified: <hook — file:line — error> per line (changed set unknown, or hook script only)
+Missing hooks worth adding: <one line, or "none">
+next: <see below>
+Skipped / risk: <one line>
 ```
+
+`next:` tells the caller what to do, one clause per non-empty line above:
+
+- Files autofixed (changed set) → `stage these with your commit: <paths>`
+- Files autofixed (outside the change) → `leave these unstaged and tell the user they hold repo-wide drift fixes for a separate commit: <paths>`
+- Unfixed (changed files) → `fix each changed-file item and run pre-commit-check again; if this was already your third run, stop and show the items to the user`
+- Pre-existing → `show the pre-existing failures to the user; leave those files alone`
+- Unclassified → `show these failures to the user; the changed set could not be worked out`
+- every line `none` → `none — ready to commit.`

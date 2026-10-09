@@ -8,7 +8,7 @@ dest = os.path.expanduser("~/.claude/skills")
 os.makedirs(dest, exist_ok=True)
 
 for dirpath, dirs, files in os.walk(repo):
-    dirs[:] = [d for d in dirs if d != ".git"]
+    dirs[:] = [d for d in dirs if d not in (".git", ".claude")]
     if "SKILL.md" in files:
         name = os.path.basename(dirpath)
         dst = os.path.join(dest, name)
