@@ -12,14 +12,14 @@ Run a structured two-axis design session before any implementation begins. Compl
 
 Ask questions **one at a time**, waiting for feedback before continuing. Asking multiple questions at once is bewildering, and each answer should shape the next question.
 
-Ask every question through `AskUserQuestion`, with exactly one question per call, so the user can step through the session by picking options:
+Ask every question through `AskUserQuestion` — including axis confirmations and ADR offers — with exactly one question per call, so the user can step through the session by picking options:
 
 - Give 2–4 options. Put your recommended answer first, with " (Recommended)" at the end of its label.
-- Fill the remaining slots with genuine alternatives — directions a reasonable user might actually choose, not filler. Do this even for open questions.
+- Fill the remaining slots with genuine alternatives — directions a reasonable user might actually choose, not filler. Do this even for open questions. For a confirmation, the alternative is the most likely adjustment.
 - Do not add an "Other" option; the tool provides one for free-text answers.
 - Put whatever context the user needs to decide — what you found in the codebase, the trade-off at stake — in the question text and option descriptions.
 
-If `AskUserQuestion` is unavailable, ask the question in plain text with your recommended answer.
+If `AskUserQuestion` is unavailable or its call fails, ask the question in plain text with your recommended answer.
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
 

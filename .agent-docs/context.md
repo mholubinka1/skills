@@ -135,7 +135,7 @@ _Avoid_: review.md, staging file, shared criteria file, review notes
 ### Design and Implementation Process
 
 **Design session**:
-The two-axis interview `design` runs (business angle then engineering angle) that sharpens scope and surfaces constraints before implementation. Produces material for a spec.
+The two-axis session `design` runs (business angle then engineering angle) that sharpens scope and surfaces constraints before implementation. Produces material for a spec.
 _Avoid_: grill, planning session, interview
 
 **Vertical slice**:
