@@ -59,6 +59,42 @@ A diff is **exempt** only if every changed file is one of these:
 | One `.agent-docs/` file and one `*.py` script changed | Review-required (not every file is exempt) |
 | Diff is empty (no files changed, or rename/binary-only with no content diff) | Exempt — vacuously true that every changed file is exempt |
 
+### Trigger Copilot Review
+
+The only place Copilot is requested — once per invocation, when the diff is review-required. Copilot reviews at the repository's default effort (Balanced); this skill never selects an effort level.
+
+#### Option A — `gh pr edit` (most plans)
+
+```bash
+gh pr edit {number} --add-reviewer '@copilot'
+```
+
+> In PowerShell, bare `@copilot` is parsed as a splat operator and consumed before arguments are passed to `gh`, so `gh` never receives the reviewer value and errors with `flag needs an argument: --add-reviewer`. Single-quote `'@copilot'` to prevent this.
+
+#### Option B — GraphQL `requestReviews` mutation (fallback if `gh pr edit` is unavailable)
+
+```bash
+gh api graphql -f query='
+mutation {
+  requestReviews(input: {
+    pullRequestId: "{pr_node_id}",
+    userIds: [],
+    union: false
+  }) {
+    pullRequest { title }
+  }
+}'
+```
+
+Get the PR node ID with:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
+```
+
+> Copilot reviewer availability depends on your GitHub plan and org settings.
+> If neither option works, manually request a review from the GitHub UI.
+
 ---
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
@@ -96,7 +132,7 @@ DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
 - **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied at all (even
   if that argument was itself an empty string, meaning no prior review existed at capture
   time): `CURRENT_REVIEW_ID` is non-empty and differs from the baseline, with nothing
-  actionable. Copilot has reviewed and left nothing to address — go to Step 8 immediately.
+  actionable. Copilot has reviewed and left nothing to address — go to Step 7 immediately.
 - **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
   nothing already actionable. Wait 60 seconds and call again.
 - **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do
@@ -131,13 +167,13 @@ bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} {
 ```
 
 `DECISION=ACTIONABLE` → exit the poll loop and continue to Step 4. `DECISION=CLEAN` → go to
-Step 8 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
+Step 7 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
 polling immediately and report the failure to the user — do not count it as a `PENDING`
 attempt or keep retrying silently.
 
 After 10 `PENDING` attempts, call the script one final time with the same arguments. If that
 final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable —
-continue to Step 8.
+continue to Step 7.
 
 Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the
 review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings
@@ -263,43 +299,7 @@ One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread
 
 ---
 
-## Step 6 — Re-trigger Copilot review
-
-### Option A — `gh pr edit` (most plans)
-
-```bash
-gh pr edit {number} --add-reviewer '@copilot'
-```
-
-> In PowerShell, bare `@copilot` is parsed as a splat operator and consumed before arguments are passed to `gh`, so `gh` never receives the reviewer value and errors with `flag needs an argument: --add-reviewer`. Single-quote `'@copilot'` to prevent this.
-
-### Option B — GraphQL `requestReviews` mutation (fallback if `gh pr edit` is unavailable)
-
-```bash
-gh api graphql -f query='
-mutation {
-  requestReviews(input: {
-    pullRequestId: "{pr_node_id}",
-    userIds: [],
-    union: false
-  }) {
-    pullRequest { title }
-  }
-}'
-```
-
-Get the PR node ID with:
-
-```bash
-gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
-```
-
-> Copilot reviewer availability depends on your GitHub plan and org settings.
-> If neither option works, manually request a review from the GitHub UI.
-
----
-
-## Distil review criteria (Step 7b)
+## Distil review criteria (Step 6)
 
 ### What generalising looks like
 
@@ -337,7 +337,7 @@ using the "Appending an entry" procedure documented there.
 If dedupe removed every candidate, skip this step entirely — make no gist write. This is a
 live network write to a resource outside the target repo; there is nothing to `git add`,
 commit, or push for it. If the fetch or the write fails — no network, `gh` not authenticated,
-the gist unreachable — report the failure plainly and continue to Step 8 regardless; there is
+the gist unreachable — report the failure plainly and continue to Step 7 regardless; there is
 no local file at risk here, so a failed write simply means this run's criteria go
 unrecorded rather than being lost from something that already existed.
 
@@ -354,12 +354,12 @@ unrecorded rather than being lost from something that already existed.
 
 ## Loop termination conditions
 
-The loop (Steps 3–7) never starts at all if Step 2b judges the diff exempt — docs-only, config-only, or trivial. No review requested, no poll, no `review_round` set. Step 7b is also skipped (nothing was reviewed). PR is ready to merge.
+The loop (Steps 3–5) never starts at all if Step 2b judges the diff exempt — docs-only, config-only, or trivial. No review requested, no poll. Step 6 is also skipped (nothing was reviewed). PR is ready to merge.
 
 Otherwise, the loop is complete when **any** of these conditions is met:
 
-1. **All push-backs in a round** — no code changes were made this round. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Steps 5–7 and do not re-trigger Copilot, then go to Step 7b.
-2. **Max reviews reached** — `review_round >= 2` at Step 6. Do not re-trigger; go to Step 7b.
-3. **Clean review or poll exhausted** — the Step 3 poll (or Step 7 re-poll) ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 7b.
+1. **All push-backs in a round** — no code changes were made this round. Threads are already resolved after Step 4c, and any suppressed comments are already acknowledged via the PR-level comment posted in Step 4d. Skip Step 5, then go to Step 6.
+2. **Fixes pushed** — Step 5 committed and pushed this round's fixes. Copilot is not re-triggered and nothing is re-polled; go to Step 6.
+3. **Clean review or poll exhausted** — the Step 3 poll ends with zero unresolved threads and zero suppressed comments. Either a new Copilot review was detected with no comments, or 10 attempts elapsed with no new review. Go to Step 6.
 
-In every non-exempt case, Step 7b runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.
+In every non-exempt case, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge.
