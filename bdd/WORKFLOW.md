@@ -6,11 +6,11 @@ Full step-by-step workflow. The philosophy and scenario format are in [SKILL.md]
 
 Run the **branch-hygiene** skill with a one-line summary of the request (no `change_type` — it infers one), e.g. `/branch-hygiene "add CSV export to reports"`. Act on its `next:` line.
 
-This catches the most obvious problem before planning begins: being on a trunk branch (`main`, `master`, `develop`). Step 2 re-checks once planning confirms the change type. **Do not push or commit.**
+This catches the most obvious problem before planning begins: being on a trunk branch (`main`, `master`, `develop`). Step 2 re-checks once planning confirms the change type; a mismatch that is only a `wip/` placeholder waits for Step 2. **Do not push or commit.**
 
 ## Step 1 — Planning
 
-When the issue being worked already holds Given-When-Then acceptance criteria (as `/create-issues` writes them into `.agent-docs/issues/<branch-name>.md`), show them as the scenario list, get the user's confirmation or adjustments, and go to Step 2.
+When the issue being worked already holds Given-When-Then acceptance criteria (as `/create-issues` writes them into `.agent-docs/issues/<branch-name>.md`), show them as the scenario list together with the interface changes they need (the issues file does not record those — reconstruct them from the issue and the code), get the user's confirmation or adjustments to both, and go to Step 2.
 
 Otherwise, before writing any code, run a **Three Amigos** conversation between:
 
@@ -35,7 +35,7 @@ Ask: "What should success look like for the user? Which scenarios are most impor
 
 Now that planning has produced agreed user stories, acceptance criteria, and a confirmed change type, run the **branch-hygiene** skill again, passing `change_type` first, then the summary — e.g. `/branch-hygiene feature "add CSV export to reports"`.
 
-Determine `change_type` from the Three Amigos output:
+Determine `change_type` from the Three Amigos output — or, when Step 1 reused an issue's criteria, from that issue:
 
 - **feature**: new capability or behaviour ("As a user I want to add X")
 - **bugfix**: restoring broken behaviour ("X should work but doesn't")
@@ -63,9 +63,9 @@ This is your tracer bullet: it proves the first scenario is expressible as a fai
 
 The main context is now saturated with planning, the Three Amigos discussion, interface debate, and false starts. Production code written here would be biased toward the shape that discussion imagined rather than what the tests specify. So the implementation loop runs in a **fresh subagent** that treats the agreed scenarios as its specification.
 
-**Small change?** When the whole scenario list needs only a few lines of production code, finish the loop inline instead — the handover would cost more than the work. Follow [IMPLEMENTER.md](IMPLEMENTER.md)'s loop and ladder, then go to Step 5.
+**Small change?** When the whole scenario list needs only a few lines of production code (one file, roughly 20 lines or fewer), finish the loop inline instead — the handover would cost more than the work. Follow [IMPLEMENTER.md](IMPLEMENTER.md)'s loop and ladder, then go to Step 5.
 
-Otherwise dispatch **one** `Agent` call, `subagent_type: general-purpose`, `model: sonnet`. The subagent starts with an empty context, and its standing rules live in [IMPLEMENTER.md](IMPLEMENTER.md), so the prompt is a short handover:
+Otherwise dispatch **one** `Agent` call, `subagent_type: general-purpose`, `model: sonnet`, `run_in_background: false`, and wait for its report. The subagent starts with an empty context, and its standing rules live in [IMPLEMENTER.md](IMPLEMENTER.md), so the prompt is a short handover:
 
 ```text
 Read <this skill's base directory>/IMPLEMENTER.md and follow it. Do not invoke the bdd skill.

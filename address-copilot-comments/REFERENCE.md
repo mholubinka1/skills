@@ -96,7 +96,7 @@ DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
 - **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied at all (even
   if that argument was itself an empty string, meaning no prior review existed at capture
   time): `CURRENT_REVIEW_ID` is non-empty and differs from the baseline, with nothing
-  actionable. Copilot has reviewed and left nothing to address — go to Step 8 immediately.
+  actionable. Copilot has reviewed and left nothing to address — go to Step 7b immediately.
 - **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
   nothing already actionable. Wait 60 seconds and call again.
 - **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do
@@ -131,13 +131,13 @@ bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} {
 ```
 
 `DECISION=ACTIONABLE` → exit the poll loop and continue to Step 4. `DECISION=CLEAN` → go to
-Step 8 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
+Step 7b immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
 polling immediately and report the failure to the user — do not count it as a `PENDING`
 attempt or keep retrying silently.
 
 After 10 `PENDING` attempts, call the script one final time with the same arguments. If that
 final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable —
-continue to Step 8.
+continue to Step 7b.
 
 Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the
 review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings
@@ -209,14 +209,6 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
   -X POST -f body="Ignored. <reason>"
 ```
 
-### Pre-commit hook (if the project uses .githooks)
-
-```bash
-bash .githooks/pre-commit
-```
-
-If it fails because a formatter modified files, stage the auto-formatted files and re-run.
-
 ### Resolve the thread — do this immediately after replying, one thread at a time
 
 **Get unresolved thread node IDs:**
@@ -247,7 +239,7 @@ mutation {
 
 ### Acknowledge suppressed comments
 
-Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies, before its commit and push:
+Suppressed comments have no per-comment reply target, so post one PR-level comment covering all of this round's suppressed entries once Fix/Push-back decisions have been made for the round — same timing as Step 4c's thread replies — after its commit and push succeed, or straight away in a round with no fixes:
 
 ```bash
 gh pr comment {number} --body "$(cat <<'EOF'

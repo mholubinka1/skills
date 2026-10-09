@@ -12,7 +12,7 @@
 # ACTIONABLE — unresolved Copilot threads or suppressed comments exist; go to Step 4.
 # CLEAN      — called WITH a baseline (4th argument supplied, even if it was itself an empty
 #              string), CURRENT_REVIEW_ID is non-empty, and it differs from the baseline, with
-#              nothing actionable; go to Step 8. The baseline itself may legitimately be
+#              nothing actionable; go to Step 7b. The baseline itself may legitimately be
 #              empty (it means no prior review existed at capture time) — what matters is
 #              that a baseline argument was supplied at all (see HAS_BASELINE below), not
 #              that its value is non-empty.

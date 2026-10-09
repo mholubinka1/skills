@@ -26,7 +26,7 @@ Step 7  Run /pr-cleanup
 
 ## Step 1 — Branch hygiene
 
-Invoke the `branch-hygiene` skill with a one-line summary of the change under review, and act on its `next:` line before continuing.
+Invoke the `branch-hygiene` skill with a quoted one-line summary of the change under review, e.g. `/branch-hygiene "add CSV export to reports"`, and act on its `next:` line before continuing.
 
 ## Step 2 — Verify changes and pre-commit
 
@@ -35,7 +35,7 @@ git diff HEAD --stat
 git diff --cached --stat
 ```
 
-If no changes at all, stop and inform the user. Otherwise invoke the `pre-commit-check` skill to run all hooks and fix any failures before proceeding.
+If no changes at all, stop and inform the user. Otherwise invoke the `pre-commit-check` skill and act on its `next:` line before proceeding.
 
 ## Step 3 — Pin fixed point and spec source
 
@@ -51,8 +51,8 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 
 **Spec source**: look in this order:
 
-1. Issue refs in commit messages (`#123`, `Closes #45`) — fetch via `docs/agents/issue-tracker.md` if present.
-2. `.agent-docs/specs/<branch-name>.md`, or a PRD/spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name.
+1. `.agent-docs/specs/<branch-name>.md`, or a PRD/spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name.
+2. Issue refs in commit messages (`#123`, `Closes #45`) — fetch via `docs/agents/issue-tracker.md` if present.
 3. Ask the user. If there is no spec, the Spec sub-agent will skip and note "no spec available".
 
 ## Step 4 — Migrate legacy criteria, then spawn parallel review agents
@@ -117,12 +117,15 @@ next run to retry.
 
 **Dispatch the reviewers.** Each sub-agent starts with an empty context and gathers its own
 inputs, so the main context neither reads the criteria nor pastes the diff. Send a **single
-message** with two `Agent` tool calls, `subagent_type: general-purpose`, `model: sonnet`.
-Both prompts open with the same handover:
+message** with two `Agent` tool calls, `subagent_type: general-purpose`, `model: sonnet`,
+`run_in_background: false`, and wait for both reports.
+Both prompts open with the same handover, where `<fixed point>` is the ref pinned in Step 3
+(`origin/$BASE` by default, or the commit, branch or tag the user supplied):
 
 ```text
-Review the change origin/<BASE>...HEAD in <repo path>. Read it yourself:
-  git diff origin/<BASE>...HEAD   and   git log origin/<BASE>..HEAD --oneline
+Review the change since <fixed point> in <repo path>, including uncommitted edits. Read it
+yourself: git diff $(git merge-base <fixed point> HEAD), git status for untracked files,
+and git log <fixed point>..HEAD --oneline
 Read the code the diff touches, not only the diff: callers of every changed function, the
 functions it calls, its tests. When a signature, return value or behaviour changes, grep
 every caller.
@@ -136,7 +139,8 @@ End with one line, "Skipped / risk:", naming anything you could not check.
 
 ```text
 Criteria: <this skill's base directory>/REVIEW-CRITERIA.md, read in full. Also fetch the
-shared Criteria gist: gh gist view <gist ID from CRITERIA-GIST.md> -f CRITERIA.md --raw.
+shared Criteria gist: gh gist view <ID> -f CRITERIA.md --raw, reading <ID> yourself from
+<this skill's base directory>/CRITERIA-GIST.md.
 Its entries are documented standards, same status as REVIEW-CRITERIA.md. If the fetch
 fails, continue without it and say so on the Skipped / risk line.
 Check in this order: correct, safe, holds under the repo's expected load, risky logic
@@ -149,8 +153,8 @@ already enforces. Under 500 words.
 **Spec sub-agent** — the handover, plus:
 
 ```text
-Spec: <spec path, or issue numbers to read with gh issue view, from Step 3 — or "none",
-      then report only "no spec available">.
+Spec: <spec path, or issue numbers to read with gh issue view, from Step 3 — or "none":
+      then the whole report is "no spec available" plus the Skipped / risk line>.
 Report (a) requirements missing or partial; (b) behaviour in the diff that wasn't asked
 for (scope creep); (c) requirements that look implemented but where the implementation
 looks wrong. Quote the spec line for each finding. Under 400 words.

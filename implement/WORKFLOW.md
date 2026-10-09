@@ -61,7 +61,7 @@ Run the `create-issues` skill. It will break the spec into vertical slices, quiz
 For each unchecked issue in `.agent-docs/issues/<branch-name>.md`, in dependency order (no blockers first):
 
 1. Run the `bdd` skill for this issue.
-2. Run the `pre-commit-check` skill on all changed files.
+2. Run the `pre-commit-check` skill on all changed files and act on its `next:` line.
 3. Commit with a single pithy line:
 
    ```bash

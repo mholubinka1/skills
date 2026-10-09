@@ -51,7 +51,7 @@ Create `.agent-docs/issues/<branch-name>.md` using the Local Issues File Templat
 
 ### 6. Push to GitHub
 
-Publishing is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one `Agent` call, `subagent_type: general-purpose`, `model: haiku`, with this handover:
+Publishing is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one `Agent` call, `subagent_type: general-purpose`, `model: haiku`, `run_in_background: false`, and wait for its report. Handover:
 
 ```text
 Read <this skill's base directory>/REFERENCE.md, section "GitHub issue creation command".

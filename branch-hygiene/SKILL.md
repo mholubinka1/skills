@@ -1,6 +1,6 @@
 ---
 name: branch-hygiene
-description: Validates the current git branch before work begins — autoSetupRemote, trunk-branch detection, prefix-vs-change-type, and name relevance. Use at the start of a work session, or from another skill passing a known change_type.
+description: Validates the current git branch before work begins — autoSetupRemote, trunk-branch detection, prefix-vs-change-type, and name relevance. Takes a one-line summary of the work, optionally preceded by a change_type. Use at the start of a work session, or from another skill passing a known change_type.
 context: fork
 agent: general-purpose
 model: haiku
@@ -14,10 +14,13 @@ argument-hint: "[change_type] <one-line summary of the work>"
 A read-only check: report whether the current branch fits the work, and what the caller
 should do about it. Change nothing — no config, no branches, no commits.
 
-Input: `$ARGUMENTS`. When the first word is one of `feature`, `bugfix`, `hotfix`,
-`release`, `chore`, it is the confirmed `change_type`; the rest is a one-line summary of the
-work. Otherwise the whole input is the summary. An empty input means no summary: run Steps 1–2,
-skip Steps 3–5, and say so in the report.
+Input: `$ARGUMENTS`, an optional `change_type` then a quoted one-line summary of the work,
+e.g. `feature "add CSV export"` or `"add CSV export"`. A first word counts as the confirmed
+`change_type` only when it is unquoted, is one of `feature`, `bugfix`, `hotfix`, `release`,
+`chore`, and a quoted summary follows it; otherwise the whole input is the summary (so
+`"feature flag cleanup"` is a summary). A summary is required: on empty input, run
+nothing and reply `verdict: unknown — no summary given` and
+`next: rerun branch-hygiene with a one-line summary of the work`.
 
 Tables and rules for each step are in [REFERENCE.md](REFERENCE.md).
 

@@ -77,7 +77,7 @@ The isolated git worktree (created via the harness's `EnterWorktree` tool under 
 _Avoid_: sandbox, isolated checkout, workspace
 
 **Placeholder branch**:
-A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. Once `branch-hygiene`'s existing mismatch resolution switches to the real branch (confirmed from grill output), `/implement` deletes the now-empty placeholder.
+A `wip/<slug>` branch created when a worktree session is first entered, before the real branch name is known. `branch-hygiene` always reports it as a mismatch; once the caller acts on that report's `next:` line and switches to the real branch (confirmed from grill output), `/implement` deletes the now-empty placeholder.
 _Avoid_: temp branch, scratch branch
 
 **Worktree dependency bootstrap**:
@@ -151,7 +151,7 @@ The fresh-context `general-purpose` agent the `bdd` skill spawns to run the red-
 _Avoid_: impl agent, worker agent, coding subagent
 
 **Pre-commit check**:
-Validation driven by `.pre-commit-config.yaml` or `.githooks/pre-commit`, run by the `pre-commit-check` skill after every code change. Runs in two sequential passes: changed files first, then a full-repo pass (`--all-files`) that fixes any drift found repo-wide, even in untouched files.
+Validation driven by `.pre-commit-config.yaml` or `.githooks/pre-commit`, run by the `pre-commit-check` skill after every code change. Runs in two sequential passes: changed files first, then a full-repo pass (`--all-files`) that autofixes drift repo-wide and reports what it cannot fix, keeping changed-file failures apart from pre-existing ones.
 _Avoid_: lint check, pre-commit hook run, validation step
 
 **Branch hygiene**:

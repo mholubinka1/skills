@@ -20,13 +20,14 @@ green.
 
 - **Red**: write the next scenario's test; run it; it fails for the right reason (an
   assertion, or a missing function/endpoint), not an import or syntax error.
-- **Green**: write the code the ladder below picks; run the suite; it passes.
+- **Green**: write only enough code to pass the current test, as the ladder below picks —
+  nothing for later scenarios; run the suite; it passes. Never refactor while red.
 - **Refactor** once every scenario is green: one pass, running the full suite after each
   change. Deletion beats addition: remove duplication, dead code, and anything the
   scenarios did not ask for. `refactoring.md` beside this file lists other candidates.
 
-Each test uses domain vocabulary, maps to one Given-When-Then scenario, and goes through the
-public interface. `tests.md` and `mocking.md` beside this file have depth.
+Each test uses domain vocabulary, maps to one Given-When-Then scenario, goes through the
+public interface, and describes behaviour — so it survives an internal refactor. `tests.md` and `mocking.md` beside this file have depth.
 
 ## The ladder
 
@@ -52,7 +53,8 @@ redesign of working code, stop and report that scenario as blocked.
 
 ## Report
 
-Done when every scenario is green or reported blocked. Reply with exactly:
+Leave committing and pushing to the caller. Done when every scenario is green or reported
+blocked. Reply with exactly:
 
 - **Scenarios**: each one `green` or `blocked: <why>`.
 - **Files changed**: paths.

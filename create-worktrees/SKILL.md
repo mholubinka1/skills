@@ -57,7 +57,7 @@ echo '.claude' >> .gitignore
 git add .gitignore
 ```
 
-Run the `pre-commit-check` skill. If it surfaces an error, stop and resolve it before continuing. Once clean, commit:
+Run the `pre-commit-check` skill and act on its `next:` line. Commit only when it reads `none — ready to commit.` or lists only pre-existing failures or outside-the-change autofixes; otherwise stop and report. Then commit:
 
 ```bash
 git commit -m "chore: gitignore .claude"
@@ -87,7 +87,7 @@ Both prompts in this step go through `AskUserQuestion`. In a non-interactive run
 2. **Nothing detected** — do nothing; continue to the caller.
 3. **One or more first-class ecosystems detected** — print each one and its exact install command(s), then ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*. No interactive user → **Skip**, per the note above; likewise any answer that is not a clear *Install*.
    - **Skip** — leave the printed commands as a copy-paste hint; continue.
-   - **Install** — installing is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one `Agent` call, `subagent_type: general-purpose`, `model: haiku`, with this handover:
+   - **Install** — installing is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one `Agent` call, `subagent_type: general-purpose`, `model: haiku`, `run_in_background: false`, and wait for its report. Handover:
 
      ```text
      In <worktree path>, run these install commands, one ecosystem at a time:

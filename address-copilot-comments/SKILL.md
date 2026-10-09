@@ -75,17 +75,21 @@ See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFE
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 
 Polling is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one
-`Agent` call, `subagent_type: general-purpose`, `model: haiku`, with this handover:
+`Agent` call, `subagent_type: general-purpose`, `model: haiku`, `run_in_background: false`, and wait for its report. Handover:
 
 ```text
 Read <this skill's base directory>/REFERENCE.md, sections "Step 3 — Poll for Copilot review
 threads and suppressed comments" and "Step 4 — Address each comment and suppressed entry"
-(only its two fetch subsections). PR #<number>.
+(only its two fetch subsections). PR #<number> in <owner>/<repo>. The status-check script is
+<this skill's base directory>/scripts/check-review-status.sh. Wait between polls inside one
+Bash call that loops (sleep 60 between script calls, Bash timeout 600000 ms) — never poll
+back to back.
 Capture the baseline Copilot review ID, then poll as that section says (every 60s, max 10,
 one final check). On ACTIONABLE, fetch every unresolved Copilot thread and every
 suppressed-comment entry. Change nothing.
 Return: DECISION=ACTIONABLE|CLEAN|PENDING|ERROR (with the gh error if ERROR), then one block
-per item: threadId and comment_id (or "suppressed"), path:line, the comment body verbatim.
+per item: threadId and comment_id (or "suppressed"), path:line, the comment body verbatim,
+and one line "Skipped / risk:" naming any fetch that failed or was incomplete.
 ```
 
 `ACTIONABLE` → Step 4 with the returned items. `CLEAN`, or `PENDING` after the final check →
@@ -109,25 +113,31 @@ If at least one fix was applied, run `code-review` Steps 1–5 only. Pass the ex
 
 ## Step 4c — Reply, acknowledge, commit and push
 
-These steps are mechanical, so they run in one Haiku sub-agent with an empty context, after
-Step 4b has fully finished. Dispatch one `Agent` call, `subagent_type: general-purpose`,
-`model: haiku`, with this handover:
+If any decision is Fixed, first run the `pre-commit-check` skill on the files changed this
+round and act on its `next:` line, so the commit below is clean. Carry anything it says to
+tell the user into the Step 8 report. Commit-and-push before
+replying is deliberate: no thread is marked "Fixed." until its fix is pushed.
+
+The rest is mechanical, so it runs in one Haiku sub-agent with an empty context, after
+Step 4b has fully finished. Dispatch one `Agent` call, `subagent_type: general-purpose`, `model: haiku`, `run_in_background: false`, and wait for its
+report. Handover:
 
 ```text
 Read <this skill's base directory>/REFERENCE.md, sections "Step 4 — Address each comment and
 suppressed entry" (reply, resolve and acknowledge subsections) and "Staging rules". PR #<number>.
 Decisions, one per line:  <threadId> <comment_id> | suppressed <path:line> — Fixed|Ignored — <reason>
-1. For each thread: reply "Fixed. <reason>" or "Ignored. <reason>", then resolve it at once.
-2. If any suppressed entries: post one PR comment summarising each one's outcome.
-3. If any decision is Fixed: run the repo's pre-commit hooks (or .git/hooks/pre-commit) on
-   <files changed>, stage exactly those files, commit "address Copilot review: <summary>",
-   push, and show git log --oneline -3. A hook failure that needs a code change: stop and
-   report it.
-Return: threads replied and resolved, comment posted (yes/no), commit hash and push result,
-and one line "Skipped / risk:".
+1. If any decision is Fixed: stage exactly <files changed this round> — never files
+   pre-commit-check reported as autofixed outside the change — commit "address Copilot review: <summary>", push, and show
+   git log --oneline -3. If a commit hook or the push fails: stop here and report it,
+   posting nothing.
+2. For each thread: reply "Fixed. <reason>" or "Ignored. <reason>", then resolve it at once.
+3. If any suppressed entries: post one PR comment summarising each one's outcome.
+If a reply, resolve or comment fails after the push, carry on with the rest.
+Return: threads replied and resolved, any that failed (threadId and error), comment posted
+(yes/no), commit hash and push result, and one line "Skipped / risk:".
 ```
 
-A reported hook failure is fixed in the main context and the commit step re-dispatched.
+A reported commit-hook or push failure is fixed in the main context and the whole handover re-dispatched — nothing was posted yet. When the commit already exists and only the push failed, say so in the re-dispatch: step 1 then starts at the push. Failed replies after a successful push are re-dispatched alone: only those threads, with step 1 left out.
 All push-backs across threads and suppressed comments, and zero files modified → skip to
 Step 7b (skip Steps 6–7). At least one fix → continue to Step 6.
 
@@ -137,7 +147,7 @@ If `review_round >= 2`, skip to Step 7b. Otherwise increment to 2 and re-trigger
 
 ## Step 7 — Check for new threads and suppressed comments
 
-Dispatch the Step 3 polling sub-agent again (it captures a fresh baseline). `ACTIONABLE` → return to Step 4. Anything else → continue to Step 7b, reporting an `ERROR` to the user.
+Dispatch the Step 3 polling sub-agent again (it captures a fresh baseline). `ACTIONABLE` → return to Step 4. Anything else → continue to Step 7b. On `ERROR`, report it, and Step 8 shares the PR link without calling it ready to merge — the second review was never read.
 
 ## Step 7b — Distil review criteria into the shared Criteria gist
 
