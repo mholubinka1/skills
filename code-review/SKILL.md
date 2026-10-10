@@ -211,9 +211,9 @@ Then apply the accepted fixes:
 
 Then re-run pre-commit hooks.
 
-Once all findings are decided and fixes applied, update the clean-pass count. At 2,
-continue to Step 6 without asking the user. Otherwise return to **Step 4** with brand new
-agents (fresh context windows).
+Once all findings are decided and fixes applied, update the clean-pass count. Once the
+exit rule above is met, continue to Step 6 without asking the user; otherwise return to
+**Step 4** with brand new agents (fresh context windows).
 
 ## Step 6 — Copilot PR review
 

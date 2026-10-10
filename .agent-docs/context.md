@@ -111,7 +111,7 @@ A Copilot finding folded into the review body's collapsible `### Suppressed comm
 _Avoid_: hidden comment, collapsed comment, filtered finding
 
 **Clean pass**:
-A `code-review` Standards + Spec review pass with zero findings, or one whose findings are all advisory and all rejected with a reason. Two consecutive clean passes end the review loop; a blocking finding or any accepted fix resets the count.
+A `code-review` Standards + Spec review pass with zero findings, or one whose findings are all advisory and all rejected with a reason. `code-review` Step 5 defines how clean passes end the review loop.
 _Avoid_: zero-finding pass, green pass
 
 ### Agent Docs
