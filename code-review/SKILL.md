@@ -169,12 +169,16 @@ once: "shared criteria gist unavailable — reviewed against REVIEW-CRITERIA.md 
 
 ## Step 5 — Address all findings
 
+If sub-agents are still executing, wait for them to finish and aggregate their findings
+before deciding anything. Always report aggregated findings to the user, or "no findings"
+when both axes are empty.
+
 Address findings in this order: blocking first, then advisory.
 
 The loop exits on the second consecutive **clean pass**: a pass with zero findings on both
-axes, or one whose findings are all advisory and all rejected. Keep a count across passes:
-a blocking finding (even a rejected one) or any accepted fix resets it to 0; a clean pass
-adds 1.
+axes, or one whose findings are all advisory and all rejected with a reason. Keep a count
+across passes, starting at 0: a blocking finding (even a rejected one) or any accepted fix
+resets it to 0; a clean pass adds 1.
 
 Decide each finding in the main context: fix it, or reject it — code-review's push-back —
 with a one-line reason reported to the user. Carry every rejected finding and its reason
@@ -206,10 +210,6 @@ Then apply the accepted fixes:
   that does not reproduce is always rejected. There is no automatic retry.
 
 Then re-run pre-commit hooks.
-
-Always report aggregated findings to the user, or "no findings" when both axes are empty.
-If sub-agents are still executing, wait for them to finish and aggregate their findings
-before deciding anything.
 
 Once all findings are decided and fixes applied, update the clean-pass count. At 2,
 continue to Step 6 without asking the user. Otherwise return to **Step 4** with brand new
