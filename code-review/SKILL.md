@@ -18,8 +18,8 @@ Step 3  Pin fixed point + identify spec source
 Step 4  Migrate legacy review.md into the Criteria gist if present; spawn parallel
         Standards + Spec review agents → aggregate findings
 Step 5  Address all findings — blocking first, then advisory
-        Zero findings on both axes? ──► Step 6
-        Findings addressed? ──► Step 4 (new agents, new context windows)
+        Second consecutive clean pass? ──► Step 6
+        Otherwise ──► Step 4 (new agents, new context windows)
 Step 6  Run /address-copilot-comments for Copilot PR review
 Step 7  Run /pr-cleanup
 ```
@@ -169,9 +169,16 @@ once: "shared criteria gist unavailable — reviewed against REVIEW-CRITERIA.md 
 
 ## Step 5 — Address all findings
 
+If sub-agents are still executing, wait for them to finish and aggregate their findings
+before deciding anything. Always report aggregated findings to the user, or "no findings"
+when both axes are empty.
+
 Address findings in this order: blocking first, then advisory.
 
-The loop does not exit until two consecutive passes return zero findings on both axes.
+The loop exits on the second consecutive **clean pass**: a pass with zero findings on both
+axes, or one whose findings are all advisory and all rejected with a reason. Keep a count
+across passes, starting at 0: a blocking finding (even a rejected one) or any accepted fix
+resets it to 0; a clean pass adds 1.
 
 Decide each finding in the main context: fix it, or reject it — code-review's push-back —
 with a one-line reason reported to the user. Carry every rejected finding and its reason
@@ -204,13 +211,9 @@ Then apply the accepted fixes:
 
 Then re-run pre-commit hooks.
 
-Once all findings are addressed, return to **Step 4** with brand new agents (fresh context windows).
-
-Repeat until two consecutive reviews reports zero findings on both axes — blocking **and** advisory.
-
-Do not move on to Step 6 until completing two full clean review passes with zero findings. If sub-agents are still executing, wait for them to finish and aggregate their findings before proceeding.
-
-Always report aggregated findings to the user. If there are zero findings on both axes, report "no findings" and continue to Step 6.
+Once all findings are decided and fixes applied, update the clean-pass count. Once the
+exit rule above is met, continue to Step 6 without asking the user; otherwise return to
+**Step 4** with brand new agents (fresh context windows).
 
 ## Step 6 — Copilot PR review
 

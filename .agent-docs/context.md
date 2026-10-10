@@ -110,6 +110,10 @@ _Avoid_: reject, dismiss, decline comment
 A Copilot finding folded into the review body's collapsible `### Suppressed comments (N)` markdown block instead of posted as a real Unresolved thread. Has no `databaseId`/thread ID, so it is invisible to thread-count checks and can't be replied-to or resolved individually — `address-copilot-comments` acknowledges these instead with a single PR-level comment.
 _Avoid_: hidden comment, collapsed comment, filtered finding
 
+**Clean pass**:
+A `code-review` Standards + Spec review pass with zero findings, or one whose findings are all advisory and all rejected with a reason. `code-review` Step 5 defines how clean passes end the review loop.
+_Avoid_: zero-finding pass, green pass
+
 ### Agent Docs
 
 **Agent docs**:
