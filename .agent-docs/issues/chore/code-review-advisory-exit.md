@@ -1,5 +1,7 @@
 # Issues: chore/code-review-advisory-exit
 
+> Work complete — PR ready to merge.
+
 ## code-review exits on two consecutive clean passes
 
 **Blocked by**: None
@@ -16,18 +18,18 @@ rewritten to match, and the glossary gains the **Clean pass** term.
 
 ### Acceptance criteria
 
-- [ ] Given two consecutive passes each with only advisory findings, all rejected with
+- [x] Given two consecutive passes each with only advisory findings, all rejected with
       reasons, when Step 5 finishes the second, then the loop proceeds to Step 6 without
       asking the user.
-- [ ] Given a zero-finding pass followed by an all-rejected-advisory pass, then the loop
+- [x] Given a zero-finding pass followed by an all-rejected-advisory pass, then the loop
       exits (mixed clean passes count).
-- [ ] Given a clean pass followed by a pass with one accepted advisory fix, then the count
+- [x] Given a clean pass followed by a pass with one accepted advisory fix, then the count
       resets to 0 and the loop continues.
-- [ ] Given a pass with a blocking finding that is rejected, then the count resets to 0.
-- [ ] Given a pass with one advisory rejected and one fixed, then it is not clean and the
+- [x] Given a pass with a blocking finding that is rejected, then the count resets to 0.
+- [x] Given a pass with one advisory rejected and one fixed, then it is not clean and the
       count resets.
-- [ ] The loop diagram shows two consecutive clean passes as the exit to Step 6, and no
+- [x] The loop diagram shows two consecutive clean passes as the exit to Step 6, and no
       remaining text requires zero findings as the only exit condition.
-- [ ] `.agent-docs/context.md` defines **Clean pass** consistently with Step 5.
+- [x] `.agent-docs/context.md` defines **Clean pass** consistently with Step 5.
 
 ---
