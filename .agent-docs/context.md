@@ -45,7 +45,7 @@ _Avoid_: keyword, term, jargon
 ### Skill Distribution
 
 **`sync_claude_skills.py`**:
-The standard-library script that walks this repo and replaces every directory containing a `SKILL.md` wholesale in `~/.claude/skills/`, then records them in the skill manifest. On the default branch it also removes manifest-listed skills the repo no longer has. Invoked by the `sync-claude-skills` hook and by `update-skills`.
+The standard-library script that walks this repo and replaces every directory containing a `SKILL.md` wholesale in `~/.claude/skills/`, then records them in the skill manifest. On the default branch, when every skill installed, it also removes manifest-listed skills the repo no longer has. A skill that fails to install is reported and the script exits non-zero. Invoked by the `sync-claude-skills` hook and by `update-skills`.
 _Avoid_: sync script, copier
 
 **Skill manifest**:

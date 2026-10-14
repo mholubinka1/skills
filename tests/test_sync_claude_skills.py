@@ -36,7 +36,11 @@ class SyncClaudeSkillsTest(unittest.TestCase):
         subprocess.run(
             [sys.executable, str(SCRIPT)],
             cwd=self.repo,
-            env={**os.environ, "HOME": str(self.home)},
+            env={
+                **os.environ,
+                "HOME": str(self.home),
+                "USERPROFILE": str(self.home),
+            },
             check=True,
         )
 
@@ -172,8 +176,9 @@ class SyncClaudeSkillsTest(unittest.TestCase):
         os.chdir(self.repo)
         self.addCleanup(os.chdir, cwd)
         with mock.patch("shutil.copytree", copytree), mock.patch.dict(os.environ, home):
-            with self.assertRaises(OSError):
+            with self.assertRaises(SystemExit) as raised:
                 runpy.run_path(str(SCRIPT), run_name="__main__")
+        self.assertTrue(failing in str(raised.exception.code))
 
     def test_failed_copy_keeps_the_previous_install(self):
         self.add_skill("alpha", "OLD.md")
@@ -187,14 +192,48 @@ class SyncClaudeSkillsTest(unittest.TestCase):
             [p for p in self.installed.iterdir() if p.name.startswith(".alpha")]
         )
 
-    def test_aborted_sync_still_records_the_skills_it_installed(self):
+    def test_failed_skill_does_not_block_the_others_and_is_not_recorded(self):
         self.add_skill("alpha")
         self.add_skill("beta")
+        self.add_skill("gamma")
 
         self.sync_with_copy_failing_for("beta")
 
         self.assertTrue((self.installed / "alpha").exists())
-        self.assertEqual(self.manifest(), ["alpha"])
+        self.assertFalse((self.installed / "beta").exists())
+        self.assertTrue((self.installed / "gamma").exists())
+        self.assertEqual(self.manifest(), ["alpha", "gamma"])
+
+    def test_failure_skips_pruning_and_keeps_the_failed_skill_listed(self):
+        self.add_skill("alpha")
+        self.add_skill("beta")
+        self.add_skill("gone")
+        self.sync()
+        shutil.rmtree(self.repo / "gone")
+
+        self.sync_with_copy_failing_for("beta")
+
+        self.assertTrue((self.installed / "gone").exists())
+        self.assertEqual(self.manifest(), ["alpha", "beta", "gone"])
+
+    @unittest.skipUnless(os.name == "nt", "junctions are Windows-only")
+    def test_junctioned_install_is_replaced_without_touching_its_target(self):
+        target = self.home / "dev-alpha"
+        target.mkdir()
+        (target / "KEEP.md").write_text("keep")
+        self.installed.mkdir(parents=True)
+        subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(self.installed / "alpha"), str(target)],
+            check=True,
+            capture_output=True,
+        )
+        self.add_skill("alpha")
+
+        self.sync()
+
+        self.assertFalse(os.path.isjunction(self.installed / "alpha"))
+        self.assertTrue((self.installed / "alpha" / "SKILL.md").exists())
+        self.assertTrue((target / "KEEP.md").exists())
 
     def test_aborted_sync_on_default_branch_prunes_nothing_and_keeps_the_manifest(self):
         self.add_skill("alpha")

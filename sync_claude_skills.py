@@ -2,6 +2,7 @@
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 
 repo = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip()
@@ -40,13 +41,17 @@ if os.path.exists(manifest):
 
 
 def remove(path):
-    if os.path.isdir(path) and not os.path.islink(path):
+    if os.path.isjunction(path):
+        # Windows junctions are not symlinks to rmtree; rmdir removes only the link.
+        os.rmdir(path)
+    elif os.path.isdir(path) and not os.path.islink(path):
         shutil.rmtree(path)
     elif os.path.lexists(path):
         os.unlink(path)
 
 
 current = []
+failed = []
 keep = sorted(set(old))
 try:
     for dirpath, dirs, files in os.walk(repo):
@@ -56,22 +61,45 @@ try:
             dst = os.path.join(dest, name)
             # Copy into a per-run staging dir beside the install, so a failed copy
             # keeps the previous one and concurrent syncs never share a staging path.
-            staging = tempfile.mkdtemp(prefix=f".{name}.new-", dir=dest)
+            staging = None
             try:
+                staging = tempfile.mkdtemp(prefix=f".{name}.new-", dir=dest)
                 shutil.copytree(dirpath, os.path.join(staging, name))
                 remove(dst)
                 os.rename(os.path.join(staging, name), dst)
+            except OSError as e:
+                # A failed copy leaves the previous install in place; a failed
+                # remove or rename (e.g. a directory with a broken ACL) may not.
+                # Either way, don't block the other skills: report it and fail at
+                # the end.
+                failed.append(name)
+                print(
+                    f"sync_claude_skills: could not install {name}: {e}",
+                    file=sys.stderr,
+                )
+                continue
             finally:
-                remove(staging)
+                if staging:
+                    try:
+                        remove(staging)
+                    except OSError as e:
+                        print(
+                            f"sync_claude_skills: could not remove {staging}: {e}",
+                            file=sys.stderr,
+                        )
             current.append(name)
             keep = sorted(set(old) | set(current))
 
-    if branch == default_branch:
+    # Prune only when every skill installed; a failed install skips pruning.
+    if branch == default_branch and not failed:
         for name in old:
             if name not in current:
                 remove(os.path.join(dest, name))
         keep = current
 finally:
-    # Always record what is installed, even if a later copy failed.
+    # Always record what is installed, even if an unexpected error interrupted the run.
     with open(manifest, "w") as f:
         f.write("".join(name + "\n" for name in keep))
+
+if failed:
+    sys.exit(f"sync_claude_skills: failed to install: {', '.join(failed)}")
