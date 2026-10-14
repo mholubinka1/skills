@@ -67,8 +67,10 @@ try:
                 remove(dst)
                 os.rename(os.path.join(staging, name), dst)
             except OSError as e:
-                # One unremovable install (e.g. a directory with a broken ACL) must
-                # not block the other skills; report it and fail at the end.
+                # A failed copy leaves the previous install in place; a failed
+                # remove or rename (e.g. a directory with a broken ACL) may not.
+                # Either way, don't block the other skills: report it and fail at
+                # the end.
                 failed.append(name)
                 print(
                     f"sync_claude_skills: could not install {name}: {e}",
