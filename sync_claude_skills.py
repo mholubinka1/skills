@@ -80,11 +80,12 @@ try:
             current.append(name)
             keep = sorted(set(old) | set(current))
 
-    if branch == default_branch:
+    # Prune only after a fully successful sync, as when an abort skipped it.
+    if branch == default_branch and not failed:
         for name in old:
-            if name not in current and name not in failed:
+            if name not in current:
                 remove(os.path.join(dest, name))
-        keep = sorted(set(current) | set(failed))
+        keep = current
 finally:
     # Always record what is installed, even if a later copy failed.
     with open(manifest, "w") as f:
