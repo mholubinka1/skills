@@ -195,12 +195,14 @@ class SyncClaudeSkillsTest(unittest.TestCase):
     def test_failed_skill_does_not_block_the_others_and_is_not_recorded(self):
         self.add_skill("alpha")
         self.add_skill("beta")
+        self.add_skill("gamma")
 
         self.sync_with_copy_failing_for("beta")
 
         self.assertTrue((self.installed / "alpha").exists())
         self.assertFalse((self.installed / "beta").exists())
-        self.assertEqual(self.manifest(), ["alpha"])
+        self.assertTrue((self.installed / "gamma").exists())
+        self.assertEqual(self.manifest(), ["alpha", "gamma"])
 
     def test_failure_skips_pruning_and_keeps_the_failed_skill_listed(self):
         self.add_skill("alpha")

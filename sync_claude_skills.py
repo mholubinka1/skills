@@ -61,8 +61,9 @@ try:
             dst = os.path.join(dest, name)
             # Copy into a per-run staging dir beside the install, so a failed copy
             # keeps the previous one and concurrent syncs never share a staging path.
-            staging = tempfile.mkdtemp(prefix=f".{name}.new-", dir=dest)
+            staging = None
             try:
+                staging = tempfile.mkdtemp(prefix=f".{name}.new-", dir=dest)
                 shutil.copytree(dirpath, os.path.join(staging, name))
                 remove(dst)
                 os.rename(os.path.join(staging, name), dst)
@@ -78,7 +79,14 @@ try:
                 )
                 continue
             finally:
-                remove(staging)
+                if staging:
+                    try:
+                        remove(staging)
+                    except OSError as e:
+                        print(
+                            f"sync_claude_skills: could not remove {staging}: {e}",
+                            file=sys.stderr,
+                        )
             current.append(name)
             keep = sorted(set(old) | set(current))
 
