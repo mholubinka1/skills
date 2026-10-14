@@ -119,6 +119,9 @@ next run to retry.
 inputs, so the main context neither reads the criteria nor pastes the diff. Send a **single
 message** with two `Agent` tool calls, `subagent_type: general-purpose`, `model: sonnet`,
 `run_in_background: false`, and wait for both reports.
+Passes run strictly in sequence: never start a pass while a previous pass's reviewers are
+still running, and start pass N+1 only after pass N has returned, been aggregated, and had
+its findings decided and fixed (Step 5). This holds for every pass (2, 3, 4, …).
 Both prompts open with the same handover, where `<fixed point>` is the ref pinned in Step 3
 (`origin/$BASE` by default, or the commit, branch or tag the user supplied):
 
@@ -213,7 +216,8 @@ Then re-run pre-commit hooks.
 
 Once all findings are decided and fixes applied, update the clean-pass count. Once the
 exit rule above is met, continue to Step 6 without asking the user; otherwise return to
-**Step 4** with brand new agents (fresh context windows).
+**Step 4** for the next pass, with brand new agents (fresh context windows). Never dispatch
+the next pass before this one is fully resolved.
 
 ## Step 6 — Copilot PR review
 
