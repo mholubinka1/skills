@@ -80,14 +80,14 @@ try:
             current.append(name)
             keep = sorted(set(old) | set(current))
 
-    # Prune only after a fully successful sync, as when an abort skipped it.
+    # Prune only when every skill installed; a failed install skips pruning.
     if branch == default_branch and not failed:
         for name in old:
             if name not in current:
                 remove(os.path.join(dest, name))
         keep = current
 finally:
-    # Always record what is installed, even if a later copy failed.
+    # Always record what is installed, even if an unexpected error interrupted the run.
     with open(manifest, "w") as f:
         f.write("".join(name + "\n" for name in keep))
 
