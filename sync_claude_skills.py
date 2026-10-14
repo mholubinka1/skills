@@ -2,6 +2,7 @@
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 
 repo = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode().strip()
@@ -40,13 +41,17 @@ if os.path.exists(manifest):
 
 
 def remove(path):
-    if os.path.isdir(path) and not os.path.islink(path):
+    if os.path.isjunction(path):
+        # Windows junctions are not symlinks to rmtree; rmdir removes only the link.
+        os.rmdir(path)
+    elif os.path.isdir(path) and not os.path.islink(path):
         shutil.rmtree(path)
     elif os.path.lexists(path):
         os.unlink(path)
 
 
 current = []
+failed = []
 keep = sorted(set(old))
 try:
     for dirpath, dirs, files in os.walk(repo):
@@ -61,6 +66,15 @@ try:
                 shutil.copytree(dirpath, os.path.join(staging, name))
                 remove(dst)
                 os.rename(os.path.join(staging, name), dst)
+            except OSError as e:
+                # One unremovable install (e.g. a directory with a broken ACL) must
+                # not block the other skills; report it and fail at the end.
+                failed.append(name)
+                print(
+                    f"sync_claude_skills: could not install {name}: {e}",
+                    file=sys.stderr,
+                )
+                continue
             finally:
                 remove(staging)
             current.append(name)
@@ -68,10 +82,13 @@ try:
 
     if branch == default_branch:
         for name in old:
-            if name not in current:
+            if name not in current and name not in failed:
                 remove(os.path.join(dest, name))
-        keep = current
+        keep = sorted(set(current) | set(failed))
 finally:
     # Always record what is installed, even if a later copy failed.
     with open(manifest, "w") as f:
         f.write("".join(name + "\n" for name in keep))
+
+if failed:
+    sys.exit(f"sync_claude_skills: failed to install: {', '.join(failed)}")
