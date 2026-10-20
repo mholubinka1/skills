@@ -52,7 +52,8 @@ these:
 - **Log transcripts**: an exact sequence of log lines, or a filter on the logging file's
   name. When a scenario says something is logged, assert that one line.
 - **Ghost absences**: asserting that text is absent when it only ever appeared in a draft.
-  Keep a negative assertion only for a defect that could come back.
+  Keep a negative assertion when a scenario requires the absence (a secret never logged)
+  or it guards a defect that could come back.
 
 ## The ladder
 
