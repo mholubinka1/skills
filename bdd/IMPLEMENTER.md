@@ -23,11 +23,37 @@ green.
 - **Green**: write only enough code to pass the current test, as the ladder below picks —
   nothing for later scenarios; run the suite; it passes. Never refactor while red.
 - **Refactor** once every scenario is green: one pass, running the full suite after each
-  change. Deletion beats addition: remove duplication, dead code, and anything the
-  scenarios did not ask for. `refactoring.md` beside this file lists other candidates.
+  change. Deletion beats addition: remove duplication, dead code, anything the
+  scenarios did not ask for, and any test from the list below. `refactoring.md` beside
+  this file lists other candidates.
 
 Each test uses domain vocabulary, maps to one Given-When-Then scenario, goes through the
 public interface, and describes behaviour — so it survives an internal refactor. `tests.md` and `mocking.md` beside this file have depth.
+
+## Tests that never earn their place
+
+A test earns its place when breaking a behaviour a scenario names turns it red. Never write
+these:
+
+- **Unreachable input**: a state no production caller produces, such as an empty list the
+  caller already guards against. Read the callers first, then test the guard.
+- **Echoes**: assertions that restate a constant, a config structure, or a class or handler
+  type. Assert the behaviour the value causes.
+- **Library proofs**: showing the standard library, framework or a dependency works (log
+  rotation, a config call replacing handlers). Test your use of it.
+- **Impossible failures**: patching your own code to raise an error it cannot raise, so a
+  defensive branch gets covered. Drive failures from a real boundary, or delete the branch.
+- **Accidents**: pinning behaviour no scenario asked for: a leaked `KeyError`, an order
+  nothing depends on, a missing bound noted as "there is no lower bound". Leave it free to
+  change.
+- **Repeats**: one behaviour asserted at two layers, or twice in one file under different
+  names. Test a rule's boundary values once, at the unit that owns the rule; test the
+  wiring once, at the outermost layer.
+- **Log transcripts**: an exact sequence of log lines, or a filter on the logging file's
+  name. When a scenario says something is logged, assert that one line.
+- **Ghost absences**: asserting that text is absent when it only ever appeared in a draft.
+  Keep a negative assertion when a scenario requires the absence (a secret never logged)
+  or it guards a defect that could come back.
 
 ## The ladder
 
