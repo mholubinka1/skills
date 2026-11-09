@@ -1,9 +1,9 @@
 # Review Criteria
 
-All content here is passed verbatim to the Standards sub-agent. Two rule bindings apply throughout:
+The Standards sub-agent reads this file in full. Two rule bindings apply throughout:
 
 - **The repo overrides.** A documented repo standard always wins; where it endorses something that the smell baseline would flag, suppress the smell.
-- **Always a judgement call.** Smells are labelled heuristics, not hard violations. Documented-standard breaches may be blocking; smells are always advisory. Skip anything tooling already enforces.
+- **Always a judgement call.** Smells are labelled heuristics, not hard violations. Documented-standard breaches may be blocking; smells are always advisory.
 
 ## Smell Baseline (Fowler, _Refactoring_ ch. 3 — via Matt Pocock)
 

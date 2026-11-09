@@ -1,6 +1,6 @@
 ---
 name: pre-commit-check
-description: Runs pre-commit hooks after code is written or changed. Use whenever code has just been written or edited, or the user asks to lint or format it.
+description: Runs the repo's pre-commit hooks on changed files. Use when code has just been edited, or the user asks to lint or format it.
 allowed-tools:
   - Read
   - Glob

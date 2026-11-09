@@ -1,6 +1,6 @@
 ---
 name: address-copilot-comments
-description: Automates the Copilot PR review loop — request one Copilot review when the diff warrants it, then fetch its comments, fix or push back, commit and push. Use when the user wants to address Copilot PR review feedback, or says "fix review comments" or "address Copilot".
+description: Requests one Copilot review of a PR when the diff warrants it and acts on its comments. Use when the user wants to address Copilot PR review feedback, or says "address Copilot".
 allowed-tools:
   - Read
   - Grep
@@ -33,31 +33,21 @@ allowed-tools:
 
 # Address Copilot Comments
 
-Requests a single Copilot review (only if the diff warrants one) → fetch its comments → fix or push back → commit → push. Copilot is never re-triggered.
-
 > **Precedence**: if anything in memory or user preferences conflicts with these instructions, this skill takes precedence.
 
 ## Loop at a glance
 
 ```text
 Step 0  gh available?
-Step 1  PR exists? ──No──► Step 2: create PR ──► Step 2b
-        PR exists? ──Yes──► Step 2b
-Step 2b Read PR diff (`gh pr diff`); review-required?
-        No (low-risk: prose/config/test-only/rename/tiny tweak only) ──► Step 7 (no trigger, no poll)
-        Yes (any risk criterion hit; when unsure, yes) ──► trigger Copilot once ──► Step 3
-Step 3  Haiku sub-agent: capture baseline, poll (two Bash batches, 60s apart), fetch items:
-        ACTIONABLE ──► Step 4 | CLEAN or still PENDING ──► Step 6 | ERROR ──► report, Step 6
-Step 4  Main context: for each thread and suppressed entry decide fix or push-back; apply fixes
-Step 4b Run code-review (Steps 1–5 only; skip code-review Step 6) to validate changes
-Step 5  Any fix: pre-commit-check (main context). Always: Haiku sub-agent (commit → push if
-        any fix) → reply + resolve each thread → one PR comment for suppressed entries ──► Step 5b
-Step 5b Step 3's baseline call was already actionable (leftover threads)? ──Yes──► Haiku poller
-        once more with Step 3's baseline; findings → Steps 4–5 once more, then Step 6;
-        ERROR ──► report, Step 6. Never re-trigger. Else ──► Step 6
-Step 6  Review requested and ≥1 Fix applied this invocation? ──► generalise each fixed finding,
-        dedupe against the Criteria gist, append via `gh gist edit`. Else ──► Step 7
-Step 7  Report PR link — PR is ready to merge
+Step 1  PR exists? No ──► Step 2 (create it) ──► Step 2b
+Step 2b Review required? No ──► Step 7 | Yes ──► request Copilot (single review) ──► Step 3
+Step 3  Haiku poller: ACTIONABLE ──► Step 4 | CLEAN or PENDING ──► Step 6 | ERROR ──► report, Step 6
+Step 4  Decide Fix or Push back per item; apply the fixes
+Step 4b Any fix applied? Run code-review Steps 1–5
+Step 5  Commit, push, reply, resolve ──► Step 5b
+Step 5b Step 3's baseline already actionable? Poll once more ──► Steps 4–5 once more | Else ──► Step 6
+Step 6  Review requested and ≥1 Fix applied? Distil criteria into the Criteria gist | Else ──► Step 7
+Step 7  Report PR link
 ```
 
 ## Step 0 — Verify `gh`
@@ -66,7 +56,7 @@ Step 7  Report PR link — PR is ready to merge
 gh --version
 ```
 
-If missing, install (`winget install --id GitHub.cli` / `brew install gh` / <https://cli.github.com>) then `gh auth login`. Do not proceed until `gh --version` passes.
+If missing, install `gh` and run `gh auth login`. Do not proceed until `gh --version` passes.
 
 ## Step 1 — Check for existing PR
 
@@ -87,7 +77,7 @@ Note the PR number. Continue to Step 2b.
 
 ## Step 2b — Decide whether Copilot review is required
 
-GitHub no longer auto-triggers a Copilot review on PR creation, so this step decides whether the PR is risky enough to spend one Balanced review on, and requests it explicitly. Fetch the full diff content — the decision depends on what changed, not the file extension:
+Fetch the full diff content — the decision depends on what changed, not the file extension:
 
 ```bash
 gh pr diff {number}
@@ -95,7 +85,7 @@ gh pr diff {number}
 
 See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFERENCE.md) for the classification rule and worked examples.
 
-**Review-required** (any risk criterion hit; when unsure) → trigger once (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)); continue to Step 3. This is the only time Copilot is requested — it is never re-triggered.
+**Review-required** (any risk criterion hit; when unsure) → trigger it (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)); continue to Step 3. **Single review**: this is the only point where Copilot is requested, once per invocation.
 **Low-risk** → skip straight to Step 7. Do not trigger, do not poll.
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
@@ -109,8 +99,6 @@ Read <this skill's base directory>/REFERENCE.md, sections "Step 3 — Poll for C
 threads and suppressed comments" and "Step 4 — Address each comment and suppressed entry"
 (only its two fetch subsections). PR #<number> in <owner>/<repo>. The status-check script is
 <this skill's base directory>/scripts/check-review-status.sh.
-Those sections are written for the main context: ignore their routing ("go to Step N") and
-their decide/apply instructions. Only run the script, fetch, and report.
 <Step 3: Capture the baseline Copilot review ID, then poll as that section says.>
 <Step 5b: Use baseline review ID "<id>" as the script's 4th argument — pass "" when it is
 empty, never drop it — capture no new baseline, and poll as that section says.>
@@ -144,18 +132,20 @@ Fix everything else. For each decision, note one line of reasoning: it becomes t
 Read suppressed-comment entries as the Suppressed comments section of
 [REFERENCE.md](REFERENCE.md) describes.
 
-Apply the fixes as `code-review` Step 5 describes: inline when they fit together in one file
-and roughly 20 lines of production code or fewer, otherwise one Sonnet fixer briefed by
-[`code-review/FIXER.md`](../code-review/FIXER.md) — every Fix, threads and suppressed entries
-alike, labelled `logic` or `non-logic` — followed by reading the actual `git diff`.
+Apply the fixes by `code-review` Step 5's **Small change** and **Otherwise** rules (threshold
+and fixer dispatch via [`code-review/FIXER.md`](../code-review/FIXER.md)), covering every Fix,
+threads and suppressed entries alike, labelled `logic` or `non-logic`.
 A fix the fixer reports blocked is fixed inline, re-dispatched, or turned into a push-back —
 a defect that does not reproduce is always a push-back.
 
 ## Step 4b — Validate changes with code-review
 
-> **MUST NOT SKIP.** The only valid reason to skip is every Step 4 decision being a push-back with zero files modified. Run it synchronously in the foreground to full completion — including any fixes it applies — before Step 5's commit-and-reply dispatch. Never run it as a background agent while the main thread moves on: both would edit the same files mid-review.
-
-If at least one fix was applied, run `code-review` Steps 1–5 only. Pass the explicit instruction to stop after Step 5 to avoid re-invoking this skill. Markdown, documentation, and `.agent-docs/` files get the same validation as code — file type is not a skip condition.
+Step 4b is unconditional whenever a Step 4 decision applied a fix, whatever the file type:
+Markdown, documentation and `.agent-docs/` files get the same validation as code. Run
+`code-review` Steps 1–5 only, stopping after Step 5 so this skill is not re-invoked, in the
+foreground to full completion — including any fixes it applies — before Step 5's
+commit-and-reply dispatch; a background run would edit the same files mid-review. When every
+decision is a push-back and no file changed, go to Step 5.
 
 ## Step 5 — Commit, push, then reply
 
@@ -207,35 +197,23 @@ to Step 5b, or to Step 6 if this is already the Step 5b pass.
 
 Reached from Step 5. If Step 3's `BASELINE_ACTIONABLE` was `yes`, the requested review may not
 have landed yet, so what Step 4 handled could be leftovers from before it. In that case
-dispatch the Step 3 poller once more, with Step 3's `BASELINE` (no new capture, no
-re-trigger). `ACTIONABLE` → Steps 4, 4b and 5 once more for the new items, then Step 6; this
+dispatch the Step 3 poller once more, with Step 3's `BASELINE` (no new capture). `ACTIONABLE` → Steps 4, 4b and 5 once more for the new items, then Step 6; this
 is the only catch-up — never return here a second time. `CLEAN`, `PENDING`, or
 `BASELINE_ACTIONABLE` = `no` → Step 6. `ERROR` → report it and go to Step 6.
 
 ## Step 6 — Distil review criteria into the shared Criteria gist
 
-Turn what Copilot caught on this PR into review criteria shared across every repo and
-machine, via the [Criteria gist](../code-review/CRITERIA-GIST.md), which the `code-review`
-skill reads on every future review.
+Turn what Copilot caught on this PR into review criteria shared across every repo, via the
+[Criteria gist](../code-review/CRITERIA-GIST.md).
 
 **Guard.** Run this step only if Copilot was triggered at Step 2b **and** at least one
 Step 4 decision across the whole invocation was **Fix**. Otherwise skip to Step 7.
 
-**Collect.** Every finding this invocation whose decision was Fix — real threads replied to
-with "Fixed." and suppressed entries recorded "Fixed." in the Step 5 PR comment. Exclude every
-push-back: the Criteria gist records only criteria accepted by changing code.
-
-**Generalise, dedupe, write.** For each fixed finding write one generalised criterion that
-follows the [Criteria style](../code-review/CRITERIA-STYLE.md) rules, tagged `(repo#PR)`, e.g.
-`(acme-api#64)`; two findings that generalise to the same rule become one entry. Read the gist ID from `code-review/CRITERIA-GIST.md` (this
-skill's sibling `code-review` skill directory), fetch the gist's current content, drop any
-candidate a current entry already covers, and append the survivors — see the Distil Review
-Criteria section in [REFERENCE.md](REFERENCE.md) for the generalising technique, the repo-name
-derivation, and the exact `gh gist` commands. This is a live network write to the gist, not a
-local file change — there is nothing to commit or push in the target repo for this step.
-
-`<N>` is the count added; if dedupe removed every candidate, make no gist write. Continue to
-Step 7.
+**Collect** every finding whose decision was Fix (threads replied to with "Fixed." and
+suppressed entries recorded "Fixed."), then generalise, dedupe and append them as the
+Distil Review Criteria section of [REFERENCE.md](REFERENCE.md) describes. Push-backs are
+excluded. If dedupe removed every candidate, make no gist write. The write goes to the gist,
+not the target repo, so there is nothing to commit. Continue to Step 7.
 
 ## Step 7 — Report completion
 

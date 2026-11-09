@@ -142,17 +142,15 @@ CURRENT_REVIEW_ID=<id or empty>
 DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
 ```
 
-- **`ACTIONABLE`** — `THREAD_COUNT` or `SUPPRESSED_COUNT` is non-zero. Exit the poll loop and
-  go to Step 4.
+- **`ACTIONABLE`** — `THREAD_COUNT` or `SUPPRESSED_COUNT` is non-zero. Exit the poll loop.
 - **`CLEAN`** — only possible when a `baseline_review_id` argument was supplied at all (even
   if that argument was itself an empty string, meaning no prior review existed at capture
   time): `CURRENT_REVIEW_ID` is non-empty and differs from the baseline, with nothing
-  actionable. Copilot has reviewed and left nothing to address — go to Step 6 immediately.
+  actionable. Copilot has reviewed and left nothing to address.
 - **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
   nothing already actionable. Wait 60 seconds and call again.
 - **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do
-  not treat this as `PENDING` — stop polling and report the failure to the user instead of
-  looping until exhaustion.
+  not treat this as `PENDING` — stop polling and return the `gh` error.
 
 Exits 0 for any well-formed call, including `DECISION=ERROR` — branch on the `DECISION` line,
 not the exit code. Exits 2 with a usage message on stderr for a malformed invocation (wrong
@@ -168,8 +166,7 @@ Run the script once before polling begins, with no `baseline_review_id` argument
 bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number}
 ```
 
-If this first call already prints `DECISION=ACTIONABLE`, skip the poll loop entirely and go
-straight to Step 4 — there's no need to wait when something is already there to address. An
+If this first call already prints `DECISION=ACTIONABLE`, skip the poll loop entirely. An
 empty `CURRENT_REVIEW_ID` means no Copilot review exists yet; any review that appears during
 polling is considered new.
 
@@ -187,14 +184,12 @@ Call the script again on each iteration, passing the baseline captured above:
 bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} {baseline_review_id}
 ```
 
-`DECISION=ACTIONABLE` → exit the poll loop and continue to Step 4. `DECISION=CLEAN` → go to
-Step 6 immediately. `DECISION=PENDING` → wait 60 seconds and repeat. `DECISION=ERROR` → stop
-polling immediately and report the failure to the user — do not count it as a `PENDING`
-attempt or keep retrying silently.
+`DECISION=ACTIONABLE` or `CLEAN` → exit the poll loop. `DECISION=PENDING` → wait 60 seconds
+and repeat. `DECISION=ERROR` → stop polling immediately and return the failure — do not count
+it as a `PENDING` attempt or keep retrying silently.
 
 After 10 `PENDING` attempts, call the script one final time with the same arguments. If that
-final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable —
-continue to Step 6.
+final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable.
 
 Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the
 review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings
@@ -248,9 +243,9 @@ gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
   --jq '[.[] | select((.user.login // "") | test("copilot";"i"))] | last | .body // empty'
 ```
 
-Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Treat each entry as its own finding — decide Fix or Push back exactly as for a thread (by the push-back rules in SKILL.md Step 4), and apply any code changes the same way.
+Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Each entry is its own finding, decided like a thread (SKILL.md Step 4).
 
-Suppressed entries have no `threadId` or `comment_id` — the reply and resolve steps below apply only to real threads. Skip straight to the "Acknowledge suppressed comments" section for these instead.
+Suppressed entries have no `threadId` or `comment_id`, so the reply and resolve subsections apply only to real threads; these get the "Acknowledge suppressed comments" subsection instead.
 
 ### Reply: fixed
 
@@ -308,7 +303,7 @@ EOF
 )"
 ```
 
-One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread replies. Post this whenever suppressed comments existed this invocation, even if every decision (threads and suppressed comments together) was a push-back — see Loop termination conditions below.
+One line per suppressed entry, same "Fixed."/"Ignored." phrasing used for thread replies. Post this whenever suppressed comments existed this invocation, even if every decision (threads and suppressed comments together) was a push-back.
 
 ---
 
@@ -337,8 +332,8 @@ Start the "Appending an entry" procedure in `code-review/CRITERIA-GIST.md` now, 
 after its fetch step (step 1) —
 that gist content is what you compare each candidate against here: match on meaning rather
 than wording, and skip any that a current entry already covers. Carry that same fetched
-content forward into "Writing the gist" rather than fetching it again. Do not read the
-`code-review` skill's `REVIEW-CRITERIA.md` — it's a different, curated list, and a little
+content forward into "Writing the gist" rather than fetching it again. Dedupe against the gist
+only: the `code-review` skill's `REVIEW-CRITERIA.md` is a separate, curated list, and a little
 overlap between the two is acceptable.
 
 ### Writing the gist
@@ -362,27 +357,3 @@ unrecorded rather than being lost from something that already existed.
 |---|---|
 | Stage specific files | `git add <file1> <file2> ...` |
 | **Never** | `git add .` (stages untracked files including secrets, build artefacts) |
-
----
-
-## Loop termination conditions
-
-The loop (Steps 3–5) never starts at all if Step 2b judges the diff low-risk. No review requested, no poll. Step 6 is also skipped (nothing was reviewed). PR is ready to merge.
-
-Otherwise, the loop is complete when **any** of these conditions is met:
-
-1. **Step 5 done** — fixes (if any) committed and pushed, every thread replied to and
-   resolved, and any suppressed comments acknowledged in one PR comment. Copilot is never
-   re-triggered; go to Step 5b.
-2. **Clean review or poll exhausted** — the Step 3 poll ends with zero unresolved threads and
-   zero suppressed comments. Either a new Copilot review was detected with no comments, or
-   every attempt elapsed with no new review. Go to Step 6.
-3. **Catch-up done** — Step 5b polls at most once for a requested review that had not landed
-   when Step 4 began (leftover threads made Step 3's baseline call actionable). Whatever it
-   finds is handled by one more pass through Steps 4–5; then go to Step 6. Step 5b is never
-   entered twice.
-4. **Poll error** — a poll returned `ERROR`. Report it and go to Step 6 (a no-op unless a fix
-   was already made), then Step 7, which shares the PR link without calling it ready to
-   merge.
-
-Whenever a review was requested, Step 6 runs next — it records criteria only if at least one Fix was applied at some point this invocation, otherwise it is a no-op — and then the PR is ready to merge, unless a poll errored.
