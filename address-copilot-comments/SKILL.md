@@ -28,6 +28,7 @@ allowed-tools:
   - Bash(git log *)
   - Bash(git push)
   - Bash(bash "*/address-copilot-comments/scripts/check-review-status.sh" *)
+  - Bash(bash "*\address-copilot-comments\scripts\check-review-status.sh" *)
   - Bash(sleep 60)
 ---
 

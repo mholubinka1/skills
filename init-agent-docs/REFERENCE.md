@@ -47,7 +47,7 @@ Otherwise create `.agent-docs/` if needed, read this skill's `AGENT-TEMPLATE.md`
      > Please resolve manually by moving the correct file to `.agent-docs/context.md`, then
      > re-run this skill.
 
-   - **Exactly one found**: safe-move it to `.agent-docs/context.md` (on any failure, report it and go to Step 4). Report "Moved `<source path>` to `.agent-docs/context.md`." and take the review sub-path.
+   - **Exactly one found**: safe-move it to `.agent-docs/context.md`; here a failed write **or** a failed delete overrides the safe-move rule: report it and go to Step 4. Report "Moved `<source path>` to `.agent-docs/context.md`." and take the review sub-path.
    - **None found**: take the generate sub-path.
 
 **Generate sub-path.**

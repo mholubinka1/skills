@@ -79,6 +79,7 @@ Every skill declares `allowed-tools` in its frontmatter as a YAML block list, on
 - **Least privilege.** List exactly the tools the skill's own steps run, plus the commands only its sub-agents run. Every entry traces to a step or a sub-agent handover.
 - **Scope Bash.** Write `Bash(<cmd> *)` (which also matches the bare `<cmd>`) or an exact `Bash(<cmd>)`. Every part of a compound command (`a && b`, `$(...)`, pipes) must match an entry, or the call prompts.
 - **Never pre-approved.** Unscoped `Bash`, `Bash(*)`, `Bash(git *)`, `git push` with arguments (bare `Bash(git push)` is fine), force pushes, `reset --hard`, `branch -D`, `rm`, `git clean`, `stash pop` and `stash drop`, `>`/`>>` redirects, package installs outside a project virtualenv (`pip install …`), and the project's test command.
+- **Path wildcards also match later flags.** `Bash(gh api repos/*)` matches `gh api repos/o/r -X DELETE`; only a call that puts `--method` before the path stays outside it. Use a path wildcard only where the skill's own writes are flag-first or acceptable to pre-approve.
 - **Path-scoped `Edit(...)` / `Write(...)`** are fine where a skill writes under one tree. If the harness ignores the path scope, the call prompts, which fails safe.
 
 `tests/test_skill_frontmatter.py` fails when a skill lacks `allowed-tools`, has an unscoped `Bash`, or pre-approves a destructive pattern.

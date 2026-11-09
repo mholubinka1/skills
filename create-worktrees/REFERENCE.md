@@ -61,7 +61,7 @@ Return per ecosystem: pass, or fail with the failing command and its first error
 
 ## Uncovered ecosystems (Step 5)
 
-**Courtesy list** — best-effort, always non-fatal, always followed by the `ACTION NEEDED` prompt below. When the user chose *Install*, add each recognised one's command to the Install handover above; on *Skip*, print it as a hint with the rest.
+**Courtesy list** — best-effort, always non-fatal, always followed by the `ACTION NEEDED` prompt below. Attempt each recognised one's install whatever the *Install* answer, in the Install sub-agent (add it to the handover above, or dispatch that handover with only these commands), reported like a first-class install.
 
 | Marker | Best-effort install |
 |---|---|

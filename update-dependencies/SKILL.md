@@ -67,7 +67,7 @@ If nothing matches, report that no known ecosystem was detected and give brief g
 
 ## Step 3: Update dependencies per ecosystem
 
-For each detected ecosystem, follow its command sequence in [REFERENCE.md](REFERENCE.md):
+For each detected ecosystem, follow its command sequence in [REFERENCE.md](REFERENCE.md).
 
 Apply patch/minor bumps only. Record any package where a major version is available but not applied — these go in the final report, not the working tree.
 
@@ -97,7 +97,7 @@ chore: update dependencies (patch/minor)
 - pre-commit: black 23.12.0 -> 24.1.1
 ```
 
-Do not push. Commit whatever the Step 4 and Step 5 results — they are already captured in the report for the user to act on.
+Do not push. Commit even when Steps 3–5 reported failures; their results are already captured in the report for the user to act on.
 
 ## Step 7: Report
 

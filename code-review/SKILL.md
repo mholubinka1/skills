@@ -14,6 +14,7 @@ allowed-tools:
   - Bash(git log *)
   - Bash(git rev-parse *)
   - Bash(git symbolic-ref *)
+  - Bash(sed 's|origin/||')
   - Bash(git merge-base *)
   - Bash(git branch --show-current)
   - Bash(git ls-files *)
