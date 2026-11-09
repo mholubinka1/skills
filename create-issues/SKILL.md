@@ -1,6 +1,6 @@
 ---
 name: create-issues
-description: Break a spec into vertical-slice issues, write them to .agent-docs/issues/<branch-name>.md, and mirror to GitHub. Use after /write-spec when the spec is ready to be broken into implementation work.
+description: Turns a spec into vertical-slice issues, recorded locally and mirrored to GitHub. Use after /write-spec when the spec is ready to be broken into implementation work.
 allowed-tools:
   - Read
   - Grep
@@ -32,28 +32,11 @@ Read the codebase if not already done. Use domain glossary vocabulary from `.age
 
 ### 3. Draft vertical slices
 
-Break the spec into tracer bullet issues — each a thin vertical slice cutting through all integration layers end-to-end. Each slice must be demoable on its own and have any required prefactoring as its own preceding slice.
+Break the spec into tracer bullet issues — each a thin vertical slice cutting through all integration layers end-to-end. Each slice must be demoable on its own and have any required prefactoring as its own preceding slice. This step is done when every user story in the spec is covered by at least one slice.
 
-### 4. Three amigos review
+### 4. Write the acceptance criteria
 
-Run a **Three Amigos** conversation between:
-
-- **Business** (product/stakeholder): defines the problem and acceptance criteria in plain language
-- **Development**: proposes technical approach and constraints
-- **Testing**: questions edge cases and missing scenarios
-
-This produces agreed-upon scenarios that become your test plan. Then:
-
-- [ ] Capture behaviors as user stories: "As a [role], I want [feature], so that [benefit]"
-- [ ] Write acceptance criteria as Given-When-Then scenarios for each story
-- [ ] Confirm with user what interface changes are needed
-- [ ] Identify opportunities for deep modules (small interface, deep implementation) — see `deep-modules.md`
-- [ ] Design interfaces for testability — see `interface-design.md`
-- [ ] Get user approval on the scenario list
-
-Ask: "What should success look like for the user? Which scenarios are most important to get right?"
-
-**You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
+For each slice, draw Given-When-Then scenarios from the spec's user stories as its acceptance criteria. Show the user the slices and their scenarios, and get approval on the list before writing the issues file. `/bdd` owns interface and test-design work when it picks up each slice.
 
 ### 5. Write the local issues file
 

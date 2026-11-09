@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Runs the full implementation workflow inline, from change request to merged PR: worktree, init-agent-docs, design, branch, spec, issues, BDD per issue, code review, and merge confirmation. Use when the user wants to implement a feature, fix a bug, or make any repository change.
+description: Carries a repository change from request to merged PR inline in the current conversation. Use when the user wants to make any change to a repository.
 allowed-tools:
   - Skill
   - Read

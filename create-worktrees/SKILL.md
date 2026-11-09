@@ -1,6 +1,6 @@
 ---
 name: create-worktrees
-description: Enters an isolated git worktree for the current task so work never touches the main checkout, creating one (and optionally bootstrapping its dependencies) or resuming an existing one. Use when starting implementation work that should be isolated, or as the first step of /implement.
+description: Enters an isolated git worktree for the current task, creating one (optionally bootstrapping its dependencies) or resuming an existing one. Use when starting implementation work that must not touch the main checkout, or as the first step of /implement.
 allowed-tools:
   - Read
   - Glob
@@ -37,6 +37,8 @@ allowed-tools:
 
 Get into an isolated worktree before any repository writes happen. Runs standalone (`/create-worktrees`) or as the first step of `/implement` — same behaviour either way.
 
+Every prompt goes through `AskUserQuestion`. In a non-interactive run (no `AskUserQuestion` available), don't read stdin or block: take the default each prompt names.
+
 ## Step 1 — Already isolated?
 
 Check whether the current directory is already a linked worktree:
@@ -53,17 +55,15 @@ If the output contains `worktrees/`, the session is already isolated. Stop here 
 git worktree list
 ```
 
-Ignore the entry for the main checkout (the first line). If one or more other worktrees are listed, show them to the user and ask whether to resume one:
+Ignore the entry for the main checkout (the first line). If one or more other worktrees are listed, ask via `AskUserQuestion`: *"Found an existing worktree on branch `<branch>` at `<path>` — resume there, or start a new one?"* with one option per listed worktree plus *Start new*. Default: *Start new*.
 
-> Found an existing worktree on branch `<branch>` at `<path>` — resume there, or start a new one?
-
-If the user picks one:
+If the user picks a worktree:
 
 ```text
 EnterWorktree(path: "<worktree-path>")
 ```
 
-Stop here. If none exist, or the user opts to start fresh, continue to Step 3.
+Stop here. If none exist, or the answer is *Start new*, continue to Step 3.
 
 ## Step 3 — Ensure `.claude` is gitignored
 
@@ -101,7 +101,7 @@ Slugify the current task's trigger message (see [REFERENCE.md](REFERENCE.md) for
 EnterWorktree(name: "wip/<slug>")
 ```
 
-`EnterWorktree` turns that name into the branch `worktree-wip+<slug>` (it adds `worktree-` and replaces `/` with `+`). `branch-hygiene` classifies `worktree-wip+*` as a placeholder that "must be renamed before code is written," so it always reports a mismatch there and its `next:` line moves work off this branch once the real name is known from later work (e.g. a `/implement` design session).
+`EnterWorktree` turns that name into the branch `worktree-wip+<slug>`. `branch-hygiene` treats it as a placeholder and moves work off it once the real name is known.
 
 If `EnterWorktree` errors because a branch of that name already exists (e.g. a leftover `worktree-wip+<slug>` from an earlier aborted run that was never cleaned up), append a short disambiguating suffix to the slug and retry.
 
@@ -109,26 +109,11 @@ If `EnterWorktree` errors because a branch of that name already exists (e.g. a l
 
 Runs only after Step 4 creates a fresh worktree — the Step 1 (already isolated) and Step 2 (resume) paths stop before reaching it.
 
-A fresh worktree is a bare checkout: none of the gitignored dependency artifacts (`.venv`, `node_modules`, NuGet caches, …) the main checkout built up are present, so code that runs on `main` may not run here. This step offers to install them — never to copy or symlink them from the main checkout.
+A fresh worktree is a bare checkout: none of the gitignored dependency artifacts (`.venv`, `node_modules`, NuGet caches, …) from the main checkout are present, so code that runs on `main` may not run here. This step offers to install them, never to copy or symlink them from the main checkout.
 
-Both prompts in this step go through `AskUserQuestion`. In a non-interactive run (no `AskUserQuestion` available), don't read stdin or block: take *Skip* for the install question, and for the `ACTION NEEDED` line just print it and continue (there is nothing to gate on).
-
-1. Detect the repo's dependency ecosystems. Apply `update-dependencies`' Detection Table marker rules (the repo root, plus one level of subdirectories for a monorepo), **and also** note any other dependency-manifest file present that the Detection Table doesn't cover (`go.mod`, `Cargo.toml`, `Gemfile`, or anything comparable). The per-ecosystem install commands, the courtesy list for the uncovered ones, and the pip-interpreter note are in the Dependency bootstrap section of [REFERENCE.md](REFERENCE.md).
+1. Detect the repo's dependency ecosystems: the first-class ones from `../update-dependencies/REFERENCE.md` "Detection Table" (marker rules and scan scope), plus any other dependency manifest present (`go.mod`, `Cargo.toml`, `Gemfile`, or anything comparable).
 2. **Nothing detected** — do nothing; continue to the caller.
-3. **One or more first-class ecosystems detected** — print each one and its exact install command(s), then ask via `AskUserQuestion`: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*. No interactive user → **Skip**, per the note above; likewise any answer that is not a clear *Install*.
+3. **One or more ecosystems detected** — print each one and its exact install command(s) from [REFERENCE.md](REFERENCE.md) "Dependency bootstrap", then ask: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*. Default: *Skip*, as for any answer that is not a clear *Install*.
    - **Skip** — leave the printed commands as a copy-paste hint; continue.
-   - **Install** — installing is mechanical, so it runs in a Haiku sub-agent with an empty context. Dispatch one `Agent` call, `subagent_type: general-purpose`, `model: haiku`, `run_in_background: false`, and wait for its report. Handover:
-
-     ```text
-     In <worktree path>, run these install commands, one ecosystem at a time:
-     <ecosystem>: <command(s) printed above>, one line each
-     A failing install does not stop the others.
-     Return per ecosystem: pass, or fail with the failing command and its first error line.
-     ```
-
-     Report its result. A failed install does **not** abort: the worktree is created and is usable for work that doesn't execute the code.
-4. **Uncovered ecosystem(s)** — any marker from step 1 that is not a first-class Detection Table ecosystem:
-   - If it is on the courtesy list in REFERENCE.md, attempt that conventional install — best-effort, non-fatal, reported as in step 3. Otherwise attempt nothing.
-   - Then print once, covering every uncovered ecosystem found:
-     `ACTION NEEDED: add <ecosystem>[, <ecosystem>…] as a first-class entry in create-worktrees/REFERENCE.md`
-     and use `AskUserQuestion` a single time to make the user acknowledge it before the workflow continues (no interactive user → print and continue, per the note above).
+   - **Install** — dispatch the install sub-agent per [REFERENCE.md](REFERENCE.md) "Install handover", and report its result. A failed install does **not** abort: the worktree is usable for work that doesn't execute the code.
+4. **Uncovered ecosystem(s)** — any marker that is not a first-class Detection Table ecosystem: follow [REFERENCE.md](REFERENCE.md) "Uncovered ecosystems".

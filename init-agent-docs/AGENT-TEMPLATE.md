@@ -7,8 +7,8 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 ## 1. Ownership and Independence
 
 - Take ownership of a task from start to finish with minimal handholding. Clarify ambiguity, scope the work, implement it, verify it locally, and confirm it works in the target environment.
-- Know when to ask for help. Try for a reasonable period, but do not stall in silence. When you ask, include what you tried, what you expected, and what happened.
-- Recognise when a task is larger than initially scoped and surface this early. Do not produce oversized changes — break work into smaller increments.
+- Know when to ask for help. Try for a reasonable period, then ask promptly rather than staying silent. When you ask, include what you tried, what you expected, and what happened.
+- Recognise when a task is larger than initially scoped and surface this early. Keep changes small — break work into smaller increments.
 - Deliver consistently against the stated scope. Make your effort estimates broadly reliable.
 
 ---
@@ -19,11 +19,11 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 - Favour clarity over brevity. Prefer maintainability over micro-efficiency.
 - Give every function and class a single, clear responsibility. Keep methods short enough that their behaviour is understood without extensive scrolling.
 - Name everything descriptively. Choose names for variables, methods, classes, and files that communicate intent without requiring the reader to open another file.
-- Never use unanchored `sed`/regex find-replace to rename an identifier — a pattern like `_parse_window_date` also matches inside `test_parse_window_date_x`. Anchor on word boundaries or use a proper multi-file rename tool instead.
-- Never hardcode values, magic numbers, secrets, credentials, URLs, or environment-specific strings. Use secret-safe configuration.
-- Never leave commented-out code, dead code, or deprecated code in committed changes. Replace unnecessary TODOs with proper work items — do not leave them in the codebase.
-- Never leave debug output (`console.log`, `print`, `System.out.println`, etc.) in committed code.
-- Handle errors deliberately. Understand the possible failure states, handle them explicitly, and test for them. Never swallow errors or re-throw them blindly.
+- Rename an identifier with a find-replace anchored on word boundaries, or a proper multi-file rename tool — an unanchored pattern like `_parse_window_date` also matches inside `test_parse_window_date_x`.
+- Keep values, magic numbers, secrets, credentials, URLs, and environment-specific strings in secret-safe configuration.
+- Commit only live code: delete commented-out, dead, and deprecated code, and replace unnecessary TODOs with proper work items so none stay in the codebase.
+- Keep committed code free of debug output (`console.log`, `print`, `System.out.println`, etc.).
+- Handle errors deliberately. Understand the possible failure states, handle them explicitly, and test for them. Surface each error, or re-throw it with context.
 - Catch common pitfalls before raising any PR: N+1 queries, unbounded loops, leaked secrets, unsanitised input.
 - Use logging levels (`info`, `debug`, `warning`, `error`) appropriately. Write log messages that are meaningful.
 - Follow the existing patterns and conventions of the codebase. Introduce new patterns slowly, with good reason and explicit agreement.
@@ -35,9 +35,9 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 
 - Accompany any change to execution logic with tests. If code can be changed without tests failing, the current test coverage is insufficient.
 - Write unit tests that cover happy paths and meaningful edge cases: empty inputs, boundary conditions, error paths, and all execution branches introduced by your change.
-- Write tests that verify behaviour, not implementation. Do not test internal structure — tests that verify implementation details have no value.
-- Write deterministic tests. Do not rely on real network calls, real clocks, or shared mutable state. Mock only at system boundaries — never mock code you control.
-- Ensure all tests pass locally before raising any PR. Do not raise a PR with a failing pipeline.
+- Write tests that verify behaviour, not implementation — tests of internal structure have no value.
+- Write deterministic tests: stand in for network calls, clocks, and shared mutable state. Mock only at system boundaries — code you control runs for real.
+- Raise a PR only once all tests pass locally and the pipeline is green.
 - Add integration and/or contract tests where a change is integration-heavy.
 - Maintain a minimum of 80% code coverage, enforced at the pipeline level. Prioritise meaningful coverage of business logic over hitting the number with implementation tests.
 
@@ -46,10 +46,10 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 ## 4. Source Control and Git Practice
 
 - Always branch from the latest `main` or `develop`. Name branches consistently: `feature/`, `bugfix/`, `hotfix/`, `chore/`. Confirm conventions when joining a new codebase.
-- Make commits small, logical, and with meaningful descriptive messages. Do not use loose messages (`fix`, `wip`, `update`) on reviewed branches.
-- Rebase or merge with the latest target branch before raising a PR. Resolve conflicts yourself — do not leave them for the reviewer.
+- Make commits small, logical, and with meaningful descriptive messages (not `fix`, `wip`, `update`) on reviewed branches.
+- Rebase or merge with the latest target branch before raising a PR. Resolve conflicts yourself, so the reviewer never inherits them.
 - Avoid long-lived feature branches. Break work down for incremental merging. Hide new UI behind feature flags rather than leaving it unmerged.
-- Keep PRs focused on one concern. Do not mix features, refactors, and unrelated fixes in a single PR.
+- Keep PRs focused on one concern: features, refactors, and unrelated fixes each get their own PR.
 
 ---
 
@@ -64,9 +64,9 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 
 ## 6. Communication and Feedback
 
-- Surface blockers and scope changes proactively and early in your response — do not wait to be asked. Alert the team immediately if a deadline or scope commitment is at risk.
+- Surface blockers and scope changes proactively and early in your response, before anyone asks. Alert the team immediately if a deadline or scope commitment is at risk.
 - Treat review feedback as input to improve the work. Engage with it constructively.
-- Disagree with feedback through productive discussion and reasoning. Do not silently revert to the same pattern on the next task.
+- Disagree with feedback through productive discussion and reasoning, and carry the outcome into the next task.
 - Contribute context and experience to team decisions. Every level has useful perspective to share.
 
 ---
