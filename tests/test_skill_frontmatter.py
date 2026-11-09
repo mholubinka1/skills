@@ -6,14 +6,14 @@ REPO = Path(__file__).resolve().parent.parent
 
 UNSCOPED_BASH = re.compile(
     r"Bash(\(\*\))?"
-    r"|Bash\((git|gh|bash|sh|pwsh|powershell|cmd|python3?|node|npm|npx|uv|pip) \*\)"
+    r"|Bash\((git|gh|bash|sh|pwsh|powershell|cmd|python3?|node|npm|npx|uv|pip)[ :]\*\)"
 )
 DESTRUCTIVE = [
     r"git push(\s+\S|\*|:)",
     r"--force",
     r"reset --hard",
     r"branch -D",
-    r"(^|\s)rm(\s|\*|$)",
+    r"(^|\s)rm(\s|\*|:|$)",
     r"git clean",
     r"stash pop",
     r"stash drop",
@@ -56,7 +56,7 @@ def _allowed_tools(skill_md_text):
             collecting = False
         key = re.match(r"allowed-tools:\s*(.*)$", line)
         if key:
-            value = key.group(1).strip()
+            value = key.group(1).strip().removeprefix("[").removesuffix("]")
             if value:
                 entries.extend(_split_inline(value))
             else:
@@ -104,6 +104,7 @@ class AllowedToolsGuardTest(unittest.TestCase):
             "Bash(bash *)",
             "Bash(python *)",
             "Bash(npm *)",
+            "Bash(git:*)",
         ):
             with self.subTest(entry=entry):
                 violations = allowed_tools_violations(skill_with(block("Read", entry)))
@@ -118,6 +119,7 @@ class AllowedToolsGuardTest(unittest.TestCase):
             "git push:*",
             "rm",
             "rm*",
+            "rm:*",
             "git reset --hard *",
             "git branch -D *",
             "rm *",
@@ -140,6 +142,13 @@ class AllowedToolsGuardTest(unittest.TestCase):
 
     def test_inline_string_form_is_parsed(self):
         text = skill_with("allowed-tools: Read, Bash(git diff *) Bash(rm *)\n")
+        self.assertEqual(
+            allowed_tools_violations(text),
+            ["destructive pattern pre-approved: Bash(rm *)"],
+        )
+
+    def test_flow_sequence_form_is_parsed(self):
+        text = skill_with("allowed-tools: [Read, Bash(rm *)]\n")
         self.assertEqual(
             allowed_tools_violations(text),
             ["destructive pattern pre-approved: Bash(rm *)"],

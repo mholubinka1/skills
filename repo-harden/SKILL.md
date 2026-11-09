@@ -69,7 +69,8 @@ command and fields.
   reachability is the separate Reachable self-hosted job check.
 
 **Done** when every check above has printed at least one report line — pass, flagged, or
-skipped — with no check silently omitted, whether or not any finding turned up. A check that
+skipped — with no check silently omitted, whether or not any finding turned up. The one
+exception is a Visibility 403, which ends the audit at that check. A check that
 flags more than one item (a collaborator per line, a Reachable self-hosted job per job, an
 unpinned action per occurrence) prints one line per item, not a single combined line —
 "at least one," not "exactly one," is what every check owes the report.

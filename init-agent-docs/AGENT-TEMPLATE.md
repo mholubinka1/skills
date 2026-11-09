@@ -23,7 +23,7 @@ These standards apply to all AI agent work in this repository. Follow them on ev
 - Keep values, magic numbers, secrets, credentials, URLs, and environment-specific strings in secret-safe configuration.
 - Commit only live code: delete commented-out, dead, and deprecated code, and replace unnecessary TODOs with proper work items so none stay in the codebase.
 - Keep committed code free of debug output (`console.log`, `print`, `System.out.println`, etc.).
-- Handle errors deliberately. Understand the possible failure states, handle them explicitly, and test for them. Surface each error, or re-throw it with context.
+- Handle errors deliberately. Understand the possible failure states, handle them explicitly, and test for them. Handle or surface every error; add context when re-throwing.
 - Catch common pitfalls before raising any PR: N+1 queries, unbounded loops, leaked secrets, unsanitised input.
 - Use logging levels (`info`, `debug`, `warning`, `error`) appropriately. Write log messages that are meaningful.
 - Follow the existing patterns and conventions of the codebase. Introduce new patterns slowly, with good reason and explicit agreement.

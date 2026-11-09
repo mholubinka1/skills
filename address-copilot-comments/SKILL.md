@@ -45,7 +45,7 @@ Step 2b Review required? No ──► Step 7 | Yes ──► request Copilot (si
 Step 3  Haiku poller: ACTIONABLE ──► Step 4 | CLEAN or PENDING ──► Step 6 | ERROR ──► report, Step 6
 Step 4  Decide Fix or Push back per item; apply the fixes
 Step 4b Any fix applied? Run code-review Steps 1–5
-Step 5  Commit, push, reply, resolve ──► Step 5b
+Step 5  pre-commit-check, then commit, push, reply, resolve ──► Step 5b
 Step 5b Step 3's baseline already actionable? Poll once more ──► Steps 4–5 once more | Else ──► Step 6
 Step 6  Review requested and ≥1 Fix applied? Distil criteria into the Criteria gist | Else ──► Step 7
 Step 7  Report PR link
