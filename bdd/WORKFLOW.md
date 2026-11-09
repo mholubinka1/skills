@@ -1,6 +1,6 @@
 # BDD Workflow
 
-Full step-by-step workflow. The philosophy and scenario format are in [SKILL.md](SKILL.md). Commits and pushes belong to the caller (Step 5); this workflow makes none.
+Full step-by-step workflow. The philosophy and scenario format are in [SKILL.md](SKILL.md). Commits and pushes belong to the caller; this workflow makes none.
 
 ## Step 0 — Fast Branch Check (before planning)
 
