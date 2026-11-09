@@ -1,6 +1,28 @@
 ---
 name: code-review
 description: Full code-review workflow — branch hygiene, pre-commit checks, iterative two-axis review (Standards + Spec) with fresh parallel sub-agents until clean, Copilot PR review, then pre-merge cleanup. Use when the user wants a branch or PR reviewed, or says "review my code" or "is this ready to merge".
+allowed-tools:
+  - Skill
+  - Agent
+  - Read
+  - Grep
+  - Glob
+  - Edit
+  - Write
+  - Bash(git diff *)
+  - Bash(git status *)
+  - Bash(git log *)
+  - Bash(git rev-parse *)
+  - Bash(git symbolic-ref *)
+  - Bash(git merge-base *)
+  - Bash(git branch --show-current)
+  - Bash(git ls-files *)
+  - Bash(git add .agent-docs/review.md)
+  - Bash(gh repo view *)
+  - Bash(gh issue view *)
+  - Bash(gh gist view *)
+  - Bash(gh gist edit *)
+  - Bash(mktemp *)
 ---
 
 # Code Review

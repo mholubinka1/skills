@@ -1,6 +1,12 @@
 ---
 name: write-spec
 description: Synthesises the current conversation into a spec (PRD) at .agent-docs/specs/<branch-name>.md — no interview, synthesis only. Use after a /design session when the design is agreed and ready to record.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Write(.agent-docs/specs/**)
+  - Bash(git branch --show-current)
 attribution: Based on to-prd (Matt Pocock, mattpocock/skills)
 ---
 

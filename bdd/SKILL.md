@@ -1,6 +1,15 @@
 ---
 name: bdd
 description: Behaviour-driven development with a red-green-refactor loop and Given-When-Then scenarios. Use whenever a user is writing or changing code, mentions "red-green-refactor", or asks for test-first development or integration/acceptance tests.
+allowed-tools:
+  - Skill
+  - Agent
+  - Read
+  - Grep
+  - Glob
+  - Edit
+  - Write
+  - Bash(git diff *)
 ---
 
 # Behaviour-Driven Development

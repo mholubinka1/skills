@@ -1,6 +1,13 @@
 ---
 name: init-agent-docs
 description: Bootstraps AI-agent documentation in the current repository — .agent-docs/ layout, agent.md, context.md, ADR migration, and a CLAUDE.md reference — idempotently. Use at the start of an implementation workflow to ensure agent standards are in place before work begins.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash(git log -1 *)
 context: fork
 agent: general-purpose
 model: haiku

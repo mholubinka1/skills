@@ -1,6 +1,42 @@
 ---
 name: update-dependencies
 description: Syncs the current repo with main/master, then updates dependencies to their latest patch/minor versions across detected ecosystems (Python, .NET/C#, Node/TypeScript/React) and bumps pre-commit hook versions, committing the result locally. Use when the user asks to update dependencies or refresh pre-commit hooks.
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash(git status *)
+  - Bash(git fetch *)
+  - Bash(git pull *)
+  - Bash(git checkout -b *)
+  - Bash(git merge *)
+  - Bash(git diff *)
+  - Bash(git stash push *)
+  - Bash(git add *)
+  - Bash(git commit *)
+  - Bash(uv lock --upgrade)
+  - Bash(uv sync)
+  - Bash(uv tree --outdated)
+  - Bash(uv pip list --outdated)
+  - Bash(poetry update)
+  - Bash(poetry show --outdated)
+  - Bash(pdm update)
+  - Bash(pdm outdated)
+  - Bash(pipenv update *)
+  - Bash(pip-compile --upgrade *)
+  - Bash(pip list --outdated)
+  - Bash(dotnet list package --outdated)
+  - Bash(dotnet add * package *)
+  - Bash(dotnet tool list --global)
+  - Bash(dotnet outdated *)
+  - Bash(npm outdated)
+  - Bash(npm update)
+  - Bash(yarn outdated)
+  - Bash(yarn upgrade)
+  - Bash(pnpm outdated)
+  - Bash(pnpm update)
+  - Bash(pre-commit autoupdate *)
+  - Bash(pre-commit run *)
 context: fork
 agent: general-purpose
 model: haiku

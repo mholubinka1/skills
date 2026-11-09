@@ -1,7 +1,19 @@
 ---
 name: pre-commit-check
 description: Runs pre-commit hooks after code is written or changed. Use whenever code has just been written or edited, or the user asks to lint or format it.
-allowed-tools: Bash, Read
+allowed-tools:
+  - Read
+  - Glob
+  - Bash(git diff *)
+  - Bash(git ls-files *)
+  - Bash(git symbolic-ref *)
+  - Bash(pre-commit *)
+  - Bash(.venv/bin/pre-commit *)
+  - Bash(.venv/Scripts/pre-commit *)
+  - Bash(poetry run pre-commit *)
+  - Bash(uv run pre-commit *)
+  - Bash(.githooks/pre-commit *)
+  - Bash(.git/hooks/pre-commit *)
 context: fork
 agent: general-purpose
 model: haiku

@@ -84,6 +84,18 @@ Split `SKILL.md` when a section is branch-only (disclose it) or a run of steps t
 - **No-op** — a line the model already obeys by default. → Delete the sentence, or use a stronger leading word.
 - **Premature completion** — a step stops before it is done. → Sharpen the criterion; then split the sequence if the rush persists.
 
+## allowed-tools
+
+Every skill declares `allowed-tools` in its frontmatter as a YAML block list, one entry per line, after `description:`.
+
+- **Pre-approves, never restricts.** The list lets the skill's turn run those tools without a permission prompt; every other tool stays available and prompts as usual.
+- **Least privilege.** List exactly the tools the skill's own steps run, plus the commands only its sub-agents run. Every entry traces to a step or a sub-agent handover.
+- **Scope Bash.** Write `Bash(<cmd> *)` (which also matches the bare `<cmd>`) or an exact `Bash(<cmd>)`. Every part of a compound command (`a && b`, `$(...)`, pipes) must match an entry, or the call prompts.
+- **Never pre-approved.** Unscoped `Bash`, `Bash(*)`, `Bash(git *)`, `git push` with arguments (bare `Bash(git push)` is fine), force pushes, `reset --hard`, `branch -D`, `rm`, `git clean`, `stash pop` and `stash drop`, `>`/`>>` redirects, package installs outside a project virtualenv (`pip install …`), and the project's test command.
+- **Path-scoped `Edit(...)` / `Write(...)`** are fine where a skill writes under one tree. If the harness ignores the path scope, the call prompts, which fails safe.
+
+`tests/test_skill_frontmatter.py` fails when a skill lacks `allowed-tools`, has an unscoped `Bash`, or pre-approves a destructive pattern.
+
 ## Review Checklist
 
 Every item is pass/fail. A skill that fails one is not done.
@@ -109,5 +121,6 @@ Every item is pass/fail. A skill that fails one is not done.
 ### General
 
 - [ ] `name:` matches the directory name.
+- [ ] `allowed-tools` lists the least-privilege set — every entry traces to a step or sub-agent; Bash is scoped; nothing destructive.
 - [ ] No time-sensitive info; consistent terminology throughout.
 - [ ] Concrete examples included.

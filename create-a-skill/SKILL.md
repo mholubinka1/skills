@@ -1,6 +1,12 @@
 ---
 name: create-a-skill
 description: Creates, reworks, or reviews a Claude Code agent skill. Use when the user asks to build a skill, when an existing skill needs changing, or when checking a skill against the writing levers.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Write
+  - Edit
 ---
 
 # Writing Skills
@@ -38,6 +44,9 @@ skill-name/
 ---
 name: skill-name
 description: <what it does>. Use when <one trigger per branch>.
+allowed-tools:
+  - Read
+  - Bash(<command> *)
 ---
 
 # Skill Name

@@ -1,6 +1,17 @@
 ---
 name: repo-harden
 description: Audits the current repo's CI/CD trust boundary — visibility, collaborators, dependabot config, actions pinning, branch protection, and self-hosted-runner exposure — then applies only the fixes the user explicitly selects. Use when the user asks to harden a repo, asks to check its security posture, or mentions a self-hosted runner and a public repo together.
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Edit
+  - AskUserQuestion
+  - Bash(gh repo view *)
+  - Bash(gh api repos/*)
+  - Bash(gh api --paginate repos/*)
+  - Bash(gh api users/*)
+  - Bash(gh api orgs/*)
 ---
 
 # Repo Harden

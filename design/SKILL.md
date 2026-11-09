@@ -1,6 +1,15 @@
 ---
 name: design
 description: Two-axis design session before any repository change — interviews from the business angle (what and why) then the engineering angle (how), updating CONTEXT.md and ADRs inline as decisions crystallise. Use whenever a user wants to change the codebase, technical documents, skills, or configuration.
+allowed-tools:
+  - AskUserQuestion
+  - Read
+  - Grep
+  - Glob
+  - Edit(.agent-docs/**)
+  - Write(.agent-docs/**)
+  - Edit(CONTEXT.md)
+  - Write(CONTEXT.md)
 attribution: Combines grilling and grill-with-docs disciplines (Matt Pocock, mattpocock/skills)
 ---
 

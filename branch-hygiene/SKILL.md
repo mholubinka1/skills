@@ -1,6 +1,11 @@
 ---
 name: branch-hygiene
 description: Validates the current git branch before work begins — autoSetupRemote, trunk-branch detection, prefix-vs-change-type, and name relevance. Takes a one-line summary of the work, optionally preceded by a change_type. Use at the start of a work session, or from another skill passing a known change_type.
+allowed-tools:
+  - Read
+  - Bash(git config push.autoSetupRemote)
+  - Bash(git branch --show-current)
+  - Bash(git symbolic-ref *)
 context: fork
 agent: general-purpose
 model: haiku

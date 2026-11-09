@@ -1,6 +1,18 @@
 ---
 name: quiz-the-diff
 description: Teaches a pull request's diff, then quizzes the reader with multiple-choice questions — re-teaching and moving to a fresh question on every wrong answer until ten are answered correctly. Use when the user wants to be quizzed on a PR or diff, wants to check their understanding of a change before reviewing it, or says "quiz me on this PR".
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - AskUserQuestion
+  - TodoWrite
+  - Bash(gh pr diff *)
+  - Bash(gh pr view *)
+  - Bash(git symbolic-ref *)
+  - Bash(git remote show *)
+  - Bash(git fetch *)
+  - Bash(git diff *)
 ---
 
 # Quiz the Diff

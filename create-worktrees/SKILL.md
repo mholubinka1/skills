@@ -1,6 +1,36 @@
 ---
 name: create-worktrees
 description: Enters an isolated git worktree for the current task so work never touches the main checkout, creating one (and optionally bootstrapping its dependencies) or resuming an existing one. Use when starting implementation work that should be isolated, or as the first step of /implement.
+allowed-tools:
+  - Read
+  - Glob
+  - Skill
+  - AskUserQuestion
+  - EnterWorktree
+  - Agent
+  - Bash(git rev-parse --git-dir)
+  - Bash(git worktree list *)
+  - Bash(grep -qxE *)
+  - Bash(echo present)
+  - Bash(echo missing)
+  - Bash(git branch --show-current)
+  - Bash(git add .gitignore)
+  - Bash(git commit -m *)
+  - Bash(uv sync)
+  - Bash(poetry install)
+  - Bash(pdm install)
+  - Bash(pipenv sync)
+  - Bash(.venv/bin/pip install -r *)
+  - Bash(.venv/Scripts/pip install -r *)
+  - Bash(dotnet restore)
+  - Bash(npm ci)
+  - Bash(yarn --version)
+  - Bash(yarn install --immutable)
+  - Bash(yarn install --frozen-lockfile)
+  - Bash(pnpm install --frozen-lockfile)
+  - Bash(go mod download)
+  - Bash(cargo fetch)
+  - Bash(bundle install)
 ---
 
 # Create Worktrees

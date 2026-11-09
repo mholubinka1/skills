@@ -1,6 +1,34 @@
 ---
 name: address-copilot-comments
 description: Automates the Copilot PR review loop — request one Copilot review when the diff warrants it, then fetch its comments, fix or push back, commit and push. Use when the user wants to address Copilot PR review feedback, or says "fix review comments" or "address Copilot".
+allowed-tools:
+  - Read
+  - Grep
+  - Edit
+  - Write
+  - Agent
+  - Skill
+  - Bash(gh --version)
+  - Bash(git branch --show-current)
+  - Bash(gh pr list *)
+  - Bash(gh repo view *)
+  - Bash(gh pr create *)
+  - Bash(gh pr diff *)
+  - Bash(gh pr edit *)
+  - Bash(gh pr view *)
+  - Bash(gh pr comment *)
+  - Bash(gh api repos/*)
+  - Bash(gh api graphql *)
+  - Bash(gh gist view *)
+  - Bash(gh gist edit *)
+  - Bash(mktemp *)
+  - Bash(git diff *)
+  - Bash(git add *)
+  - Bash(git commit *)
+  - Bash(git log *)
+  - Bash(git push)
+  - Bash(bash "*/address-copilot-comments/scripts/check-review-status.sh" *)
+  - Bash(sleep 60)
 ---
 
 # Address Copilot Comments
