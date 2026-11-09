@@ -97,7 +97,7 @@ chore: update dependencies (patch/minor)
 - pre-commit: black 23.12.0 -> 24.1.1
 ```
 
-Do not push. Commit even when Steps 3–5 reported failures; their results are already captured in the report for the user to act on.
+Do not push. Commit even when Step 4 or Step 5 reported failures; their results are already captured in the report for the user to act on.
 
 ## Step 7: Report
 

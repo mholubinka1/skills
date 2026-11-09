@@ -68,9 +68,9 @@ Give each design acceptance criterion at least one story.
 - API contracts
 - Specific interactions
 
-Describe decisions in prose. Include a file path or code snippet only when it encodes a
-decision more precisely than prose (e.g. a state machine or schema shape); then inline it,
-note it came from a prototype, and trim to the decision-rich parts.
+Describe decisions in prose, naming modules rather than file paths. Include a code snippet
+only when it encodes a decision more precisely than prose (e.g. a state machine or schema
+shape); then inline it, note it came from a prototype, and trim to the decision-rich parts.
 
 ## Testing Decisions
 

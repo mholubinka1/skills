@@ -243,7 +243,7 @@ gh api "repos/{owner}/{repo}/pulls/{number}/reviews?per_page=100" \
   --jq '[.[] | select((.user.login // "") | test("copilot";"i"))] | last | .body // empty'
 ```
 
-Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Each entry is its own finding, decided like a thread (SKILL.md Step 4).
+Read the `### Suppressed comments (N)` block directly rather than parsing it with a script: each entry starts with a bold `**path:line**` header line, followed by one or more `*` bullet lines with the finding text, and optionally a fenced code block quoting the affected file content. Each entry is its own finding.
 
 Suppressed entries have no `threadId` or `comment_id`, so the reply and resolve subsections apply only to real threads; these get the "Acknowledge suppressed comments" subsection instead.
 

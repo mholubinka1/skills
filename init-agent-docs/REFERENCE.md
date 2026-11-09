@@ -53,7 +53,7 @@ Otherwise create `.agent-docs/` if needed, read this skill's `AGENT-TEMPLATE.md`
 **Generate sub-path.**
 
 1. Read the **Structure** and **Rules** sections of `CONTEXT-FORMAT.md` (alongside this `REFERENCE.md`).
-2. Collect candidate terms from `README.md`, `CLAUDE.md`, and the names of top-level files and directories only. Keep a term that appears in at least two of those sources or names a workflow or file convention unique to this repository. A term a new contributor would need to work here qualifies; a general programming concept does not.
+2. Collect candidate terms from `README.md`, `CLAUDE.md`, the names of top-level files and directories, and the repository's entry-point modules only. Keep a term that appears in at least two of those sources or names a workflow or file convention unique to this repository. A term a new contributor would need to work here qualifies; a general programming concept does not.
 3. Write `.agent-docs/context.md` in the `CONTEXT-FORMAT.md` format: a `# {Context Name}` heading using the repository or domain name, a one- or two-sentence description, a `## Language` section giving each term a tight one- or two-sentence definition and an `_Avoid_` line of synonyms to reject, and subheadings where natural clusters emerge. If the write fails, report the error and go to Step 4.
 4. Report: "Created `.agent-docs/context.md` from codebase analysis."
 

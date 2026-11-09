@@ -6,11 +6,11 @@ REPO = Path(__file__).resolve().parent.parent
 
 UNSCOPED_BASH = {"Bash", "Bash(*)", "Bash(git *)"}
 DESTRUCTIVE = [
-    r"git push\s+\S",
+    r"git push(\s+\S|\*|:)",
     r"--force",
     r"reset --hard",
     r"branch -D",
-    r"(^|\s)rm\s",
+    r"(^|\s)rm(\s|\*|$)",
     r"git clean",
     r"stash pop",
     r"stash drop",
@@ -103,6 +103,10 @@ class AllowedToolsGuardTest(unittest.TestCase):
             "git push *",
             "git push origin main",
             "git push --force *",
+            "git push*",
+            "git push:*",
+            "rm",
+            "rm*",
             "git reset --hard *",
             "git branch -D *",
             "rm *",
