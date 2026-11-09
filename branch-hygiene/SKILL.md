@@ -5,7 +5,7 @@ allowed-tools:
   - Read
   - Bash(git config push.autoSetupRemote)
   - Bash(git branch --show-current)
-  - Bash(git symbolic-ref *)
+  - Bash(git symbolic-ref refs/remotes/origin/HEAD --short)
 context: fork
 agent: general-purpose
 model: haiku

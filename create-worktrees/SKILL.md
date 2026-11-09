@@ -55,7 +55,7 @@ If the output contains `worktrees/`, the session is already isolated. Stop here 
 git worktree list
 ```
 
-Ignore the entry for the main checkout (the first line). If one or more other worktrees are listed, ask via `AskUserQuestion`: *"Found an existing worktree on branch `<branch>` at `<path>` — resume there, or start a new one?"* with one option per listed worktree plus *Start new*. Default: *Start new*.
+Ignore the entry for the main checkout (the first line). If one or more other worktrees are listed, ask via `AskUserQuestion`: *"Found an existing worktree on branch `<branch>` at `<path>` — resume there, or start a new one?"* with one option for each of the three most recent listed worktrees, plus *Start new*. Default: *Start new*.
 
 If the user picks a worktree:
 

@@ -9,7 +9,7 @@ allowed-tools:
   - TodoWrite
   - Bash(gh pr diff *)
   - Bash(gh pr view *)
-  - Bash(git symbolic-ref *)
+  - Bash(git symbolic-ref refs/remotes/origin/HEAD --short)
   - Bash(git remote show *)
   - Bash(git fetch *)
   - Bash(git diff *)

@@ -35,7 +35,7 @@ Ask: "What should success look like for the user? Which scenarios are most impor
 
 Now that planning has produced agreed user stories, acceptance criteria, and a confirmed change type, run the **branch-hygiene** skill again, passing `change_type` first, then the summary — e.g. `/branch-hygiene feature "add CSV export to reports"`.
 
-Determine `change_type` from the Three Amigos output — or, when Step 1 reused an issue's criteria, from that issue — as one of `feature`, `bugfix`, `hotfix`, `release`, `chore`, per branch-hygiene's Change Type Inference Heuristics.
+Determine `change_type` from the Three Amigos output — or, when Step 1 reused an issue's criteria, from that issue — as one of `feature`, `bugfix`, `hotfix`, `release`, `chore`, per the Change Type Inference Heuristics in [branch-hygiene's REFERENCE.md](../branch-hygiene/REFERENCE.md).
 
 Act on its `next:` line. A `wip/` or `worktree-wip+` placeholder branch always reports a mismatch, so this is where it gets its proper name.
 

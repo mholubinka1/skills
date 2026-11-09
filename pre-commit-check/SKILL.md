@@ -6,7 +6,7 @@ allowed-tools:
   - Glob
   - Bash(git diff *)
   - Bash(git ls-files *)
-  - Bash(git symbolic-ref *)
+  - Bash(git symbolic-ref refs/remotes/origin/HEAD --short)
   - Bash(pre-commit *)
   - Bash(.venv/bin/pre-commit *)
   - Bash(.venv/Scripts/pre-commit *)

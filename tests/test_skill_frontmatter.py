@@ -4,7 +4,10 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 
-UNSCOPED_BASH = {"Bash", "Bash(*)", "Bash(git *)"}
+UNSCOPED_BASH = re.compile(
+    r"Bash(\(\*\))?"
+    r"|Bash\((git|gh|bash|sh|pwsh|powershell|cmd|python3?|node|npm|npx|uv|pip) \*\)"
+)
 DESTRUCTIVE = [
     r"git push(\s+\S|\*|:)",
     r"--force",
@@ -67,7 +70,7 @@ def allowed_tools_violations(skill_md_text):
         return ["no allowed-tools"]
     violations = []
     for entry in entries:
-        if entry in UNSCOPED_BASH:
+        if UNSCOPED_BASH.fullmatch(entry):
             violations.append(f"unscoped Bash: {entry}")
             continue
         inner = re.fullmatch(r"Bash\((.*)\)", entry)
@@ -93,7 +96,15 @@ class AllowedToolsGuardTest(unittest.TestCase):
         self.assertEqual(allowed_tools_violations(text), ["no allowed-tools"])
 
     def test_unscoped_bash_is_flagged_naming_the_entry(self):
-        for entry in ("Bash", "Bash(*)", "Bash(git *)"):
+        for entry in (
+            "Bash",
+            "Bash(*)",
+            "Bash(git *)",
+            "Bash(gh *)",
+            "Bash(bash *)",
+            "Bash(python *)",
+            "Bash(npm *)",
+        ):
             with self.subTest(entry=entry):
                 violations = allowed_tools_violations(skill_with(block("Read", entry)))
                 self.assertEqual(violations, [f"unscoped Bash: {entry}"])

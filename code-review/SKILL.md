@@ -13,7 +13,7 @@ allowed-tools:
   - Bash(git status *)
   - Bash(git log *)
   - Bash(git rev-parse *)
-  - Bash(git symbolic-ref *)
+  - Bash(git symbolic-ref refs/remotes/origin/HEAD --short)
   - Bash(sed 's|origin/||')
   - Bash(git merge-base *)
   - Bash(git branch --show-current)
@@ -126,7 +126,7 @@ exists:
   old, uncommitted bootstrap that never got added), there's nothing to stage — the file being
   gone from disk is already the complete outcome, and `git add` on an untracked deletion would
   just fail with a pathspec error. Either way, leave the deletion uncommitted: the next
-  commit this workflow makes (Step 6 or 7) picks up the staged deletion.
+  commit made after this review picks up the staged deletion.
 
 This is idempotent: once `.agent-docs/review.md` is gone, later runs against the same repo
 skip straight past this check. A failed migration simply leaves the file in place for the
