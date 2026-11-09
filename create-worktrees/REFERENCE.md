@@ -75,4 +75,4 @@ Then print once, covering every uncovered ecosystem found:
 
 `ACTION NEEDED: add <ecosystem>[, <ecosystem>…] as a first-class entry in create-worktrees/REFERENCE.md`
 
-and use `AskUserQuestion` a single time to make the user acknowledge it before the workflow continues. Non-interactive: print it and continue.
+and use `AskUserQuestion` a single time to make the user acknowledge it before the workflow continues.

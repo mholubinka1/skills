@@ -37,7 +37,7 @@ allowed-tools:
 
 Get into an isolated worktree before any repository writes happen. Runs standalone (`/create-worktrees`) or as the first step of `/implement` — same behaviour either way.
 
-Every prompt goes through `AskUserQuestion`. In a non-interactive run (no `AskUserQuestion` available), don't read stdin or block: take the default each prompt names.
+Every prompt goes through `AskUserQuestion`. In a non-interactive run (no `AskUserQuestion` available), don't read stdin or block: take the default each prompt names, and for a prompt with no default, print it and continue.
 
 ## Step 1 — Already isolated?
 

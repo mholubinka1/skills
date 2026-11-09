@@ -82,7 +82,7 @@ Every skill declares `allowed-tools` in its frontmatter as a YAML block list, on
 - **Path wildcards also match later flags.** `Bash(gh api repos/*)` matches `gh api repos/o/r -X DELETE`; only a call that puts `--method` before the path stays outside it. Likewise `Bash(gh api graphql *)` matches any mutation, not just the skill's own queries. Use a path wildcard only where the skill's own writes are flag-first or acceptable to pre-approve.
 - **Path-scoped `Edit(...)` / `Write(...)`** are fine where a skill writes under one tree. If the harness ignores the path scope, the call prompts, which fails safe.
 
-`tests/test_skill_frontmatter.py` enforces a subset: it fails when a skill lacks `allowed-tools`, pre-approves a shell, interpreter or git/gh/npm CLI with a bare `*`, or pre-approves `git push` with arguments, `--force`, `reset --hard`, `branch -D`, `rm`, `git clean`, `stash pop` or `stash drop`. The rest of the never-pre-approved list is checked in review.
+`tests/test_skill_frontmatter.py` enforces a subset: it fails when a skill lacks `allowed-tools`, pre-approves a shell, interpreter, or VCS or package-manager CLI (the test's `UNSCOPED_BASH` list) with a bare `*`, or pre-approves `git push` with arguments, `--force`, `reset --hard`, `branch -D`, `rm`, `git clean`, `stash pop` or `stash drop`. The rest of the never-pre-approved list is checked in review.
 
 ## Review Checklist
 

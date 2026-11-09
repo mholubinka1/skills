@@ -6,7 +6,8 @@ REPO = Path(__file__).resolve().parent.parent
 
 UNSCOPED_BASH = re.compile(
     r"Bash(\(\*\))?"
-    r"|Bash\((git|gh|bash|sh|pwsh|powershell|cmd|python3?|node|npm|npx|uv|pip)[ :]\*\)"
+    r"|Bash\((git|gh|bash|sh|pwsh|powershell|cmd|python3?|node|npm|npx|yarn|pnpm"
+    r"|dotnet|uv|pip|pipenv|poetry|pdm)[ :]\*\)"
 )
 DESTRUCTIVE = [
     r"git push(\s+\S|\*|:)",
@@ -39,6 +40,10 @@ def _split_inline(value):
     return entries
 
 
+def _without_comment(text):
+    return re.sub(r"\s+#.*$", "", text).strip()
+
+
 def _allowed_tools(skill_md_text):
     lines = skill_md_text.splitlines()
     if not lines or lines[0].strip() != "---":
@@ -51,14 +56,14 @@ def _allowed_tools(skill_md_text):
         if collecting:
             item = re.match(r"\s+-\s+(.*\S)\s*$", line)
             if item:
-                entries.append(item.group(1).strip("\"'"))
+                entries.append(_without_comment(item.group(1)).strip("\"'"))
                 continue
             collecting = False
         key = re.match(r"allowed-tools:\s*(.*)$", line)
         if key:
-            value = key.group(1).strip().removeprefix("[").removesuffix("]")
+            value = _without_comment(key.group(1)).removeprefix("[").removesuffix("]")
             if value:
-                entries.extend(_split_inline(value))
+                entries.extend(e.strip("\"'") for e in _split_inline(value))
             else:
                 collecting = True
     return entries
@@ -105,6 +110,8 @@ class AllowedToolsGuardTest(unittest.TestCase):
             "Bash(python *)",
             "Bash(npm *)",
             "Bash(git:*)",
+            "Bash(yarn *)",
+            "Bash(dotnet *)",
         ):
             with self.subTest(entry=entry):
                 violations = allowed_tools_violations(skill_with(block("Read", entry)))
@@ -146,6 +153,18 @@ class AllowedToolsGuardTest(unittest.TestCase):
             allowed_tools_violations(text),
             ["destructive pattern pre-approved: Bash(rm *)"],
         )
+
+    def test_quoted_and_commented_entries_are_parsed(self):
+        for line in (
+            'allowed-tools: "Bash(rm *)"\n',
+            "allowed-tools: ['Bash(rm *)']\n",
+            block("Bash(rm *) # needed for cleanup"),
+        ):
+            with self.subTest(line=line):
+                self.assertEqual(
+                    allowed_tools_violations(skill_with(line)),
+                    ["destructive pattern pre-approved: Bash(rm *)"],
+                )
 
     def test_flow_sequence_form_is_parsed(self):
         text = skill_with("allowed-tools: [Read, Bash(rm *)]\n")

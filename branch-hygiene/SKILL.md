@@ -41,8 +41,8 @@ Run `git branch --show-current`. Classify it with the Branch Classification Tabl
 
 Use the given `change_type`; otherwise infer one from the summary with the Change Type
 Inference Heuristics, and mark it `inferred`. When no heuristic fits, the type is `unknown`:
-Step 4 then skips the prefix-versus-type match and flags only the mismatches that need no type
-(trunk, placeholder, unrecognised prefix).
+Step 4 then skips the prefix-versus-type match and flags only the mismatches in REFERENCE.md
+that need no type.
 
 ## Step 4 — Prefix
 
