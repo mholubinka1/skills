@@ -15,6 +15,10 @@ A skill is predictable when the agent takes the same *process* every run — not
 
 ## Process
 
+To rework or review an existing skill, read its `SKILL.md` and bundled files, then start at step 5; fix each failing item (steps 2 and 3 for content that moves) and re-run step 5. Done when every checklist item passes.
+
+To create a skill:
+
 1. **Gather requirements** — get an answer to each of: the task or domain and its concrete use cases; a utility script or instructions only; reference material to bundle or point at; model-invoked or user-invoked (see *Model- vs user-invoked* in REFERENCE.md). Drafting starts once every one is answered.
 
 2. **Place each piece of content on the information hierarchy** (see *Information hierarchy* in REFERENCE.md); the branch test (see *Progressive disclosure*) decides what to disclose. Done when every piece has a place.
@@ -62,5 +66,5 @@ test and the full suite is green">
 
 ## Advanced
 
-See [REFERENCE.md](REFERENCE.md).
+<only when some branch needs it — "When <case>, read [REFERENCE.md](REFERENCE.md) for <what>.">
 ```

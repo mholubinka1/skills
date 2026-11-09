@@ -1,6 +1,6 @@
 ---
 name: quiz-the-diff
-description: Teaches a pull request's diff, then quizzes the reader with multiple-choice questions — re-teaching and moving to a fresh question on every wrong answer until ten are answered correctly. Use when the user wants to be quizzed on a PR or diff, wants to check their understanding of a change before reviewing it, or says "quiz me on this PR".
+description: Teaches a pull request's diff, then quizzes the reader on it with multiple-choice questions. Use when the user wants to be quizzed on a PR or diff, or to check their understanding of a change before reviewing it.
 allowed-tools:
   - Read
   - Grep
@@ -43,23 +43,15 @@ Teach a reader a PR's diff, then examine them on it until they have ten correct 
   patch, `gh pr view <ref> --json number,title,body,files` for teaching context.
 - **No argument**: `gh pr view --json number,title,body,files` and `gh pr diff` — both
   default to the current branch's open PR, so no number is extracted or substituted.
-- **No PR found, or `gh` missing / unauthenticated**: read the base ref from
-  `git symbolic-ref refs/remotes/origin/HEAD --short` (it comes back already
-  `origin/`-qualified, e.g. `origin/main`; if unset, try `git remote show origin`, else
-  `origin/main`), refresh it with `git fetch` (if that fails offline, carry on and warn the
-  reader the base may be behind), then `git diff --merge-base <base-ref> HEAD`. Teach
-  without PR title/description. Full detail: the Diff resolution section in
-  [REFERENCE.md](REFERENCE.md).
+- **No PR found, or `gh` missing / unauthenticated**: run the local-diff fallback in the Diff
+  resolution section of [REFERENCE.md](REFERENCE.md), and teach without a PR
+  title/description.
 
 ## Step 2 — Filter to the in-scope diff
 
-Classify each change by **what it is for**, not by file extension. Out of scope: content
-that exists to explain the project to a human (`README*`, `CHANGELOG*`, `docs/**`,
-`.agent-docs/**`, `LICENSE`, `*.rst`, `*.txt`, narrative `.md` guides) and hunks that only
-touch comments, docstrings, or prose. In scope: anything that defines what the software or
-agent *does* — code, config, CI, build scripts, tests, lockfiles, schema, and step-logic
-edits to agent-instruction files (`SKILL.md`, `REFERENCE.md`, `WORKFLOW.md`, `AGENTS.md`,
-`CLAUDE.md`, prompt templates).
+Classify each change by **what it is for**, not by file extension: documentation is out of
+scope, anything that defines what the software or agent *does* is in scope. The In-scope diff
+section in [REFERENCE.md](REFERENCE.md) holds the rule, the lists and worked examples.
 
 If nothing is in scope, tell the reader the PR has no non-documentation changes to examine
 and **stop** — no mission question, no teaching, no exam.
@@ -67,9 +59,6 @@ and **stop** — no mission question, no teaching, no exam.
 If the in-scope diff is **trivial** (rough guide: ~15 changed lines or fewer), say so now,
 before teaching — the reader should know the exam will revisit the same few hunks from
 different angles to reach ten questions.
-
-See the In-scope diff section in [REFERENCE.md](REFERENCE.md) for the classification rule
-and worked examples.
 
 ## Step 3 — Ask the mission question
 
@@ -82,24 +71,23 @@ emphasis and question mix.
 Inline, structured as **Background → Intuition → Code walkthrough** (see the Teach phase
 section in [REFERENCE.md](REFERENCE.md)). Explore surrounding context — callers, callees,
 touched tests — not only the changed lines. Cite every claim to a specific file and hunk.
-For a large in-scope diff (rough guide: more than ~40 files or ~2000 changed lines)
-concentrate the walkthrough on the highest-signal files and summarise the rest by file; all
-non-doc hunks stay eligible for questions.
+For a large in-scope diff, follow the Large in-scope diff paragraph of the Teach phase.
+
+**Done** when Background, Intuition and the Code walkthrough have each been posted and every
+in-scope hunk is either walked through or, for a large diff, summarised by file.
 
 ## Step 5 — Run the exam loop
 
-Start `correct_count` at zero.
+Start `correct_count` at zero and create a `TodoWrite` item "0/10 correct; examined: none".
 
 - One `AskUserQuestion` call per question, with four options (plus the "Other" option
   `AskUserQuestion` adds itself, which counts as a wrong answer). Grade it, then issue the
   next call.
-- **Correct**: `correct_count++`; update the `TodoWrite` progress item (e.g. "6/10
-  correct").
+- **Correct**: `correct_count++`; update the `TodoWrite` item with the new count and the
+  hunk or concept just examined (e.g. "6/10 correct; examined: retry backoff, queue drain").
 - **Wrong**: `correct_count` unchanged; give a short focused re-teach of the missed
   concept; draw the next question from a **different** part of the diff.
 - End when `correct_count == 10`. No attempt cap. The reader may abandon at any point.
-- On a **small** in-scope diff, examine the same hunks from more than one angle (behaviour
-  vs edge case vs why-not-this-alternative). Interleaving across hunks is deliberate.
 
 Question-authoring and anti-gaming rules are in the Writing questions section of
 [REFERENCE.md](REFERENCE.md).

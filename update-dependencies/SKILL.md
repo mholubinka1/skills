@@ -1,6 +1,6 @@
 ---
 name: update-dependencies
-description: Syncs the current repo with main/master, then updates dependencies to their latest patch/minor versions across detected ecosystems (Python, .NET/C#, Node/TypeScript/React) and bumps pre-commit hook versions, committing the result locally. Use when the user asks to update dependencies or refresh pre-commit hooks.
+description: Runs a dependency update on the current repo, committing the result locally. Use when the user asks to update dependencies or refresh pre-commit hooks.
 allowed-tools:
   - Read
   - Glob
@@ -46,7 +46,7 @@ background: false
 
 # Update Dependencies
 
-Syncs with `main`/`master` first (Dependabot may have already merged updates there), then updates dependencies to their latest patch/minor versions across every detected ecosystem, plus pre-commit hook versions. Commits the result locally — it never pushes or opens a PR.
+Syncs with `main`/`master` first (Dependabot may have already merged updates there), then updates dependencies to their latest patch/minor versions across every detected ecosystem, plus pre-commit hook versions. Commits the result locally.
 
 See [REFERENCE.md](REFERENCE.md) for per-ecosystem detection rules and commands.
 
@@ -61,17 +61,13 @@ See [REFERENCE.md](REFERENCE.md) for per-ecosystem detection rules and commands.
 
 ## Step 2: Detect ecosystems
 
-Scan the repo root, and one level of subdirectories for monorepos, for marker files. See the Detection Table in [REFERENCE.md](REFERENCE.md). Run the matching update flow for every ecosystem found — a repo can have more than one.
+Scan for marker files using the Detection Table and its scan scope in [REFERENCE.md](REFERENCE.md). Run the matching update flow for every ecosystem found — a repo can have more than one.
 
 If nothing matches, report that no known ecosystem was detected and give brief generic pointers (see Unknown Ecosystems in REFERENCE.md). Do not fail the run.
 
 ## Step 3: Update dependencies per ecosystem
 
 For each detected ecosystem, follow its command sequence in [REFERENCE.md](REFERENCE.md):
-
-- **Python** — uv, Poetry, PDM, Pipenv, or pip, selected by marker file.
-- **.NET / C#** — `dotnet` CLI (covers any `.csproj`/`.sln`).
-- **Node / TypeScript / React** — npm, yarn, or pnpm, selected by lockfile.
 
 Apply patch/minor bumps only. Record any package where a major version is available but not applied — these go in the final report, not the working tree.
 
@@ -86,7 +82,7 @@ If `.pre-commit-config.yaml` exists at the repo root:
 
 ## Step 5: Best-effort validation
 
-For each ecosystem updated, run its standard build/test command if one is detectable — see Validation Commands in [REFERENCE.md](REFERENCE.md). Never block or revert on failure; just record pass/fail for the report.
+For each ecosystem updated, run its standard build/test command if one is detectable — see Validation Commands in [REFERENCE.md](REFERENCE.md). This step is **best-effort**: failures never block or revert anything and never stop the commit; just record pass/fail for the report.
 
 ## Step 6: Commit
 
@@ -101,7 +97,7 @@ chore: update dependencies (patch/minor)
 - pre-commit: black 23.12.0 -> 24.1.1
 ```
 
-Do not push. Commit even if best-effort validation (Step 5) or the pre-commit `--all-files` run (Step 4) reported failures — those results are already captured in the report for the user to act on.
+Do not push. Commit whatever the Step 4 and Step 5 results — they are already captured in the report for the user to act on.
 
 ## Step 7: Report
 

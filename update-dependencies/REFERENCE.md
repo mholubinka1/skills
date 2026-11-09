@@ -28,7 +28,7 @@ uv sync
 uv tree --outdated   # if this exits non-zero (older uv without the flag), use `uv pip list --outdated`
 ```
 
-`uv lock --upgrade` moves each dependency that isn't held at an exact version to the newest version allowed by the constraints in `pyproject.toml`, rewriting `uv.lock`; `uv sync` reconciles the environment. With normal constraints (`>=x,<y`, `~=x.y`) this is patch/minor only. Anything `uv tree --outdated` still shows behind is held below latest by a constraint — a direct one in `pyproject.toml` or a transitive dependency's requirement — so report it as a major bump candidate; don't widen a `pyproject.toml` constraint to chase it. If `uv lock --upgrade` or `uv sync` fails (resolution conflict, no network, unsatisfiable constraint), record it in the report and carry on — do not revert or block the commit.
+`uv lock --upgrade` moves each dependency that isn't held at an exact version to the newest version allowed by the constraints in `pyproject.toml`, rewriting `uv.lock`; `uv sync` reconciles the environment. With normal constraints (`>=x,<y`, `~=x.y`) this is patch/minor only. Anything `uv tree --outdated` still shows behind is held below latest by a constraint — a direct one in `pyproject.toml` or a transitive dependency's requirement — so report it as a major bump candidate; don't widen a `pyproject.toml` constraint to chase it. If `uv lock --upgrade` or `uv sync` fails (resolution conflict, no network, unsatisfiable constraint), record it in the report and carry on (best-effort).
 
 **Poetry** (`pyproject.toml` has `[tool.poetry]`):
 
@@ -122,18 +122,9 @@ pnpm update
 
 React itself is just an npm-style package — no special-casing beyond the above. If `react`/`react-dom` have a major available, call it out explicitly in the report: React majors commonly need peer-dependency and codemod follow-up beyond a simple version bump.
 
-## Pre-commit hooks
+## Validation commands
 
-```bash
-pre-commit autoupdate
-pre-commit run --all-files
-```
-
-Requires `.pre-commit-config.yaml` at the repo root.
-
-## Validation commands (best-effort, non-blocking)
-
-Run if detectable; record pass/fail only — never block or revert on failure.
+Run if detectable; record pass/fail only.
 
 | Ecosystem | Command |
 |---|---|
