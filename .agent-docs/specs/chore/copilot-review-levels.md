@@ -89,7 +89,7 @@ send extra paths to Balanced through an optional `## Review levels` section in i
 
 ## Testing Decisions
 
-- The change is Markdown-only, with no executable logic. The existing pytest suite (notably
+- The change is Markdown-only, with no executable logic. The existing unittest suite (notably
   `test_skill_frontmatter.py`, which validates every skill's `allowed-tools`) must stay green
   after `Bash(gh pr edit *)` is removed.
 - Acceptance is a manual read-through: each worked-examples row resolves to its stated level under

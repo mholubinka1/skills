@@ -17,7 +17,7 @@ Replace `address-copilot-comments`' "Trigger Copilot Review" with one request: f
 - [ ] Given a review-required PR, when Step 2b requests the review, then it calls `requestCopilotCodeReview` with an explicit `LITE` or `BALANCED`: never `MAX` or `AUTO`, and never without an effort.
 - [ ] Given the request returns `failureReason: REQUEST_CONFLICT`, then the skill continues to Step 3.
 - [ ] Given any other `failureReason`, `success: false` with no reason, or a `gh`/GraphQL error, then the skill reports it and goes to Step 7, which leaves out "ready to merge".
-- [ ] No `gh pr edit`, `--add-reviewer` or `requestReviews` remains in the skill, and the pytest suite passes.
+- [ ] No `gh pr edit`, `--add-reviewer` or `requestReviews` remains in the skill, and the unittest suite passes.
 
 ---
 
