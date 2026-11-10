@@ -99,7 +99,7 @@ In `address-copilot-comments`, the rule that Copilot is requested at most once p
 _Avoid_: review round, review iteration, re-review
 
 **Review level**:
-The Copilot review effort `address-copilot-comments` Step 2b picks for a PR from its diff content: None (no review), Lite or Balanced. Each changed file gets a level and the PR takes the highest; the rubric lives in the Classification rule of that skill's `REFERENCE.md`.
+The Copilot review effort `address-copilot-comments` Step 2b picks for a PR from its diff content: None (no review), Lite or Balanced. The rubric lives in the Classification rule of that skill's `REFERENCE.md`.
 _Avoid_: review tier, review depth, effort setting
 
 **Review-required diff**:

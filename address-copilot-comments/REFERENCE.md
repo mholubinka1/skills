@@ -54,9 +54,9 @@ Give each changed file a level. The PR takes the highest level of any file. In a
 
 1. **Security boundary:** authentication or permissions, handling untrusted input (parsing, validation, deserialisation), building SQL, shell or HTML from input, file paths from input, crypto, secrets, CORS/CSP. *Skills:* `allowed-tools`, or running input in a shell.
 2. **Data integrity or irreversible actions:** schema migrations, deletes or backfills, writes to persistent stores, money, personal data. *Skills:* new or changed `gh api` writes, GraphQL mutations, `git push`, `gh gist edit`, deleting files.
-3. **Concurrency and state:** async code, races, locks, retries and idempotency, transactions, caching and invalidation, scheduling and timers, dates and time zones.
+3. **Concurrency and state:** async code, races, locks, retries and idempotency, transactions, caching and invalidation, scheduling and timers, dates and time zones. *Skills:* poll loops, retries, waits and their timeouts.
 4. **Contract:** a public API, schema, event or message format, CLI flags, a library's exported interface, a config schema that others consume. *Skills:* an output format or path that another skill parses.
-5. **Deploy and runtime:** CI/CD workflows, Dockerfiles, infra-as-code, production config, adding a new dependency (supply-chain risk).
+5. **Deploy and runtime:** CI/CD workflows, Dockerfiles, infra-as-code, production config, adding a new dependency (supply-chain risk). *Skills:* git hooks, and install or sync scripts.
 6. **Large scope:** over about 300 changed logic lines, or logic changes across 5 or more modules.
 7. **Repo-listed path:** a file under a path listed in the repo's `## Review levels` section. The list only ever moves a file up to Balanced, never down.
 
@@ -69,7 +69,7 @@ Any behaviour change that hits no Balanced rule: a feature or bug fix contained 
 - Docs, comments or formatting.
 - A test-only change.
 - A rename or move with no content change.
-- A generated file.
+- A generated file, other than a lockfile. Lockfiles follow the dependency rules: a lockfile that adds a package is Balanced (rule 5).
 - A patch or minor dependency bump that only changes a lockfile or version pin.
 - A config value tweak outside production or security config.
 - A tiny edit of 10 lines or fewer that hits no Balanced rule.
@@ -94,7 +94,7 @@ Note the level and the rule that decided it (a Balanced rule number, the Lite ca
 | Major dependency bump with no code change | Lite |
 | New dependency added | Balanced (5) |
 | Configure logging once at startup | Lite |
-| Feature warning before a subscription renews or lapses (date logic) | Balanced (3); Lite if message text only |
+| Feature warning before a subscription renews or lapses (date logic) | Balanced (3). If only the message text changes: None at 10 lines or fewer, otherwise Lite |
 | One validated entry point for app settings (config consumed elsewhere) | Balanced (4) |
 | Dockerfile or CI workflow edit | Balanced (5) |
 | Form handler taking user input or storing guest personal data | Balanced (1, 2) |

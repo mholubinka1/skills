@@ -60,7 +60,7 @@ send extra paths to Balanced through an optional `## Review levels` section in i
   three-level rubric: the principle, seven Balanced rules (security boundary, data integrity or
   irreversible actions, concurrency and state, contract, deploy and runtime, large scope above about
   300 logic lines or across 5+ modules, repo-listed path), then Lite, then the exhaustive None list.
-  Each rule has a *Skills:* example. The doubt and edge-case rules follow. Before classifying, the
+  Each rule with a skill-specific case has a *Skills:* example. The doubt and edge-case rules follow. Before classifying, the
   agent reads the target repo's `## Review levels` section in `.agent-docs/agent.md` if it has one.
   The worked examples are replaced by the brief's table.
 - **Trigger.** "Trigger Copilot Review" becomes a single request: fetch the PR node ID, then call
