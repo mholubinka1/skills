@@ -31,7 +31,7 @@ Replace `address-copilot-comments`' "Trigger Copilot Review" with one request: f
 
 ### What to build
 
-Replace Step 2b's Classification rule with the three-level **Review level** rubric: the principle, seven Balanced rules, Lite, and the exhaustive None list, each with *Skills:* examples, then the doubt and edge-case rules. Before classifying, read the target repo's `## Review levels` section in `.agent-docs/agent.md` if it has one. Replace the worked examples with the brief's table. In the skill, Step 2b becomes a three-way decision, the "Loop at a glance" diagram matches it, and Step 7 reports the level and the rule that decided it. Add the **Review level** term to `context.md`, and update **Single review** and **Review-required diff**.
+Replace Step 2b's Classification rule with the three-level **Review level** rubric: the principle, seven Balanced rules, Lite, and the exhaustive None list, each with *Skills:* examples, then the doubt and edge-case rules. Before classifying, read the target repo's `## Review levels` section in `.agent-docs/agent.md` if it has one. Replace the worked examples with a Change → Level table: general code cases first, then skill cases, each Balanced row citing its rule number. In the skill, Step 2b becomes a three-way decision, the "Loop at a glance" diagram matches it, and Step 7 reports the level and the rule that decided it. Add the **Review level** term to `context.md`, and update **Single review** and **Review-required diff**.
 
 ### Acceptance criteria
 
