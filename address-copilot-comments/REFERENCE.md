@@ -36,6 +36,14 @@ gh pr diff {number}
 
 This reads the full diff of every changed file in one call. The classification below depends on what changed inside each file, not on the file's extension.
 
+Empty output is an empty diff only when `gh pr diff` exits 0. If it exits non-zero, for example because the diff is too large for GitHub to return, fetch the file list instead:
+
+```bash
+gh pr view {number} --json files --jq '.files[] | "\(.additions)\t\(.deletions)\t\(.path)"'
+```
+
+A diff too large to return is Balanced (rule 6). Otherwise, classify from the paths and line counts, resolving doubt by the rules below. If the file list fetch also fails, report the error and go to Step 7.
+
 ### Read the repo's listed paths
 
 Before classifying, check the target repo's `.agent-docs/agent.md` for a `## Review levels` section. If it has one, note the paths it lists for Balanced rule 7. Each entry is a directory prefix or a glob, matched against the file's repo-relative path. In a glob, `*` stays within one directory and `**` crosses directories. If the file or the section doesn't exist, use rules 1–6 only.
@@ -71,7 +79,7 @@ A file that hits any Balanced rule is Balanced, even when it also fits a bullet 
 - Docs, comments or formatting, including page copy and styling that change no logic.
 - A test-only change.
 - A rename or move with no content change.
-- A generated file, other than a lockfile. Lockfiles follow the dependency rules: a lockfile that only re-resolves, or bumps patch or minor versions, is None, and one that adds a package is Balanced (rule 5).
+- A generated file, other than a lockfile. Lockfiles follow the dependency rules: a lockfile whose versions change only by patch or minor, or not at all, is None, one with a major bump (direct or transitive) is Lite,, and one that adds a package is Balanced (rule 5).
 - A patch or minor dependency bump that only changes a lockfile or a version pin in a dependency manifest.
 - A config value tweak outside production or security config.
 - A tiny edit of 10 lines or fewer that hits no Balanced rule.

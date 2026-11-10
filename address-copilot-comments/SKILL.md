@@ -84,7 +84,7 @@ Fetch the full diff content. The level depends on what changed, not on the file 
 gh pr diff {number}
 ```
 
-Read the target repo's `## Review levels` section in `.agent-docs/agent.md` if it has one, then give each changed file a **Review level**. The PR takes the highest. The rubric, doubt rules and worked examples are in the Step 2b section of [REFERENCE.md](REFERENCE.md). Note the level and the rule that decided it for Step 7.
+If `gh pr diff` exits non-zero, never treat that as an empty diff. Follow the fallback in [REFERENCE.md](REFERENCE.md). Read the target repo's `## Review levels` section in `.agent-docs/agent.md` if it has one, then give each changed file a **Review level**. The PR takes the highest. The rubric, doubt rules and worked examples are in the Step 2b section of [REFERENCE.md](REFERENCE.md). Note the level and the rule that decided it for Step 7.
 
 - **None** → skip straight to Step 7. Do not request a review, and do not poll.
 - **Lite** or **Balanced** → request the review with `reviewEffort` set to that level (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)). On success or `REQUEST_CONFLICT`, continue to Step 3. On any other failure, report it and go to Step 7. **Single review**: this is the only point where Copilot is requested, once per invocation.
@@ -226,6 +226,7 @@ Share the PR link with the user, with the Review level chosen at Step 2b and the
 decided it (e.g. "Lite: one-module bug fix" or "Balanced (rule 2): new GraphQL mutation"), and
 anything earlier steps said to tell them. After `REQUEST_CONFLICT`, also say that a review was
 already pending, so it ran at an effort this run didn't set. The PR is
-ready to merge, with two exceptions where you leave out "ready to merge". If the Step 2b review
-request failed, say why: the review the PR needed never ran. If a poll returned `ERROR`, say
+ready to merge, with two exceptions where you leave out "ready to merge". If Step 2b failed,
+either because the diff and file list could not be fetched or because the review request
+failed, say why: the review the PR needed never ran. If a poll returned `ERROR`, say
 which poll failed: Copilot's review may not have been fully read.
