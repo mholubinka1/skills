@@ -36,13 +36,13 @@ gh pr diff {number}
 
 This reads the full diff of every changed file in one call. The classification below depends on what changed inside each file, not on the file's extension.
 
-Empty output is an empty diff only when `gh pr diff` exits 0. If it exits non-zero, for example because the diff is too large for GitHub to return, fetch the file list instead:
+Empty output is an empty diff only when `gh pr diff` exits 0. If it exits non-zero, for any reason (a diff too large for GitHub to return, or a network or auth error), fetch the file list instead:
 
 ```bash
 gh pr view {number} --json files --jq '.files[] | "\(.additions)\t\(.deletions)\t\(.path)"'
 ```
 
-A diff too large to return is Balanced (rule 6). Otherwise, classify from the paths and line counts, resolving doubt by the rules below. If the file list fetch also fails, report the error and go to Step 7.
+Without the content, the PR is Lite at least, as for a binary file. It is Balanced if the list has 100 or more entries (it may be truncated), if the counts pass rule 6, or if any path hits a Balanced rule. If the file list fetch also fails, report the error and go to Step 7.
 
 ### Read the repo's listed paths
 
@@ -104,7 +104,8 @@ Note the level and the rule that decided it (a Balanced rule number, the Lite ca
 | Major dependency bump with no code change | Lite |
 | New dependency added | Balanced (5) |
 | Configure logging once at startup | Lite |
-| Feature warning before a subscription renews or lapses (date logic) | Balanced (3). If only the message text changes: None at 10 lines or fewer, otherwise Lite |
+| Feature warning before a subscription renews or lapses (date logic) | Balanced (3) |
+| The same warning, message text only | None at 10 lines or fewer, otherwise Lite |
 | One validated entry point for app settings (config consumed elsewhere) | Balanced (4) |
 | Dockerfile or CI workflow edit | Balanced (5) |
 | Form handler taking user input or storing guest personal data | Balanced (1, 2) |

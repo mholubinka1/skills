@@ -62,6 +62,10 @@ send extra paths to Balanced through an optional `## Review levels` section in i
   300 logic lines or across 5+ modules, repo-listed path), then Lite, then the exhaustive None list.
   Each rule with a skill-specific case has a *Skills:* example. The doubt and edge-case rules follow. Before classifying, the
   agent reads the target repo's `## Review levels` section in `.agent-docs/agent.md` if it has one.
+  A failed diff fetch (non-zero `gh pr diff` exit) is never read as an empty diff. The agent
+  falls back to the PR's file list and classifies it as Lite at least: Balanced if the list has
+  100 or more entries, the line counts pass rule 6, or a path hits a Balanced rule. If the file
+  list can't be fetched either, it reports and goes to Step 7 without "ready to merge".
   The worked examples are replaced by a Change → Level table: general code cases first, then
   skill cases, each Balanced row citing its rule number.
 - **Trigger.** "Trigger Copilot Review" becomes a single request: fetch the PR node ID, then call

@@ -40,5 +40,6 @@ Replace Step 2b's Classification rule with the three-level **Review level** rubr
 - [ ] Given a PR classified None, then no review is requested, and Step 7 reports None and the rule that decided it.
 - [ ] Given a PR classified Lite or Balanced, then the review is requested at that effort, and Step 7 reports the level and the deciding rule.
 - [ ] The doubt rules, the tests-never-lower rule and the binary-file → Lite-at-least rule are stated in the rubric.
+- [ ] Given `gh pr diff` exits non-zero, then the PR is never classified None from empty output. The skill classifies from the file list (Lite at least), or, if that fetch fails too, reports and goes to Step 7 without "ready to merge".
 
 ---

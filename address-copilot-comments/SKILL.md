@@ -41,7 +41,7 @@ allowed-tools:
 Step 0  gh available?
 Step 1  PR exists? No ──► Step 2 (create it) ──► Step 2b
 Step 2b Review level? None ──► Step 7 | Lite or Balanced ──► request Copilot at that effort (single review)
-          ──► Step 3 (or Step 7 if the request fails, except REQUEST_CONFLICT)
+          ──► Step 3 (or Step 7 if the diff and file list can't be fetched, or the request fails, except REQUEST_CONFLICT)
 Step 3  Haiku poller: ACTIONABLE ──► Step 4 | CLEAN or PENDING ──► Step 6 | ERROR ──► report, Step 6
 Step 4  Decide Fix or Push back per item; apply the fixes
 Step 4b Any fix applied? Run code-review Steps 1–5
@@ -225,7 +225,7 @@ gh pr view --json url --jq '.url'
 Share the PR link with the user, with the Review level chosen at Step 2b and the rule that
 decided it (e.g. "Lite: one-module bug fix" or "Balanced (rule 2): new GraphQL mutation"), and
 anything earlier steps said to tell them. After `REQUEST_CONFLICT`, also say that a review was
-already pending, so it ran at an effort this run didn't set. The PR is
+already pending, so it ran at an effort this run didn't set. The PR can still be ready to merge. The PR is
 ready to merge, with two exceptions where you leave out "ready to merge". If Step 2b failed,
 either because the diff and file list could not be fetched or because the review request
 failed, say why: the review the PR needed never ran. If a poll returned `ERROR`, say
