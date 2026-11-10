@@ -1,5 +1,7 @@
 # Issues: chore/copilot-review-levels
 
+> Work complete — PR ready to merge.
+
 ## Request the Copilot review at an explicit effort
 
 **GitHub issue**: #158
@@ -14,10 +16,10 @@ Replace `address-copilot-comments`' "Trigger Copilot Review" with one request: f
 
 ### Acceptance criteria
 
-- [ ] Given a review-required PR, when Step 2b requests the review, then it calls `requestCopilotCodeReview` with an explicit `LITE` or `BALANCED`: never `MAX` or `AUTO`, and never without an effort.
-- [ ] Given the request returns `failureReason: REQUEST_CONFLICT`, then the skill continues to Step 3.
-- [ ] Given any other `failureReason`, `success: false` with no reason, or a `gh`/GraphQL error, then the skill reports it and goes to Step 7, which leaves out "ready to merge".
-- [ ] No `gh pr edit`, `--add-reviewer` or `requestReviews` remains in the skill, and the unittest suite passes.
+- [x] Given a review-required PR, when Step 2b requests the review, then it calls `requestCopilotCodeReview` with an explicit `LITE` or `BALANCED`: never `MAX` or `AUTO`, and never without an effort.
+- [x] Given the request returns `failureReason: REQUEST_CONFLICT`, then the skill continues to Step 3.
+- [x] Given any other `failureReason`, `success: false` with no reason, or a `gh`/GraphQL error, then the skill reports it and goes to Step 7, which leaves out "ready to merge".
+- [x] No `gh pr edit`, `--add-reviewer` or `requestReviews` remains in the skill, and the unittest suite passes.
 
 ---
 
@@ -35,11 +37,11 @@ Replace Step 2b's Classification rule with the three-level **Review level** rubr
 
 ### Acceptance criteria
 
-- [ ] Given each row of the worked-examples table, when it is classified under the rubric as written, then it resolves to the stated level.
-- [ ] Given a repo whose `.agent-docs/agent.md` lists a path under `## Review levels`, then a file under that path is Balanced, and the list never lowers a file's level.
-- [ ] Given a PR classified None, then no review is requested, and Step 7 reports None and the rule that decided it.
-- [ ] Given a PR classified Lite or Balanced, then the review is requested at that effort, and Step 7 reports the level and the deciding rule.
-- [ ] The doubt rules, the tests-never-lower rule and the binary-file → Lite-at-least rule are stated in the rubric.
-- [ ] Given `gh pr diff` exits non-zero, then the PR is never classified None from empty output. The skill classifies from the file list (Lite at least), or, if that fetch fails too, reports and goes to Step 7 without "ready to merge".
+- [x] Given each row of the worked-examples table, when it is classified under the rubric as written, then it resolves to the stated level.
+- [x] Given a repo whose `.agent-docs/agent.md` lists a path under `## Review levels`, then a file under that path is Balanced, and the list never lowers a file's level.
+- [x] Given a PR classified None, then no review is requested, and Step 7 reports None and the rule that decided it.
+- [x] Given a PR classified Lite or Balanced, then the review is requested at that effort, and Step 7 reports the level and the deciding rule.
+- [x] The doubt rules, the tests-never-lower rule and the binary-file → Lite-at-least rule are stated in the rubric.
+- [x] Given `gh pr diff` exits non-zero, then the PR is never classified None from empty output. The skill classifies from the file list (Lite at least), or, if that fetch fails too, reports and goes to Step 7 without "ready to merge".
 
 ---
