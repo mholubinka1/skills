@@ -14,7 +14,6 @@ allowed-tools:
   - Bash(gh repo view *)
   - Bash(gh pr create *)
   - Bash(gh pr diff *)
-  - Bash(gh pr edit *)
   - Bash(gh pr view *)
   - Bash(gh pr comment *)
   - Bash(gh api repos/*)
@@ -41,13 +40,14 @@ allowed-tools:
 ```text
 Step 0  gh available?
 Step 1  PR exists? No ──► Step 2 (create it) ──► Step 2b
-Step 2b Review required? No ──► Step 7 | Yes ──► request Copilot (single review) ──► Step 3
+Step 2b Review level? None ──► Step 7 | Lite or Balanced ──► request Copilot at that effort (single review)
+          ──► Step 3 (or Step 7 if the diff and file list can't be fetched, or the request fails, except REQUEST_CONFLICT)
 Step 3  Haiku poller: ACTIONABLE ──► Step 4 | CLEAN or PENDING ──► Step 6 | ERROR ──► report, Step 6
 Step 4  Decide Fix or Push back per item; apply the fixes
 Step 4b Any fix applied? Run code-review Steps 1–5
 Step 5  pre-commit-check, then commit, push, reply, resolve ──► Step 5b
 Step 5b Step 3's baseline already actionable? Poll once more ──► Steps 4–5 once more | Else ──► Step 6
-Step 6  Review requested and ≥1 Fix applied? Distil criteria into the Criteria gist | Else ──► Step 7
+Step 6  Review requested or already pending, and ≥1 Fix applied? Distil criteria into the Criteria gist | Else ──► Step 7
 Step 7  Report PR link
 ```
 
@@ -76,18 +76,18 @@ gh pr create --base "$BASE" --title "<title>" --body "<summary and test plan>"
 
 Note the PR number. Continue to Step 2b.
 
-## Step 2b — Decide whether Copilot review is required
+## Step 2b — Choose the review level
 
-Fetch the full diff content — the decision depends on what changed, not the file extension:
+Fetch the full diff content. The level depends on what changed, not on the file extension:
 
 ```bash
 gh pr diff {number}
 ```
 
-See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFERENCE.md) for the classification rule and worked examples.
+If `gh pr diff` exits non-zero, never treat that as an empty diff. Follow the fallback in [REFERENCE.md](REFERENCE.md). Read the target repo's `## Review levels` section in `.agent-docs/agent.md` if it has one, then give each changed file a **Review level**. The PR takes the highest. The rubric, doubt rules and worked examples are in the Step 2b section of [REFERENCE.md](REFERENCE.md). Note the level and the rule that decided it for Step 7.
 
-**Review-required** (any risk criterion hit; when unsure) → trigger it (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)); continue to Step 3. **Single review**: this is the only point where Copilot is requested, once per invocation.
-**Low-risk** → skip straight to Step 7. Do not trigger, do not poll.
+- **None** → skip straight to Step 7. Do not request a review, and do not poll.
+- **Lite** or **Balanced** → request the review with `reviewEffort` set to that level (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)). On success or `REQUEST_CONFLICT`, continue to Step 3. On any other failure, report it and go to Step 7. **Single review**: this is the only point where Copilot is requested, once per invocation.
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 
@@ -207,7 +207,7 @@ is the only catch-up — never return here a second time. `CLEAN`, `PENDING`, or
 Turn what Copilot caught on this PR into review criteria shared across every repo, via the
 [Criteria gist](../code-review/CRITERIA-GIST.md).
 
-**Guard.** Run this step only if Copilot was triggered at Step 2b **and** at least one
+**Guard.** Run this step only if a Copilot review was requested at Step 2b, or was already pending (`REQUEST_CONFLICT`), **and** at least one
 Step 4 decision across the whole invocation was **Fix**. Otherwise skip to Step 7.
 
 **Collect** every finding whose decision was Fix (threads replied to with "Fixed." and
@@ -222,6 +222,14 @@ not the target repo, so there is nothing to commit. Continue to Step 7.
 gh pr view --json url --jq '.url'
 ```
 
-Share the PR link with the user, with anything earlier steps said to tell them. The PR is
-ready to merge — unless a poll returned `ERROR`: then say which poll failed, so Copilot's
-review may not have been fully read, and leave out "ready to merge".
+Share the PR link with the user, with the Review level chosen at Step 2b and the rule that
+decided it (e.g. "Lite: one-module bug fix" or "Balanced (rule 2): new GraphQL mutation"), and
+anything earlier steps said to tell them. After `REQUEST_CONFLICT`, also say that a review was
+already pending, so it ran at an effort this run didn't set.
+
+The PR is ready to merge, `REQUEST_CONFLICT` included, except in two cases where you leave out
+"ready to merge":
+
+- Step 2b failed, either because the diff and file list could not be fetched or because the
+  review request failed. Say why: the review the PR needed never ran.
+- A poll returned `ERROR`. Say which poll failed: Copilot's review may not have been fully read.
