@@ -82,7 +82,7 @@ A file that hits any Balanced rule is Balanced, even when it also fits a bullet 
 - A generated file, other than a lockfile. Lockfiles follow the dependency rules: a lockfile whose versions change only by patch or minor, or not at all, is None. One with a major bump, direct or transitive, is Lite. One that adds a package is Balanced (rule 5).
 - A patch or minor dependency bump that only changes a lockfile or a version pin in a dependency manifest.
 - A config value tweak outside production or security config.
-- A tiny edit of 10 lines or fewer that hits no Balanced rule.
+- A tiny edit of 10 lines or fewer, such as a message string, constant or typo, that changes no logic and no dependency version and hits no Balanced rule. A one-line guard change or major bump is still Lite.
 
 *Skills:* reworded prose that doesn't change what a step does. The None list is exhaustive: a file that fits none of it is Lite at least.
 
