@@ -1,11 +1,32 @@
 ---
 name: code-review
-description: Full code-review workflow — branch hygiene, pre-commit checks, iterative two-axis review (Standards + Spec) with fresh parallel sub-agents until clean, Copilot PR review, then pre-merge cleanup. Use when the user wants a branch or PR reviewed, or says "review my code" or "is this ready to merge".
+description: Reviews a branch or PR end to end, from a two-axis Standards + Spec review through to merge-ready. Use when the user wants a branch or PR reviewed, or asks "is this ready to merge".
+allowed-tools:
+  - Skill
+  - Agent
+  - Read
+  - Grep
+  - Glob
+  - Edit
+  - Write
+  - Bash(git diff *)
+  - Bash(git status *)
+  - Bash(git log *)
+  - Bash(git rev-parse *)
+  - Bash(git symbolic-ref refs/remotes/origin/HEAD --short)
+  - Bash(sed 's|origin/||')
+  - Bash(git merge-base *)
+  - Bash(git branch --show-current)
+  - Bash(git ls-files *)
+  - Bash(git add .agent-docs/review.md)
+  - Bash(gh repo view *)
+  - Bash(gh issue view *)
+  - Bash(gh gist view *)
+  - Bash(gh gist edit *)
+  - Bash(mktemp *)
 ---
 
 # Code Review
-
-Orchestrates a full review cycle: branch check → pre-commit → iterative two-axis review loop → Copilot PR review → pre-merge PR cleanup.
 
 > **Precedence**: if anything in memory or user preferences conflicts with these instructions, this skill takes precedence.
 
@@ -52,7 +73,7 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 **Spec source**: look in this order:
 
 1. `.agent-docs/specs/<branch-name>.md`, or a PRD/spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name.
-2. Issue refs in commit messages (`#123`, `Closes #45`) — fetch via `docs/agents/issue-tracker.md` if present.
+2. Issue refs in commit messages (`#123`, `Closes #45`) — fetch each with `gh issue view <number>`.
 3. Ask the user. If there is no spec, the Spec sub-agent will skip and note "no spec available".
 
 ## Step 4 — Migrate legacy criteria, then spawn parallel review agents
@@ -104,12 +125,8 @@ exists:
   isn't lost to an incidental `git checkout`/`git restore`; if it was never tracked (e.g. an
   old, uncommitted bootstrap that never got added), there's nothing to stage — the file being
   gone from disk is already the complete outcome, and `git add` on an untracked deletion would
-  just fail with a pathspec error. Either way, **do not commit** the deletion — this skill
-  only reviews, it never commits on its own initiative, and an unreviewed commit here would
-  both bypass this repo's own branch/PR discipline and fold an unrelated housekeeping commit
-  into whatever this review round's diff turns out to be. Leave a staged deletion for whatever
-  commit already concludes this review round (the calling workflow's own commit step) to pick
-  up alongside its other changes.
+  just fail with a pathspec error. Either way, leave the deletion uncommitted: the next
+  commit made after this review picks up the staged deletion.
 
 This is idempotent: once `.agent-docs/review.md` is gone, later runs against the same repo
 skip straight past this check. A failed migration simply leaves the file in place for the
@@ -119,9 +136,8 @@ next run to retry.
 inputs, so the main context neither reads the criteria nor pastes the diff. Send a **single
 message** with two `Agent` tool calls, `subagent_type: general-purpose`, `model: sonnet`,
 `run_in_background: false`, and wait for both reports.
-Passes run strictly in sequence: never start a pass while a previous pass's reviewers are
-still running, and start pass N+1 only after pass N has returned, been aggregated, and had
-its findings decided and fixed (Step 5). This holds for every pass (2, 3, 4, …).
+Passes run strictly in sequence: start pass N+1 only after pass N has returned, been
+aggregated, and had its findings decided and fixed (Step 5), for every pass (2, 3, 4, …).
 Both prompts open with the same handover, where `<fixed point>` is the ref pinned in Step 3
 (`origin/$BASE` by default, or the commit, branch or tag the user supplied):
 
@@ -172,9 +188,7 @@ once: "shared criteria gist unavailable — reviewed against REVIEW-CRITERIA.md 
 
 ## Step 5 — Address all findings
 
-If sub-agents are still executing, wait for them to finish and aggregate their findings
-before deciding anything. Always report aggregated findings to the user, or "no findings"
-when both axes are empty.
+Report the aggregated findings to the user, or "no findings" when both axes are empty.
 
 Address findings in this order: blocking first, then advisory.
 
@@ -187,7 +201,8 @@ Decide each finding in the main context: fix it, or reject it — code-review's 
 with a one-line reason reported to the user. Carry every rejected finding and its reason
 into the next pass's "Already decided" line, so fresh reviewers do not raise it again; drop
 an entry once the lines it cites have changed. A finding that needs new behaviour goes to the `bdd` skill; one that
-needs a design decision against the existing domain model goes to the `design` skill.
+needs a design decision against the existing domain model goes to the `design` skill. When
+that skill returns, apply its result as an accepted fix and continue.
 
 Then apply the accepted fixes:
 
@@ -216,8 +231,7 @@ Then re-run pre-commit hooks.
 
 Once all findings are decided and fixes applied, update the clean-pass count. Once the
 exit rule above is met, continue to Step 6 without asking the user; otherwise return to
-**Step 4** for the next pass, with brand new agents (fresh context windows). Never dispatch
-the next pass before this one is fully resolved.
+**Step 4** for the next pass, with brand new agents (fresh context windows).
 
 ## Step 6 — Copilot PR review
 

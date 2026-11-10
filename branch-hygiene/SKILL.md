@@ -1,6 +1,11 @@
 ---
 name: branch-hygiene
-description: Validates the current git branch before work begins — autoSetupRemote, trunk-branch detection, prefix-vs-change-type, and name relevance. Takes a one-line summary of the work, optionally preceded by a change_type. Use at the start of a work session, or from another skill passing a known change_type.
+description: Validates that the current git branch fits the work about to start. Use at the start of a work session, or from another skill passing a known change_type.
+allowed-tools:
+  - Read
+  - Bash(git config push.autoSetupRemote)
+  - Bash(git branch --show-current)
+  - Bash(git symbolic-ref refs/remotes/origin/HEAD --short)
 context: fork
 agent: general-purpose
 model: haiku
@@ -35,12 +40,14 @@ Run `git branch --show-current`. Classify it with the Branch Classification Tabl
 ## Step 3 — Change type
 
 Use the given `change_type`; otherwise infer one from the summary with the Change Type
-Inference Heuristics, and mark it `inferred`.
+Inference Heuristics, and mark it `inferred`. When no heuristic fits, the type is `unknown`:
+Step 4 then skips the prefix-versus-type match and flags only the mismatches in REFERENCE.md
+that need no type.
 
 ## Step 4 — Prefix
 
-Check the branch prefix against the Branch Prefix Validation Table. A trunk branch, a `wip/` or
-`worktree-wip+` placeholder, a prefix that doesn't match, or an unrecognised prefix is a mismatch.
+Check the branch prefix against the Branch Prefix Validation Table; REFERENCE.md lists what
+counts as a mismatch.
 
 ## Step 5 — Name relevance
 
@@ -68,5 +75,5 @@ Skipped / risk: <one line>
 `next:` tells the caller what to do, one clause per problem found:
 
 - autoSetupRemote not `true` → `ask the user "Set push.autoSetupRemote to true?"; on yes run: git config push.autoSetupRemote true`
-- mismatch → `ask the user "You're on <branch> but this work is <summary>. Create <suggested> and move the work there?"; on yes run: <create command>. Never push or commit to the new branch.`
+- mismatch → `ask the user "You're on <branch> but this work is <summary>. Create <suggested> and move the work there?"; on yes run: <create command>. Leave the new branch unpushed with nothing committed.`
 - neither → `none — the branch fits.`

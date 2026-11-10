@@ -1,6 +1,15 @@
 ---
 name: pr-cleanup
-description: Pre-merge cleanup — check off acceptance criteria in .agent-docs/issues/<branch-name>.md, commit to the PR branch, close GitHub issues, and share the PR link for merging. Use when a branch has passed review and its PR is ready to merge, or as the final step of /code-review after the Copilot review loop.
+description: Finalises a reviewed branch's PR so it is ready to merge. Use when a branch has passed review and its PR is ready to merge, or as the final step of /code-review.
+allowed-tools:
+  - Read
+  - Edit
+  - Bash(git branch --show-current)
+  - Bash(gh pr view *)
+  - Bash(git add .agent-docs/issues/*)
+  - Bash(git commit *)
+  - Bash(git push)
+  - Bash(gh issue close *)
 context: fork
 agent: general-purpose
 model: haiku
@@ -30,6 +39,10 @@ Read `.agent-docs/issues/$BRANCH.md`. Extract all GitHub issue numbers reference
 ```md
 > Work complete — PR ready to merge.
 ```
+
+Done when no `- [ ]` remains in the file and the note is its first line. If the issues file does
+not exist, there is nothing to commit or close: skip Steps 3 and 4, go to Step 5, and name the
+missing file on the `Skipped / risk:` line.
 
 ### 3. Commit and push
 

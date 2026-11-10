@@ -1,6 +1,6 @@
 # Refactor Candidates
 
-After TDD cycle, look for:
+After each pass of the BDD loop, look for:
 
 - **Duplication** → Extract function/class
 - **Long methods** → Break into private helpers (keep tests on public interface)

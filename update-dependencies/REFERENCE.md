@@ -122,18 +122,9 @@ pnpm update
 
 React itself is just an npm-style package — no special-casing beyond the above. If `react`/`react-dom` have a major available, call it out explicitly in the report: React majors commonly need peer-dependency and codemod follow-up beyond a simple version bump.
 
-## Pre-commit hooks
+## Validation commands
 
-```bash
-pre-commit autoupdate
-pre-commit run --all-files
-```
-
-Requires `.pre-commit-config.yaml` at the repo root.
-
-## Validation commands (best-effort, non-blocking)
-
-Run if detectable; record pass/fail only — never block or revert on failure.
+Run if detectable; record pass/fail only.
 
 | Ecosystem | Command |
 |---|---|

@@ -40,7 +40,7 @@ A prefix mismatch occurs when:
 
 - The current branch is a trunk branch (`main`, `master`, `develop`)
 - The current branch is a `wip/` or `worktree-wip+` placeholder
-- The branch prefix doesn't match the change type (e.g. a feature on `bugfix/`)
+- The branch prefix doesn't match the change type (e.g. a feature on `bugfix/`) — the only mismatch that needs a known type
 - The branch name is unrecognised (no valid prefix)
 
 ## Branch name relevance rules (Step 5)

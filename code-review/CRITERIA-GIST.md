@@ -12,12 +12,6 @@ its own entries to.
 - **URL**: <https://gist.github.com/mholubinka1/12aa6da56817811e0f101d6c3cbf1d7f>
 - **File**: `CRITERIA.md`
 
-`address-copilot-comments` reads the gist ID from here to append newly discovered criteria
-(`gh gist edit`). `code-review` Step 4 reads the gist ID from here to fetch the current
-staged criteria live (`gh gist view`) alongside `REVIEW-CRITERIA.md`, and also appends —
-once per repo — when it migrates a legacy `.agent-docs/review.md` into the gist. Neither
-skill needs any other per-machine configuration to find it.
-
 ## Collating
 
 New criteria reach `REVIEW-CRITERIA.md` only through collation: run the
@@ -27,7 +21,7 @@ merges. Prune stale criteria in `REVIEW-CRITERIA.md` by hand.
 
 ## Appending an entry
 
-Whenever either skill above appends, it does so the same way — `gh gist edit` replaces a
+Whenever a skill appends, it does so the same way — `gh gist edit` replaces a
 file's content wholesale, so there is no partial-append:
 
 1. Fetch the gist's current content: `gh gist view <gist-id> -f CRITERIA.md --raw`.

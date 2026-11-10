@@ -36,7 +36,7 @@ Each lever ends on a check the draft has to pass.
 
 *Check: for each disclosed section, do only some branches reach it?*
 
-**Co-location.** A concept's definition, rules, and caveats sit under one heading.
+**Co-location.** A concept's definition, rules, and caveats sit under one heading; a meaning fragmented across headings (scattering) is the failure.
 
 *Check: does reading one part of a concept bring its caveats with it?*
 
@@ -44,7 +44,7 @@ Each lever ends on a check the draft has to pass.
 
 *Check: can the agent tell done from not-done, and does the bound force the whole job?*
 
-**When to split.** Split by sequence — the **sequence test** — when later steps tempt a rush of the current one; split by invocation when a distinct leading word should trigger a part on its own, or another skill must reach it.
+**When to split.** Split by sequence — the **sequence test** — when later steps tempt a rush of the current one; split by invocation when a distinct leading word should trigger a part on its own, or another skill must reach it. Past ~150 lines `SKILL.md` is a **sprawl smell** — attention thins across the excess — so look for one of those cuts, or disclose branch-only sections; the line count only says to look.
 
 *Check: does the cut buy more legwork or independent reach than the load it spends?*
 
@@ -52,11 +52,11 @@ Each lever ends on a check the draft has to pass.
 
 *Check: is any triad or gesturing sentence begging to collapse into one word — "fast, deterministic, low-overhead" → *tight*?*
 
-**Steer positive.** State the target behaviour; a prohibition drags the banned thing into context and makes it *more* available. Reserve "don't" for a hard guardrail, paired with the positive target.
+**Steer positive.** State the target behaviour (negation steering is the failure); a prohibition drags the banned thing into context and makes it *more* available. Reserve "don't" for a hard guardrail, paired with the positive target.
 
 *Check: does every instruction name what to do rather than what to avoid?*
 
-**Pruning.** One source of truth per meaning — changing behaviour is a one-place edit. The environment (`package.json` scripts, config, `--help`) is a source of truth too: restate it only when the lookup is expensive.
+**Pruning.** One source of truth per meaning — changing behaviour is a one-place edit; a meaning in two places (duplication) or a line the model already obeys by default (a no-op) is the failure; delete the line or use a stronger leading word. The environment (`package.json` scripts, config, `--help`) is a source of truth too: restate it only when the lookup is expensive.
 
 *Check: run the document — did any line change behaviour versus the model's default? Would changing any rule take more than a one-place edit?*
 
@@ -71,18 +71,18 @@ Pick model-invocation only when the agent or another skill must reach the skill 
 
 Add a utility script when the operation is deterministic (validation, formatting), the same code would be generated repeatedly, or errors need explicit handling. Scripts save tokens and improve reliability over generated code.
 
-## When to split files
+## allowed-tools
 
-Split `SKILL.md` when a section is branch-only (disclose it) or a run of steps tempts a rush (split the sequence). Past ~150 lines is a **sprawl smell** — attention thins across the excess — so look for one of those cuts. The branch and sequence tests drive the split; the line count only says to look.
+Every skill declares `allowed-tools` in its frontmatter as a YAML block list, one entry per line, after `description:`.
 
-## Common failure modes
+- **Pre-approves, never restricts.** The list lets the skill's turn run those tools without a permission prompt; every other tool stays available and prompts as usual.
+- **Least privilege.** List exactly the tools the skill's own steps run, plus the commands only its sub-agents run. Every entry traces to a step or a sub-agent handover.
+- **Scope Bash.** Write `Bash(<cmd> *)` (which also matches the bare `<cmd>`) or an exact `Bash(<cmd>)`. Every part of a compound command (`a && b`, `$(...)`, pipes) must match an entry, or the call prompts.
+- **Never pre-approved.** Unscoped `Bash`, `Bash(*)`, `Bash(git *)`, `git push` with arguments (bare `Bash(git push)` is fine), force pushes, `reset --hard`, `branch -D`, `rm`, `git clean`, `stash pop` and `stash drop`, `>`/`>>` redirects, package installs outside a project virtualenv (`pip install …`), and the project's test command.
+- **Path wildcards also match later flags.** `Bash(gh api repos/*)` matches `gh api repos/o/r -X DELETE`; only a call that puts `--method` before the path stays outside it. Likewise `Bash(gh api graphql *)` matches any mutation, not just the skill's own queries. Use a path wildcard only where the skill's own writes are flag-first or acceptable to pre-approve.
+- **Path-scoped `Edit(...)` / `Write(...)`** are fine where a skill writes under one tree. If the harness ignores the path scope, the call prompts, which fails safe.
 
-- **Sprawl** — too long even when every line is live. → Disclose reference behind pointers; split by branch or sequence.
-- **Negation steering** — a "don't X" makes X more available. → Prompt the positive target.
-- **Duplication** — one meaning in two places; a two-place edit to change behaviour. → Single source of truth.
-- **Scattering** — one meaning fragmented across headings. → Co-locate under one heading.
-- **No-op** — a line the model already obeys by default. → Delete the sentence, or use a stronger leading word.
-- **Premature completion** — a step stops before it is done. → Sharpen the criterion; then split the sequence if the rush persists.
+`tests/test_skill_frontmatter.py` enforces a subset: it fails when a skill lacks `allowed-tools`, pre-approves a shell, interpreter, or VCS or package-manager CLI (the test's `UNSCOPED_BASH` list) with a bare `*`, or pre-approves `git push` with arguments, `--force`, `reset --hard`, `branch -D`, `rm`, `git clean`, `stash pop` or `stash drop`. The rest of the never-pre-approved list is checked in review.
 
 ## Review Checklist
 
@@ -95,7 +95,8 @@ Every item is pass/fail. A skill that fails one is not done.
 ### Hierarchy & disclosure
 
 - [ ] Each step's actions are in `SKILL.md`; the rules and reference a step consults may sit behind a pointer the step names; branch-only material is disclosed, not inline. References are one level deep.
-- [ ] `SKILL.md` is not sprawling — see *When to split files*.
+- [ ] `SKILL.md` is not sprawling — see the *When to split* lever.
+- [ ] Each concept's definition, rules, and caveats sit under one heading (co-location).
 
 ### Completion criteria
 
@@ -104,10 +105,13 @@ Every item is pass/fail. A skill that fails one is not done.
 ### Leading words & positivity
 
 - [ ] Reaches for a leading word where a triad or phrase repeats.
+- [ ] Each meaning has one source of truth (pruning): no line restates another or the environment, and none is a no-op.
 - [ ] Steers positive — a "don't …" appears only as a guardrail paired with the positive target.
 
 ### General
 
 - [ ] `name:` matches the directory name.
+- [ ] Invocation is chosen deliberately: model-invoked only when the agent or another skill must reach it; otherwise `disable-model-invocation: true`.
+- [ ] `allowed-tools` lists the least-privilege set — every entry traces to a step or sub-agent; Bash is scoped; nothing destructive.
 - [ ] No time-sensitive info; consistent terminology throughout.
 - [ ] Concrete examples included.

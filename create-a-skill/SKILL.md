@@ -1,6 +1,12 @@
 ---
 name: create-a-skill
 description: Creates, reworks, or reviews a Claude Code agent skill. Use when the user asks to build a skill, when an existing skill needs changing, or when checking a skill against the writing levers.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Write
+  - Edit
 ---
 
 # Writing Skills
@@ -8,6 +14,10 @@ description: Creates, reworks, or reviews a Claude Code agent skill. Use when th
 A skill is predictable when the agent takes the same *process* every run — not when it produces the same output. The **writing levers** that buy that, the description rules, the model/user-invocation choice, and the Review Checklist are all in [REFERENCE.md](REFERENCE.md).
 
 ## Process
+
+To rework or review an existing skill, read its `SKILL.md` and bundled files, then start at step 5; fix each failing item (steps 2 and 3 for content that moves) and re-run step 5. Done when every checklist item passes.
+
+To create a skill:
 
 1. **Gather requirements** — get an answer to each of: the task or domain and its concrete use cases; a utility script or instructions only; reference material to bundle or point at; model-invoked or user-invoked (see *Model- vs user-invoked* in REFERENCE.md). Drafting starts once every one is answered.
 
@@ -38,6 +48,9 @@ skill-name/
 ---
 name: skill-name
 description: <what it does>. Use when <one trigger per branch>.
+allowed-tools:
+  - Read
+  - Bash(<command> *)
 ---
 
 # Skill Name
@@ -53,5 +66,5 @@ test and the full suite is green">
 
 ## Advanced
 
-See [REFERENCE.md](REFERENCE.md).
+<only when some branch needs it — "When <case>, read [REFERENCE.md](REFERENCE.md) for <what>.">
 ```

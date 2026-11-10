@@ -2,263 +2,102 @@
 
 Full detail for each step. The skill overview is in [SKILL.md](SKILL.md).
 
+**Safe move** — every move below follows this one rule: read the source, write the destination, and delete the source only after the write succeeds. If the write fails, report the error and skip that item, keeping the source. If the delete fails, report the error and continue; the destination is already written.
+
 ## Step 1 — Migrate existing agent-docs/ layout
 
-Check whether the old `agent-docs/` directory (without the dot prefix) exists in the
-current repository. If it does not exist at all, skip this step entirely and continue to
-Step 2.
+Check whether the old `agent-docs/` directory (without the dot prefix) exists. If it does not, skip this step and continue to Step 2.
 
-If `agent-docs/` exists, migrate its contents to `.agent-docs/` as follows.
+Otherwise create `.agent-docs/` if it does not exist, then handle each item with a safe move:
 
-First, create the `.agent-docs/` directory if it does not already exist.
+| Item | `.agent-docs/` copy absent | `.agent-docs/` copy present |
+|---|---|---|
+| `agent-docs/agent.md` | Safe-move it to `.agent-docs/agent.md`. Report: "Migrated `agent-docs/agent.md` to `.agent-docs/agent.md`." | Delete `agent-docs/agent.md`. Report: "Removed stale `agent-docs/agent.md` (`.agent-docs/agent.md` already present)." |
+| `agent-docs/context.md` | Safe-move it to `.agent-docs/context.md`. Report: "Migrated `agent-docs/context.md` to `.agent-docs/context.md`." | Delete `agent-docs/context.md`. Report: "Removed stale `agent-docs/context.md` (`.agent-docs/context.md` already present)." |
+| `agent-docs/adr/` | Create `.agent-docs/adr/`, safe-move each file into it, then remove `agent-docs/adr/` if empty. Report: "Migrated `agent-docs/adr/` to `.agent-docs/adr/`." | Delete all files in `agent-docs/adr/` and remove the directory. Report: "Removed stale `agent-docs/adr/` (`.agent-docs/adr/` already present)." |
 
-Then handle each of the three items below in order:
+An item that is missing from `agent-docs/` needs no action.
 
-**`agent-docs/agent.md`:**
+Then scan `agent-docs/` for anything other than `agent.md`, `context.md`, `adr/`, and `docs/` (`docs/` holds ADR files that Step 4 migrates). Typical leftovers are `specs/` or `issues/` from an older skill layout. For each leftover, report:
 
-- If `agent-docs/agent.md` exists and `.agent-docs/agent.md` does **not** exist:
-  Move it: Read source → Write to `.agent-docs/agent.md`.
-  - If the write fails, report the error clearly and skip to the next item. Do **not** delete the source file.
-  Delete `agent-docs/agent.md` only after the write succeeds.
-  - If the delete fails, report the error clearly and continue. The destination file has been written.
-  Report: "Migrated `agent-docs/agent.md` to `.agent-docs/agent.md`."
-- If both `agent-docs/agent.md` and `.agent-docs/agent.md` exist:
-  Delete `agent-docs/agent.md` (the `.agent-docs/` version is preferred).
-  Report: "Removed stale `agent-docs/agent.md` (`.agent-docs/agent.md` already present)."
-- If only `.agent-docs/agent.md` exists, or neither exists: do nothing for this item.
+> Warning: `agent-docs/<name>` was not migrated — please move it to `.agent-docs/<name>`
+> manually and re-run this skill.
 
-**`agent-docs/context.md`:**
+Leave `agent-docs/` in place while anything remains in it. When it is empty, delete it. Continue to Step 2.
 
-- If `agent-docs/context.md` exists and `.agent-docs/context.md` does **not** exist:
-  Move it: Read source → Write to `.agent-docs/context.md`.
-  - If the write fails, report the error clearly and skip to the next item. Do **not** delete the source file.
-  Delete `agent-docs/context.md` only after the write succeeds.
-  - If the delete fails, report the error clearly and continue. The destination file has been written.
-  Report: "Migrated `agent-docs/context.md` to `.agent-docs/context.md`."
-- If both `agent-docs/context.md` and `.agent-docs/context.md` exist:
-  Delete `agent-docs/context.md`.
-  Report: "Removed stale `agent-docs/context.md` (`.agent-docs/context.md` already present)."
-- If only `.agent-docs/context.md` exists, or neither exists: do nothing for this item.
+## Step 2 — Create agent.md
 
-**`agent-docs/adr/` (directory):**
+If `.agent-docs/agent.md` exists, report "`.agent-docs/agent.md` already exists — skipping." and go to Step 3.
 
-- If `agent-docs/adr/` exists and `.agent-docs/adr/` does **not** exist:
-  Move the entire directory: create `.agent-docs/adr/`, then for each file in `agent-docs/adr/`:
-  1. Read the source file.
-  2. Write to `.agent-docs/adr/<filename>`. If the write fails, report the error clearly and skip this file. Do **not** delete the source file.
-  3. Delete the source file only after the write succeeds. If the delete fails, report the error clearly and continue.
-  After processing all files, if `agent-docs/adr/` is now empty, remove it.
-  Report: "Migrated `agent-docs/adr/` to `.agent-docs/adr/`."
-- If both `agent-docs/adr/` and `.agent-docs/adr/` exist:
-  Delete all files in `agent-docs/adr/` and remove the directory.
-  Report: "Removed stale `agent-docs/adr/` (`.agent-docs/adr/` already present)."
-- If only `.agent-docs/adr/` exists, or neither exists: do nothing for this item.
+Otherwise create `.agent-docs/` if needed, read this skill's `AGENT-TEMPLATE.md` (next to `SKILL.md`), and write it verbatim to `.agent-docs/agent.md`. If the write fails, report the error and stop. Otherwise report "Created `.agent-docs/agent.md`."
 
-**After handling all three items:**
+## Step 3 — Bootstrap or review context.md
 
-Scan the `agent-docs/` directory for any remaining files or subdirectories that were not
-covered by the three items above (i.e. anything other than `agent.md`, `context.md`, `adr/`,
-and `docs/`). Do **not** warn about `docs/` — any ADR files inside `agent-docs/docs/adr/`
-will be migrated by Step 7. Common examples of items that do warrant a warning include
-`specs/`, `issues/`, or other subdirectories from an older skill layout.
+**Find the file.**
 
-If any such files or directories remain:
+1. If `.agent-docs/context.md` exists, report "`.agent-docs/context.md` found — proceeding to review." and take the review sub-path.
+2. Otherwise look (non-recursively) for `./context.md` and `docs/context.md`.
+   - **Several found**: report the ambiguity, listing each file found, then go to Step 4:
 
-- Report each one:
-  > Warning: `agent-docs/<name>` was not migrated — please move it to `.agent-docs/<name>`
-  > manually and re-run this skill.
-- Do **not** delete the `agent-docs/` directory (it is not empty and contains unmigrated
-  content). Do **not** attempt automatic migration of unknown items.
-- Continue to Step 2.
+     > Multiple `context.md` files found — unable to determine which to use:
+     > - `<path to first match>`
+     > - `<path to second match>`
+     > - (etc.)
+     >
+     > Please resolve manually by moving the correct file to `.agent-docs/context.md`, then
+     > re-run this skill.
 
-If no unexpected files or directories remain and `agent-docs/` is now empty, delete it.
+   - **Exactly one found**: safe-move it to `.agent-docs/context.md`; here a failed write **or** a failed delete overrides the safe-move rule: report it and go to Step 4. Report "Moved `<source path>` to `.agent-docs/context.md`." and take the review sub-path.
+   - **None found**: take the generate sub-path.
 
-Continue to Step 2.
+**Generate sub-path.**
 
-## Step 2 — Check for existing agent.md
-
-Check whether `.agent-docs/agent.md` already exists in the current repository.
-
-If it exists:
-
-- Report: "`.agent-docs/agent.md` already exists — skipping."
-- Skip to Step 4.
-
-If it does not exist, continue to Step 3.
-
-## Step 3 — Create .agent-docs/ and write agent.md
-
-Create the `.agent-docs/` directory if it does not already exist.
-
-Read the full contents of this skill's `AGENT-TEMPLATE.md` file (located in the same
-directory as this `SKILL.md`).
-
-Write those contents verbatim to `.agent-docs/agent.md` in the current repository.
-
-If writing fails for any reason (permissions, disk space, etc.):
-
-- Report the error clearly.
-- Stop. Do not proceed to any further steps.
-
-If writing succeeds:
-
-- Report: "Created `.agent-docs/agent.md`."
-
-## Step 4 — Check for existing context.md
-
-Check whether `.agent-docs/context.md` already exists in the current repository.
-
-If it exists:
-
-- Report: "`.agent-docs/context.md` found — proceeding to review."
-- Continue to Step 6 (review sub-path).
-
-If it does not exist, continue to Step 5.
-
-## Step 5 — Search for context.md to move
-
-Search the following locations (non-recursively) for a file named `context.md`:
-
-- Repository root (`./context.md`)
-- `docs/context.md`
-
-Collect all matches found.
-
-**If multiple files are found:**
-
-- Report the ambiguity, listing each file actually found:
-
-  > Multiple `context.md` files found — unable to determine which to use:
-  > - `<path to first match>`
-  > - `<path to second match>`
-  > - (etc.)
-  >
-  > Please resolve manually by moving the correct file to `.agent-docs/context.md`, then
-  > re-run this skill.
-
-- Skip to Step 7.
-
-**If exactly one file is found**, move it to `.agent-docs/context.md`:
-
-1. Read the contents of the source file.
-2. Write those contents verbatim to `.agent-docs/context.md`.
-   - If the write fails, report the error clearly and skip to Step 7. Do **not** delete the source file.
-3. Delete the source file only after the write succeeds.
-   - If the delete fails, report the error clearly and skip to Step 7. The destination file has already been written.
-
-If both steps succeed:
-
-- Report: "Moved `<source path>` to `.agent-docs/context.md`."
-- Continue to Step 6 (review sub-path).
-
-**If no files are found**, continue to Step 6.
-
-## Step 6 — Bootstrap or review context.md
-
-This step has two sub-paths depending on whether a `context.md` was found in Steps 4–5.
-
-### Generate sub-path (no context.md found after Steps 4–5)
-
-1. Read the **Structure** and **Rules** sections of `CONTEXT-FORMAT.md` from this skill's
-   directory (alongside this `REFERENCE.md`). Do not apply the "Single vs multi-context
-   repos" section — this skill always bootstraps a single-context `.agent-docs/context.md`.
-2. Read the codebase to identify domain-specific concepts — the terminology, workflow names,
-   file conventions, and concepts unique to this repository. Focus on terms that a new
-   contributor would need to understand to work in this codebase, not general programming
-   concepts.
-3. Write a full `context.md` to `.agent-docs/context.md` following the format defined in
-   `CONTEXT-FORMAT.md`:
-   - A `# {Context Name}` heading using the repository name or domain name.
-   - A one- or two-sentence description of what the context is and why it exists.
-   - A `## Language` section listing all domain-specific terms found, each with a tight
-     one- or two-sentence definition and an `_Avoid_` line listing synonyms to reject.
-   - Subheadings grouping terms when natural clusters emerge.
-
-   If writing fails for any reason, report the error clearly and skip to Step 7.
-
+1. Read the **Structure** and **Rules** sections of `CONTEXT-FORMAT.md` (alongside this `REFERENCE.md`).
+2. Collect candidate terms from `README.md`, `CLAUDE.md`, the names of top-level files and directories, and the repository's entry-point modules only. Keep a project-specific noun that names a file convention, workflow or domain object and appears in at least two of those sources. A term a new contributor would need to work here qualifies; a general programming concept does not.
+3. Write `.agent-docs/context.md` in the `CONTEXT-FORMAT.md` format: a `# {Context Name}` heading using the repository or domain name, a one- or two-sentence description, a `## Language` section giving each term a tight one- or two-sentence definition and an `_Avoid_` line of synonyms to reject, and subheadings where natural clusters emerge. If the write fails, report the error and go to Step 4.
 4. Report: "Created `.agent-docs/context.md` from codebase analysis."
 
-### Review and improve sub-path (context.md exists or was just moved)
+**Review sub-path.**
 
-1. Read `CONTEXT-FORMAT.md` from this skill's directory.
-2. Read the existing `.agent-docs/context.md`.
-3. Audit the file against the **Structure** and **Rules** sections of `CONTEXT-FORMAT.md`
-   (the single-context format). Apply each rule in turn and identify any shortcomings — do
-   not rely on memory; read the rules from the file. Do not apply the "Single vs multi-context
-   repos" section — this skill always bootstraps a single-context `context.md`.
-4. If shortcomings are found:
-   - Write the improved file to `.agent-docs/context.md`.
-     If writing fails, report the error clearly and skip to Step 7.
-   - Report: "Improved `.agent-docs/context.md` — `<brief summary of changes>`."
-5. If no shortcomings are found:
-   - Report: "`.agent-docs/context.md` reviewed — no improvements needed."
-   - Continue to Step 7 without writing.
+1. Read `CONTEXT-FORMAT.md`, then `.agent-docs/context.md`.
+2. Audit the file against the **Structure** and **Rules** sections, applying each rule in turn; read the rules from the file rather than from memory.
+3. The file is compliant when it satisfies every rule. A rule it violates is a shortcoming: write the improved file (on a write failure, report the error and go to Step 4) and report "Improved `.agent-docs/context.md` — `<brief summary of changes>`." A compliant file is left as is: report "`.agent-docs/context.md` reviewed — no improvements needed."
 
-## Step 7 — Migrate ADR files
+Continue to Step 4.
 
-Search the following locations for files matching the ADR naming convention (`[0-9]*-*.md`):
+## Step 4 — Migrate ADR files
 
-- `docs/` (non-recursively — files directly inside `docs/` only, not subdirectories)
-- `docs/adr/` (all `.md` files matching the pattern)
-- `agent-docs/docs/adr/` (all `.md` files matching the pattern — legacy path from older convention)
-- `.agent-docs/docs/adr/` (all `.md` files matching the pattern — dotted legacy path that may exist after Step 1 migration)
+Search these locations for files matching `[0-9]*-*.md`:
 
-Collect all matches found across all four locations.
+- `docs/` (files directly inside only, not subdirectories)
+- `docs/adr/`
+- `agent-docs/docs/adr/` (legacy path from an older convention)
+- `.agent-docs/docs/adr/` (dotted legacy path that may exist after Step 1)
 
-**If no matching files are found:**
+If none are found, record "no ADRs found — skipped" and continue to Step 5.
 
-- Record "no ADRs found — skipped" for the summary.
-- Continue to Step 8.
+Otherwise create `.agent-docs/adr/` if needed and process each match in the order found:
 
-**If matching files are found:**
+- **No file of that name in `.agent-docs/adr/`**: safe-move it (on a write failure, skip this file and continue with the next). Report: "Moved `<source path>` to `.agent-docs/adr/<filename>`."
+- **A file of that name already exists** (conflict): get each file's effective date from `git log -1 --format="%ai" -- <path>`, using the filesystem modification time when the command exits non-zero or prints nothing. Then:
+  - Source newer: overwrite the destination with a safe move. Report: "Overwrote `.agent-docs/adr/<filename>` with newer `<source path>`."
+  - Destination newer or same age: skip the source. Report: "Skipped `<source path>` — `.agent-docs/adr/<filename>` is already newer."
 
-1. Create the `.agent-docs/adr/` directory if it does not already exist.
-2. For each matched file, in the order found:
-   - **If no file with the same name exists at `.agent-docs/adr/<filename>`:**
-     1. Read the source file contents.
-     2. Write those contents verbatim to `.agent-docs/adr/<filename>`.
-        - If the write fails, report the error clearly and skip this file. Continue with the next file.
-     3. Delete the source file only after the write succeeds.
-        - If the delete fails, report the error clearly and continue. The destination file has been written.
-     4. Report: "Moved `<source path>` to `.agent-docs/adr/<filename>`."
-   - **If a file with the same name already exists at `.agent-docs/adr/<filename>`** (conflict):
-     1. Determine the effective date of the source file: run `git log -1 --format="%ai" -- <source path>`. If the command exits non-zero or the output is empty (file is untracked or unknown to git), use the filesystem modification time instead.
-     2. Determine the effective date of the destination file: run `git log -1 --format="%ai" -- .agent-docs/adr/<filename>`. If the command exits non-zero or the output is empty, use the filesystem modification time instead.
-     3. Compare the two dates:
-        - **Source is newer**: overwrite the destination. Read source → Write to `.agent-docs/adr/<filename>` → delete source. Report: "Overwrote `.agent-docs/adr/<filename>` with newer `<source path>`."
-        - **Destination is newer or same age**: skip the source file. Report: "Skipped `<source path>` — `.agent-docs/adr/<filename>` is already newer."
-3. After processing all files, clean up each legacy source directory if it is now empty:
-   - If `docs/adr/` exists and is empty, delete it. Do **not** delete or modify `docs/` itself.
-   - If `agent-docs/docs/adr/` exists and is empty, delete it. If `agent-docs/docs/` is then empty, delete it too. If `agent-docs/` is then empty, delete it too.
-   - If `.agent-docs/docs/adr/` exists and is empty, delete it. If `.agent-docs/docs/` is then empty, delete it too.
+Afterwards clean up each legacy source directory that is now empty:
 
-Continue to Step 8.
+- `docs/adr/`: delete it; leave `docs/` itself untouched.
+- `agent-docs/docs/adr/`: delete it, then `agent-docs/docs/` and `agent-docs/` if each becomes empty.
+- `.agent-docs/docs/adr/`: delete it, then `.agent-docs/docs/` if empty.
 
-## Step 8 — Check CLAUDE.md
+Continue to Step 5.
 
-Check whether `CLAUDE.md` exists in the current repository root.
+## Step 5 — Create or append CLAUDE.md
 
-Check the content of `CLAUDE.md` (if it exists) for the following strings, in this order:
+Check `CLAUDE.md` in the repository root, in this order:
 
-1. **If `CLAUDE.md` contains `.agent-docs/agent.md`** (new path, with dot):
-   - Report: "`CLAUDE.md` already references `.agent-docs/agent.md` — skipping."
-   - Continue to Step 10.
-
-2. **If `CLAUDE.md` contains `agent-docs/agent.md`** (old path, without dot):
-   - Replace the old path string `agent-docs/agent.md` with `.agent-docs/agent.md` everywhere
-     it appears in `CLAUDE.md`. This includes both the link text and the link target.
-   - Report: "Migrated `CLAUDE.md` reference from `agent-docs/agent.md` to `.agent-docs/agent.md`."
-   - Continue to Step 10.
-
-3. **If `CLAUDE.md` does not exist, or exists but contains neither path**:
-   - Continue to Step 9.
-
-## Step 9 — Create or append CLAUDE.md
-
-Append the following content to `CLAUDE.md` (create the file first if it does not exist).
-Write only the Markdown content below — do not include the code fence markers. When
-appending to an existing file, ensure there is a blank line between the existing content
-and the block (add one if the file does not already end with a newline):
+1. Contains `.agent-docs/agent.md`: report "`CLAUDE.md` already references `.agent-docs/agent.md` — skipping." and go to Step 6.
+2. Contains the old path `agent-docs/agent.md`: replace it with `.agent-docs/agent.md` everywhere (link text and target). Report "Migrated `CLAUDE.md` reference from `agent-docs/agent.md` to `.agent-docs/agent.md`." and go to Step 6.
+3. Missing, or contains neither path: append the block below, creating the file first if needed. Write only the Markdown content, not the fence markers, with a blank line between existing content and the block.
 
 ```markdown
 ## Agent Standards
@@ -266,46 +105,14 @@ and the block (add one if the file does not already end with a newline):
 See [.agent-docs/agent.md](.agent-docs/agent.md) for behavioural standards that apply to all AI agent work in this repository.
 ```
 
-If `CLAUDE.md` did not exist:
+Report "Created `CLAUDE.md` with Agent Standards reference." for a new file, or "Appended Agent Standards reference to existing `CLAUDE.md`." otherwise.
 
-- Report: "Created `CLAUDE.md` with Agent Standards reference."
+## Step 6 — Summary
 
-If `CLAUDE.md` existed and was appended to:
-
-- Report: "Appended Agent Standards reference to existing `CLAUDE.md`."
-
-## Step 10 — Summary
-
-Report a brief summary of every action taken and every step skipped with a reason.
-Example (fresh repo with no prior agent docs):
+Report every action taken and every step skipped with a reason, ending with the `Skipped / risk:` line. Example:
 
 ```text
 init-agent-docs complete:
-  - no agent-docs/ layout to migrate — skipped
-  - Created `.agent-docs/agent.md`.
-  - Created `.agent-docs/context.md` from codebase analysis.
-  - no ADRs found — skipped
-  - Created `CLAUDE.md` with Agent Standards reference.
-Skipped / risk: none
-```
-
-Example (existing repo where context.md needed improvement):
-
-```text
-init-agent-docs complete:
-  - no agent-docs/ layout to migrate — skipped
-  - `.agent-docs/agent.md` already exists — skipping.
-  - `.agent-docs/context.md` found — proceeding to review.
-  - Improved `.agent-docs/context.md` — tightened 2 definitions, added avoid-lists for 3 terms.
-  - no ADRs found — skipped
-  - `CLAUDE.md` already references `.agent-docs/agent.md` — skipping.
-Skipped / risk: none
-```
-
-Or if nothing needed doing:
-
-```text
-init-agent-docs complete (nothing to do):
   - no agent-docs/ layout to migrate — skipped
   - `.agent-docs/agent.md` already exists — skipping.
   - `.agent-docs/context.md` reviewed — no improvements needed.

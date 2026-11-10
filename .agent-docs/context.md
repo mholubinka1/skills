@@ -38,6 +38,10 @@ _Avoid_: structure, layout, organisation
 Moving material down the information hierarchy — out of `SKILL.md` and behind a context pointer — so the top stays legible. Driven by branching: inline what every branch needs, disclose what only some branches reach.
 _Avoid_: extraction, splitting, factoring out
 
+**allowed-tools**:
+The `SKILL.md` frontmatter field listing the tools a skill pre-approves (runs without a permission prompt) for the turn that invokes it. It never restricts other tools, so each skill lists the least-privilege set its steps and sub-agents run, with Bash scoped to command patterns.
+_Avoid_: tool whitelist, tool restriction, permissions list
+
 **Leading word**:
 A compact concept already in the model's pretraining (`tracer bullet`, `red`, `fog of war`) repeated as a token, never a sentence, so it accumulates a distributed definition and anchors a region of behaviour cheaply.
 _Avoid_: keyword, term, jargon

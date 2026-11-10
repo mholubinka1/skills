@@ -1,6 +1,15 @@
 ---
 name: design
-description: Two-axis design session before any repository change — interviews from the business angle (what and why) then the engineering angle (how), updating CONTEXT.md and ADRs inline as decisions crystallise. Use whenever a user wants to change the codebase, technical documents, skills, or configuration.
+description: Runs a two-axis design interview — business (what and why), then engineering (how) — recording CONTEXT.md terms and ADRs as decisions land. Use when the user wants to design or think through a change before building it, or when /implement reaches its design step.
+allowed-tools:
+  - AskUserQuestion
+  - Read
+  - Grep
+  - Glob
+  - Edit(.agent-docs/**)
+  - Write(.agent-docs/**)
+  - Edit(CONTEXT.md)
+  - Write(CONTEXT.md)
 attribution: Combines grilling and grill-with-docs disciplines (Matt Pocock, mattpocock/skills)
 ---
 
@@ -10,9 +19,7 @@ Run a structured two-axis design session before any implementation begins. Compl
 
 ## Interview discipline
 
-Ask questions **one at a time**, waiting for feedback before continuing. Asking multiple questions at once is bewildering, and each answer should shape the next question.
-
-Ask every question through `AskUserQuestion` — including axis confirmations and ADR offers — with exactly one question per call, so the user can step through the session by picking options:
+Each answer shapes the next question, so ask every question through `AskUserQuestion` — including axis confirmations and ADR offers — with exactly one question per call, waiting for the answer before continuing:
 
 - Give 2–4 options. Put your recommended answer first, with " (Recommended)" at the end of its label.
 - Fill the remaining slots with genuine alternatives — directions a reasonable user might actually choose, not filler. Do this even for open questions. For a confirmation, the alternative is the most likely adjustment.
@@ -22,8 +29,6 @@ Ask every question through `AskUserQuestion` — including axis confirmations an
 If `AskUserQuestion` is unavailable or its call fails, ask the question in plain text with your recommended answer.
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
-
-Do not enact the plan until the user confirms a shared understanding across **both** axes.
 
 ## Phase 1 — Business axis
 
@@ -42,7 +47,7 @@ Probe the *what* and *why* before thinking about the *how*. Open with the first 
 2. **Reviewed PR, user merges** — the workflow stops at an approved PR and leaves the merge to the user.
 3. **Local commits only** — the workflow commits locally; pushing and the PR stay manual.
 
-Do not move to Phase 2 until the business picture is complete and agreed.
+Phase 1 is complete when every bullet above is answered or marked N/A, and the user confirms the business picture.
 
 ## Phase 2 — Engineering axis
 
@@ -55,6 +60,8 @@ Now that the *what* is pinned, probe the *how*. Explore:
 - **Backwards compatibility**: Does this break existing callers, schemas, or contracts?
 - **Testing strategy**: How will correct behaviour be verified?
 - **Performance**: Are there latency, memory, or concurrency risks?
+
+Phase 2 is complete when every bullet above is answered or marked N/A, and the user confirms the engineering picture.
 
 ### Update domain docs inline
 
@@ -77,4 +84,4 @@ Once both axes are resolved, summarise:
 - The agreed acceptance criteria (from Phase 1)
 - The chosen technical approach and any ADRs raised (from Phase 2)
 
-Only then proceed to implementation.
+Then hand back to whatever invoked this session: when that was `/implement` Step 2, continue `/implement` at Step 3; when another skill called it (e.g. `code-review` Step 5), return the summary to that skill; when the user invoked it directly, offer to run `/implement` for the change.

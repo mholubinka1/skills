@@ -1,11 +1,5 @@
 # Implementation Workflow
 
-This is the full implementation workflow run inline by [SKILL.md](SKILL.md).
-
----
-
-Work through the steps below in order.
-
 > **Prerequisite skills**: all skills referenced in this workflow live in this same skills
 > repo and are installed automatically via the post-commit sync hook:
 > `create-worktrees`, `init-agent-docs`, `design`, `write-spec`, `create-issues`, `branch-hygiene`,
@@ -89,35 +83,24 @@ The PR link was shared by `/pr-cleanup` at the end of `/code-review`. Prompt the
 - If the state is not `MERGED`, tell the user and press them again.
 - Once verified as `MERGED`, clean up. How depends on how Step 0 entered the worktree:
 
-  - **Step 0 created a fresh worktree this session** (`EnterWorktree(name: ...)`): it's
-    exclusively this task's, so remove it automatically. Its branch will have commits beyond
-    the base ref by design, so `ExitWorktree` will refuse to remove it unless told to discard
-    those changes — safe here specifically because the PR carrying them was just confirmed
-    merged:
+  - **Step 0 created a fresh worktree this session** (`EnterWorktree(name: ...)`): remove it.
+    The merged PR carries its commits, so discard them:
 
     ```text
     ExitWorktree(action: "remove", discard_changes: true)
     ```
 
   - **Step 0 resumed an existing worktree, or found the session already isolated with no
-    `EnterWorktree` call this session**: don't auto-remove. Neither `create-worktrees` nor
-    this step ever confirmed the worktree is exclusively this task's — it could be a
-    long-lived worktree the user is reusing for other work, or have uncommitted changes of
-    its own — so force-deleting it here would risk destroying something this workflow
-    doesn't own. `ExitWorktree`'s `remove` action can't help either way (it only ever
-    operates on a worktree it created in the current session — an explicit no-op on removal
-    for a `path`-entered worktree, and a full no-op if `EnterWorktree` was never called this
-    session). Instead, report the path and branch so the user can decide:
+    `EnterWorktree` call this session**: keep it and report its path and branch:
 
     ```bash
     git rev-parse --show-toplevel
     git branch --show-current
     ```
 
-    Then call `ExitWorktree(action: "keep")` — safe either way, since it returns a resumed
-    session to its original directory and is a harmless no-op if `EnterWorktree` was never
-    called — and tell the user the worktree at that path is done and ready to remove
-    whenever they want (`git worktree remove <path>`, adding `--force` only if it reports
-    uncommitted changes they're fine discarding, then `git branch -D <branch>`).
+    Then call `ExitWorktree(action: "keep")` and tell the user the worktree at that path is
+    done and ready to remove whenever they want (`git worktree remove <path>`, adding
+    `--force` only if it reports uncommitted changes they're fine discarding, then
+    `git branch -D <branch>`).
 
   The workflow is complete.
