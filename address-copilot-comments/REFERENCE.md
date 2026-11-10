@@ -79,7 +79,7 @@ A file that hits any Balanced rule is Balanced, even when it also fits a bullet 
 - Docs, comments or formatting, including page copy and styling that change no logic.
 - A test-only change.
 - A rename or move with no content change.
-- A generated file, other than a lockfile. Lockfiles follow the dependency rules: a lockfile whose versions change only by patch or minor, or not at all, is None, one with a major bump (direct or transitive) is Lite,, and one that adds a package is Balanced (rule 5).
+- A generated file, other than a lockfile. Lockfiles follow the dependency rules: a lockfile whose versions change only by patch or minor, or not at all, is None. One with a major bump, direct or transitive, is Lite. One that adds a package is Balanced (rule 5).
 - A patch or minor dependency bump that only changes a lockfile or a version pin in a dependency manifest.
 - A config value tweak outside production or security config.
 - A tiny edit of 10 lines or fewer that hits no Balanced rule.
