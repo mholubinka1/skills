@@ -40,7 +40,8 @@ allowed-tools:
 ```text
 Step 0  gh available?
 Step 1  PR exists? No ──► Step 2 (create it) ──► Step 2b
-Step 2b Review required? No ──► Step 7 | Yes ──► request Copilot (single review) ──► Step 3
+Step 2b Review level? None ──► Step 7 | Lite or Balanced ──► request Copilot at that effort (single review)
+          ──► Step 3 (or Step 7 if the request fails, except REQUEST_CONFLICT)
 Step 3  Haiku poller: ACTIONABLE ──► Step 4 | CLEAN or PENDING ──► Step 6 | ERROR ──► report, Step 6
 Step 4  Decide Fix or Push back per item; apply the fixes
 Step 4b Any fix applied? Run code-review Steps 1–5
@@ -75,18 +76,18 @@ gh pr create --base "$BASE" --title "<title>" --body "<summary and test plan>"
 
 Note the PR number. Continue to Step 2b.
 
-## Step 2b — Decide whether Copilot review is required
+## Step 2b — Choose the review level
 
-Fetch the full diff content — the decision depends on what changed, not the file extension:
+Fetch the full diff content. The level depends on what changed, not on the file extension:
 
 ```bash
 gh pr diff {number}
 ```
 
-See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFERENCE.md) for the classification rule and worked examples.
+Read the target repo's `## Review levels` section in `.agent-docs/agent.md` if it has one, then give each changed file a **Review level**. The PR takes the highest. The rubric, doubt rules and worked examples are in the Step 2b section of [REFERENCE.md](REFERENCE.md). Note the level and the rule that decided it for Step 7.
 
-**Review-required** (any risk criterion hit; when unsure) → request the review at `BALANCED` (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)). On success or `REQUEST_CONFLICT`, continue to Step 3. On any other failure, report it and go to Step 7. **Single review**: this is the only point where Copilot is requested, once per invocation.
-**Low-risk** → skip straight to Step 7. Do not trigger, do not poll.
+- **None** → skip straight to Step 7. Do not request a review, and do not poll.
+- **Lite** or **Balanced** → request the review with `reviewEffort` set to that level (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)). On success or `REQUEST_CONFLICT`, continue to Step 3. On any other failure, report it and go to Step 7. **Single review**: this is the only point where Copilot is requested, once per invocation.
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
 
@@ -221,7 +222,9 @@ not the target repo, so there is nothing to commit. Continue to Step 7.
 gh pr view --json url --jq '.url'
 ```
 
-Share the PR link with the user, with anything earlier steps said to tell them. The PR is
+Share the PR link with the user, with the Review level chosen at Step 2b and the rule that
+decided it (e.g. "Lite: one-module bug fix" or "Balanced (rule 2): new GraphQL mutation"), and
+anything earlier steps said to tell them. The PR is
 ready to merge, with two exceptions where you leave out "ready to merge". If the Step 2b review
 request failed, say why: the review the PR needed never ran. If a poll returned `ERROR`, say
 which poll failed: Copilot's review may not have been fully read.

@@ -95,11 +95,15 @@ _Avoid_: dependency sync, env setup, provisioning
 ### PR Review Loop
 
 **Single review**:
-In `address-copilot-comments`, the rule that Copilot is requested at most once per invocation and never re-triggered. Review effort stays at the repository default (Balanced); the skill decides only whether to request a review.
-_Avoid_: review round, review iteration, re-review, Lite review
+In `address-copilot-comments`, the rule that Copilot is requested at most once per invocation and never re-triggered. That one request always names its **Review level** explicitly, never the repository default.
+_Avoid_: review round, review iteration, re-review
+
+**Review level**:
+The Copilot review effort `address-copilot-comments` Step 2b picks for a PR from its diff content: None (no review), Lite or Balanced. Each changed file gets a level and the PR takes the highest; the rubric lives in the Classification rule of that skill's `REFERENCE.md`.
+_Avoid_: review tier, review depth, effort setting
 
 **Review-required diff**:
-The judgment `address-copilot-comments` Step 2b makes about whether a PR's diff is risky enough to warrant the one Copilot review, based on diff content rather than file extension. The criteria live in the Classification rule of that skill's `REFERENCE.md`; when unsure, the diff is review-required.
+A diff whose **Review level** is Lite or Balanced, so Step 2b requests the one Copilot review. When unsure between None and a review, the diff is review-required.
 _Avoid_: complex change, non-trivial diff, code change
 
 **Unresolved thread**:

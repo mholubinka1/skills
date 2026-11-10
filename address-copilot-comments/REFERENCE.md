@@ -26,7 +26,7 @@ gh api "repos/{owner}/{repo}/pulls/{number}/reviews" \
 
 ---
 
-## Step 2b — Decide whether Copilot review is required
+## Step 2b — Choose the review level
 
 ### Fetch the diff
 
@@ -34,45 +34,79 @@ gh api "repos/{owner}/{repo}/pulls/{number}/reviews" \
 gh pr diff {number}
 ```
 
-Reads the full diff content of every changed file, in one call — the classification below depends on what changed inside each file, not the file's extension.
+This reads the full diff of every changed file in one call. The classification below depends on what changed inside each file, not on the file's extension.
+
+### Read the repo's listed paths
+
+Before classifying, check the target repo's `.agent-docs/agent.md` for a `## Review levels` section. If it has one, note the paths it lists for Balanced rule 7. If the file or the section doesn't exist, use rules 1–6 only.
 
 ### Classification rule
 
-Copilot reviews at Balanced effort, so a review is spent only where the risk justifies it. A diff is **review-required** if it hits **any** of these:
+The Review level depends on two things: how bad a missed defect would be, and how hard it would be to spot from the diff alone. Lite catches obvious bugs and vulnerabilities visible in the changed lines. Balanced reasons across files and through complex logic.
 
-1. **Trust-boundary change** — auth, permissions, secrets handling, CI workflows, dependency manifests or lockfiles, or anything that executes input in a shell.
-2. **External mutation** — a new or changed command that writes outside the working tree: `gh api` writes, GraphQL mutations, `git push`, `gh gist edit`, file deletion.
-3. **Control-flow change** — new or changed branching, guards, loop termination, step ordering, or error handling. In `SKILL.md`, `REFERENCE.md` and `WORKFLOW.md` this includes decisioning rules and branching conditions: their step logic is the executable behaviour the harness runs, so extension alone does not make them documentation.
-4. **Contract change** — an interface, flag, output format or path that other files or callers depend on.
-5. **Non-trivial scope** — more than about 30 changed logic lines, or logic changes across 3 or more files.
+- **None:** the change doesn't alter behaviour.
+- **Lite:** behaviour changes, but a defect would stay local, be recoverable, and be visible in the diff.
+- **Balanced:** a defect would be costly or irreversible, or would only show up by reasoning beyond the changed lines.
 
-A diff is **low-risk (skip the review)** only if every changed file is one of these:
+Give each changed file a level. The PR takes the highest level of any file. In a skill, the step logic of `SKILL.md`, `REFERENCE.md` and `WORKFLOW.md` is the behaviour the harness runs, so judge those files by what a step does, not as documentation.
 
-- Prose, formatting or comment-only — wording or markdown formatting that doesn't alter what a step does.
-- A config value tweak (any config format, e.g. `*.json`, `*.yaml`, `*.yml`, `*.toml`, `*.ini`) that doesn't add or change a script.
-- A test-only change (added or edited tests) that touches no production logic.
+#### Balanced: any one of these
+
+1. **Security boundary:** authentication or permissions, handling untrusted input (parsing, validation, deserialisation), building SQL, shell or HTML from input, file paths from input, crypto, secrets, CORS/CSP. *Skills:* `allowed-tools`, or running input in a shell.
+2. **Data integrity or irreversible actions:** schema migrations, deletes or backfills, writes to persistent stores, money, personal data. *Skills:* new or changed `gh api` writes, GraphQL mutations, `git push`, `gh gist edit`, deleting files.
+3. **Concurrency and state:** async code, races, locks, retries and idempotency, transactions, caching and invalidation, scheduling and timers, dates and time zones.
+4. **Contract:** a public API, schema, event or message format, CLI flags, a library's exported interface, a config schema that others consume. *Skills:* an output format or path that another skill parses.
+5. **Deploy and runtime:** CI/CD workflows, Dockerfiles, infra-as-code, production config, adding a new dependency (supply-chain risk).
+6. **Large scope:** over about 300 changed logic lines, or logic changes across 5 or more modules.
+7. **Repo-listed path:** a file under a path listed in the repo's `## Review levels` section. The list only ever moves a file up to Balanced, never down.
+
+#### Lite
+
+Any behaviour change that hits no Balanced rule: a feature or bug fix contained in one module, a refactor, new branching or error handling inside a function, moderate size. Also a major dependency version bump. *Skills:* step logic, guards, step ordering, decision rules, branching conditions.
+
+#### None: every changed file is one of these
+
+- Docs, comments or formatting.
+- A test-only change.
 - A rename or move with no content change.
-- A tiny isolated tweak — 10 or fewer lines in one file, such as a message string, constant or typo — that matches none of criteria 1–4.
+- A generated file.
+- A patch or minor dependency bump that only changes a lockfile or version pin.
+- A config value tweak outside production or security config.
+- A tiny edit of 10 lines or fewer that hits no Balanced rule.
 
-A file that hits criteria 1–5 is review-required even when it fits a category above (e.g. a CI workflow `*.yml` is config but also a trust boundary). The low-risk list is exhaustive: anything not on it — including a logic change of 11–30 lines that hits none of criteria 1–5 — is review-required. **When unsure, trigger.** Doubt about whether a criterion applies counts as a hit.
+*Skills:* reworded prose that doesn't change what a step does. The None list is exhaustive: a file that fits none of it is Lite at least.
+
+#### Doubt and edge cases
+
+- **None or a review:** when unsure, review.
+- **Lite or Balanced:** doubt about rule 1 or 2 means Balanced. Any other doubt means Lite.
+- **Tests never lower the level.** Tests added alongside a change leave that change's level as it is.
+- **Empty diff, or renames only:** None. **A binary file added, changed or deleted:** Lite at least, because it can't be inspected.
+- **Never** `MAX` or `AUTO`: `AUTO`'s cost is unpredictable, and Step 7 couldn't report the level it got.
+
+Note the level and the rule that decided it (a Balanced rule number, the Lite category, or the None category). Step 7 reports both.
 
 ### Worked examples
 
-| Diff | Classification |
+| Change | Level |
 |---|---|
-| Only `.agent-docs/specs/*.md` and `.agent-docs/issues/*.md` changed | Skip |
-| `SKILL.md` changed, but only a step's prose explanation was reworded | Skip |
-| One-line typo or message-string fix in a script | Skip |
-| `SKILL.md` changed: a new `gh api` write added to a step | Review (criterion 2) |
-| A guard or termination condition changed in a step | Review (criterion 3) |
-| `uv.lock` or a dependency manifest changed | Review (criterion 1) |
-| A script's output format changed that another skill parses | Review (criterion 4) |
-| 40 changed logic lines in a single file | Review (criterion 5) |
-| Logic changes spread across 3 files | Review (criterion 5) |
-| One `.agent-docs/` file plus a change hitting any criterion | Review (not every file is low-risk) |
-| Unsure whether a change touches a contract | Review (when unsure, trigger) |
-| Diff is empty (no files changed), or a rename with no content change | Skip — vacuously true that every changed file is low-risk |
-| A binary file was added, changed or deleted | Review (uninspectable; when unsure, trigger) |
+| Dev-dependency patch bump, lockfile only (e.g. ruff) | None |
+| Major dependency bump with no code change | Lite |
+| New dependency added | Balanced (5) |
+| Configure logging once at startup | Lite |
+| Feature warning before a subscription renews or lapses (date logic) | Balanced (3); Lite if message text only |
+| One validated entry point for app settings (config consumed elsewhere) | Balanced (4) |
+| Dockerfile or CI workflow edit | Balanced (5) |
+| Form handler taking user input or storing guest personal data | Balanced (1, 2) |
+| Page copy or styling only | None |
+| Only `.agent-docs/specs/*.md` and `.agent-docs/issues/*.md` | None |
+| `SKILL.md` step prose reworded only | None |
+| `SKILL.md` guard or termination condition changed | Lite |
+| `SKILL.md` gains a new `gh api` write | Balanced (2) |
+| `allowed-tools` changed | Balanced (1) |
+| Script output format another skill parses changes | Balanced (4) |
+| 40 logic lines in one module | Lite |
+| 350 logic lines, or logic across 5+ modules | Balanced (6) |
 
 ### Trigger Copilot Review
 
