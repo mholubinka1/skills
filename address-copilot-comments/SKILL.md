@@ -207,7 +207,7 @@ is the only catch-up — never return here a second time. `CLEAN`, `PENDING`, or
 Turn what Copilot caught on this PR into review criteria shared across every repo, via the
 [Criteria gist](../code-review/CRITERIA-GIST.md).
 
-**Guard.** Run this step only if Copilot was triggered at Step 2b **and** at least one
+**Guard.** Run this step only if a Copilot review was requested at Step 2b, or was already pending (`REQUEST_CONFLICT`), **and** at least one
 Step 4 decision across the whole invocation was **Fix**. Otherwise skip to Step 7.
 
 **Collect** every finding whose decision was Fix (threads replied to with "Fixed." and

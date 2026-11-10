@@ -66,6 +66,8 @@ Any behaviour change that hits no Balanced rule: a feature or bug fix contained 
 
 #### None: every changed file is one of these
 
+A file that hits any Balanced rule is Balanced, even when it also fits a bullet below. For example, a generated migration still hits rule 2.
+
 - Docs, comments or formatting, including page copy and styling that change no logic.
 - A test-only change.
 - A rename or move with no content change.
