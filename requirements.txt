@@ -4,7 +4,7 @@ cfgv==3.5.0
     # via pre-commit
 distlib==0.4.3
     # via virtualenv
-filelock==3.32.7
+filelock==4.2.10
     # via
     #   python-discovery
     #   virtualenv
@@ -17,9 +17,9 @@ packaging==26.3
 platformdirs==4.11.8
     # via virtualenv
 pre-commit==4.6.2
-python-discovery==1.6.1
+python-discovery==1.9.5
     # via virtualenv
 pyyaml==6.0.3
     # via pre-commit
-virtualenv==21.14.6
+virtualenv==21.15.6
     # via pre-commit
