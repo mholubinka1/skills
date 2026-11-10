@@ -225,8 +225,11 @@ gh pr view --json url --jq '.url'
 Share the PR link with the user, with the Review level chosen at Step 2b and the rule that
 decided it (e.g. "Lite: one-module bug fix" or "Balanced (rule 2): new GraphQL mutation"), and
 anything earlier steps said to tell them. After `REQUEST_CONFLICT`, also say that a review was
-already pending, so it ran at an effort this run didn't set. The PR can still be ready to merge. The PR is
-ready to merge, with two exceptions where you leave out "ready to merge". If Step 2b failed,
-either because the diff and file list could not be fetched or because the review request
-failed, say why: the review the PR needed never ran. If a poll returned `ERROR`, say
-which poll failed: Copilot's review may not have been fully read.
+already pending, so it ran at an effort this run didn't set.
+
+The PR is ready to merge, `REQUEST_CONFLICT` included, except in two cases where you leave out
+"ready to merge":
+
+- Step 2b failed, either because the diff and file list could not be fetched or because the
+  review request failed. Say why: the review the PR needed never ran.
+- A poll returned `ERROR`. Say which poll failed: Copilot's review may not have been fully read.
