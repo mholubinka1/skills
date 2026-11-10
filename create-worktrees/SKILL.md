@@ -113,7 +113,7 @@ A fresh worktree is a bare checkout: none of the gitignored dependency artifacts
 
 1. Detect the repo's dependency ecosystems: the first-class ones from `../update-dependencies/REFERENCE.md` "Detection Table" (marker rules and scan scope), plus any other dependency manifest present (`go.mod`, `Cargo.toml`, `Gemfile`, or anything comparable).
 2. **Nothing detected** — do nothing; continue to the caller.
-3. **One or more ecosystems detected** — print each one and its exact install command(s) from [REFERENCE.md](REFERENCE.md) "Dependency bootstrap", then ask: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*. Default: *Skip*, as for any answer that is not a clear *Install*.
+3. **One or more first-class ecosystems detected** — print each one and its exact install command(s) from [REFERENCE.md](REFERENCE.md) "Dependency bootstrap", then ask: *"Install dependencies in this worktree now?"* with options *Install* / *Skip*. Default: *Skip*, as for any answer that is not a clear *Install*.
    - **Skip** — leave the printed commands as a copy-paste hint; continue.
    - **Install** — dispatch the install sub-agent per [REFERENCE.md](REFERENCE.md) "Install handover", and report its result. A failed install does **not** abort: the worktree is usable for work that doesn't execute the code.
 4. **Uncovered ecosystem(s)** — any marker that is not a first-class Detection Table ecosystem: follow [REFERENCE.md](REFERENCE.md) "Uncovered ecosystems".

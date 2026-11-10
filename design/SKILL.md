@@ -84,4 +84,4 @@ Once both axes are resolved, summarise:
 - The agreed acceptance criteria (from Phase 1)
 - The chosen technical approach and any ADRs raised (from Phase 2)
 
-Then hand back: when `/implement` ran this session, return to its Step 3; otherwise offer to run `/implement` for the change.
+Then hand back to whatever invoked this session: when that was `/implement` Step 2, continue `/implement` at Step 3; when another skill called it (e.g. `code-review` Step 5), return the summary to that skill; when the user invoked it directly, offer to run `/implement` for the change.
