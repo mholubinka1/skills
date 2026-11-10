@@ -1,5 +1,7 @@
 # Issues: chore/audit-skills-allowed-tools
 
+> Work complete — PR ready to merge.
+
 ## allowed-tools convention: guard test, create-a-skill rule, all 16 skills (#139)
 
 **Blocked by**: None
@@ -19,18 +21,18 @@ pass/fail Review Checklist item (CAS-5).
 
 ### Acceptance criteria
 
-- [ ] Given a skill whose frontmatter has no `allowed-tools`, when the guard runs, then it fails
+- [x] Given a skill whose frontmatter has no `allowed-tools`, when the guard runs, then it fails
       naming that skill.
-- [ ] Given a skill that pre-approves unscoped `Bash`, `Bash(*)` or `Bash(git *)`, when the guard runs,
+- [x] Given a skill that pre-approves unscoped `Bash`, `Bash(*)` or `Bash(git *)`, when the guard runs,
       then it fails naming the skill and the entry.
-- [ ] Given a skill that pre-approves a destructive pattern (`git push` + anything, `--force`,
+- [x] Given a skill that pre-approves a destructive pattern (`git push` + anything, `--force`,
       `reset --hard`, `branch -D`, `rm`, `git clean`, `stash pop`, `stash drop`), when the guard runs,
       then it fails naming the skill and the entry.
-- [ ] Given all 16 skills after this slice, when the guard runs, then it passes. Every list matches the
+- [x] Given all 16 skills after this slice, when the guard runs, then it passes. Every list matches the
       spec's table, adjusted only by the verified command check.
-- [ ] Given `create-a-skill`, when an author follows its template and checklist, then `allowed-tools`
+- [x] Given `create-a-skill`, when an author follows its template and checklist, then `allowed-tools`
       is in the template, explained in REFERENCE.md, and a pass/fail checklist item.
-- [ ] `pre-commit run --all-files` passes and the full unittest suite is green.
+- [x] `pre-commit run --all-files` passes and the full unittest suite is green.
 
 ---
 
@@ -48,13 +50,13 @@ create-worktrees (CW-1, CW-4 to CW-10) and init-agent-docs (IAD-3, IAD-5 to IAD-
 
 ### Acceptance criteria
 
-- [ ] Given each listed finding ID, when its file is read, then the fix is applied as the spec and
+- [x] Given each listed finding ID, when its file is read, then the fix is applied as the spec and
       audit describe.
-- [ ] Given the design and implement descriptions, when compared, then no trigger branch appears in
+- [x] Given the design and implement descriptions, when compared, then no trigger branch appears in
       both: design triggers on designing or thinking through a change, or from /implement Step 2.
-- [ ] Given any edited skill, when diffed, then no command, step order or output changed.
-- [ ] Every edited description is two sentences, the second starting "Use when".
-- [ ] `pre-commit run --all-files` passes.
+- [x] Given any edited skill, when diffed, then no command, step order or output changed.
+- [x] Every edited description is two sentences, the second starting "Use when".
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -73,15 +75,15 @@ BDD-11).
 
 ### Acceptance criteria
 
-- [ ] Given each listed finding ID, when its file is read, then the fix is applied as the spec and
+- [x] Given each listed finding ID, when its file is read, then the fix is applied as the spec and
       audit describe.
-- [ ] Given address-copilot-comments, when searched, then "Single review" is its leading word and
+- [x] Given address-copilot-comments, when searched, then "Single review" is its leading word and
       "never re-trigger" appears at most once.
-- [ ] Given bdd, when read, then vertical slicing is framed positively (tracer bullets) with no
+- [x] Given bdd, when read, then vertical slicing is framed positively (tracer bullets) with no
       spelled-out banned horizontal pattern.
-- [ ] Given any edited skill, when diffed, then no command, step order or output changed.
-- [ ] Every edited description is two sentences, the second starting "Use when".
-- [ ] `pre-commit run --all-files` passes.
+- [x] Given any edited skill, when diffed, then no command, step order or output changed.
+- [x] Every edited description is two sentences, the second starting "Use when".
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -98,13 +100,13 @@ QD-8), update-dependencies (UD-7, UD-8, UD-9) and create-a-skill (CAS-1 to CAS-4
 
 ### Acceptance criteria
 
-- [ ] Given each listed finding ID, when its file is read, then the fix is applied as the spec and
+- [x] Given each listed finding ID, when its file is read, then the fix is applied as the spec and
       audit describe.
-- [ ] Given create-a-skill, when asked to review or rework an existing skill, then the Process has an
+- [x] Given create-a-skill, when asked to review or rework an existing skill, then the Process has an
       explicit branch for it, and the checklist covers Pruning, co-location and invocation choice.
-- [ ] Given any edited skill, when diffed, then no command, step order or output changed.
-- [ ] Every edited description is two sentences, the second starting "Use when".
-- [ ] `pre-commit run --all-files` passes.
+- [x] Given any edited skill, when diffed, then no command, step order or output changed.
+- [x] Every edited description is two sentences, the second starting "Use when".
+- [x] `pre-commit run --all-files` passes.
 
 ---
 
@@ -137,9 +139,9 @@ Filed:
 
 ### Acceptance criteria
 
-- [ ] Given the spec's Out of Scope B and R lists, when the follow-up issues are listed, then every
+- [x] Given the spec's Out of Scope B and R lists, when the follow-up issues are listed, then every
       finding ID appears in exactly one issue.
-- [ ] Each follow-up issue names the problem, the proposed fix and the file:line for every ID it
+- [x] Each follow-up issue names the problem, the proposed fix and the file:line for every ID it
       carries.
 
 ---
