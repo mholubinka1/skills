@@ -7,7 +7,7 @@ REPO = Path(__file__).resolve().parent.parent
 UNSCOPED_BASH = re.compile(
     r"Bash(\(\*\))?"
     r"|Bash\((git|gh|bash|sh|pwsh|powershell|cmd|python3?|node|npm|npx|yarn|pnpm"
-    r"|dotnet|uv|pip|pipenv|poetry|pdm)[ :]\*\)"
+    r"|dotnet|uv|pip|pipenv|poetry|pdm)[ :]?\*\)"
 )
 DESTRUCTIVE = [
     r"git push(\s+\S|\*|:)",
@@ -110,6 +110,7 @@ class AllowedToolsGuardTest(unittest.TestCase):
             "Bash(python *)",
             "Bash(npm *)",
             "Bash(git:*)",
+            "Bash(git*)",
             "Bash(yarn *)",
             "Bash(dotnet *)",
         ):
