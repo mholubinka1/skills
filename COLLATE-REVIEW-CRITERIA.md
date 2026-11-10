@@ -38,6 +38,9 @@ Give each gist entry one outcome, trying them in this order and taking the first
 4. **Dropped** — tooling already enforces it, or it describes a one-off situation no other
    change would repeat. State the reason.
 
+Minimise the number of criteria that need to be altered. Be judicious in assessing whether
+the new criterion covers a genuine gap or an obscure edge case.
+
 The style rules set the limit on merging: one criterion names one defect. When entries look
 related but a single line would need two triggers or two fixes, they are two defects and
 become two criteria.
