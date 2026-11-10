@@ -76,39 +76,33 @@ A file that hits criteria 1–5 is review-required even when it fits a category 
 
 ### Trigger Copilot Review
 
-The only place Copilot is requested — once per invocation, when the diff is review-required. Copilot reviews at the repository's default effort (Balanced); this skill never selects an effort level.
+This is the only place Copilot is requested: once per invocation, when the Review level is Lite or Balanced. Always pass the effort explicitly. Without `reviewEffort`, the repository default applies, and the level reported at Step 7 would no longer be the level the review ran at. Send only `LITE` or `BALANCED`, never `MAX` or `AUTO`. Every other way of adding Copilot as a reviewer, whether from the CLI or the REST API, takes no effort parameter, so none of them is used.
 
-#### Option A — `gh pr edit` (most plans)
-
-```bash
-gh pr edit {number} --add-reviewer '@copilot'
-```
-
-> In PowerShell, bare `@copilot` is parsed as a splat operator and consumed before arguments are passed to `gh`, so `gh` never receives the reviewer value and errors with `flag needs an argument: --add-reviewer`. Single-quote `'@copilot'` to prevent this.
-
-#### Option B — GraphQL `requestReviews` mutation (fallback if `gh pr edit` is unavailable)
-
-```bash
-gh api graphql -f query='
-mutation {
-  requestReviews(input: {
-    pullRequestId: "{pr_node_id}",
-    userIds: [],
-    union: false
-  }) {
-    pullRequest { title }
-  }
-}'
-```
-
-Get the PR node ID with:
+Get the PR node ID, then request the review with `{effort}` set to `LITE` or `BALANCED`:
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/{number} --jq '.node_id'
+
+gh api graphql \
+  -f query='mutation($pr: ID!, $effort: CopilotCodeReviewEffort!) {
+    requestCopilotCodeReview(input: {pullRequestId: $pr, reviewEffort: $effort}) {
+      success
+      failureReason
+    }
+  }' \
+  -f pr='{pr_node_id}' -f effort='{effort}' \
+  --jq '.data.requestCopilotCodeReview'
 ```
 
-> Copilot reviewer availability depends on your GitHub plan and org settings.
-> If neither option works, manually request a review from the GitHub UI.
+Pass the values as variables, as shown. `$pr` and `$effort` sit inside single quotes, so neither Bash nor PowerShell expands them.
+
+#### Result
+
+| Result | Next |
+|---|---|
+| `success: true` | Step 3 |
+| `failureReason: REQUEST_CONFLICT`: a Copilot review is already pending | Step 3. That pending review is the one to poll. |
+| Any other `failureReason` (`ACTOR_INELIGIBLE`, `REPOSITORY_INELIGIBLE`, `APP_NOT_INSTALLED`, `NO_QUOTA_REMAINING`, `LICENSED_ORGANIZATION_UNAVAILABLE`), `success: false` with no reason, or a non-zero `gh` exit (GraphQL or network error) | Report the reason or error, then go to Step 7. No review was requested, so Step 7 leaves out "ready to merge". |
 
 ---
 

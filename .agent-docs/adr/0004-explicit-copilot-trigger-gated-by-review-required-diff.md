@@ -9,4 +9,4 @@ GitHub no longer auto-triggers a Copilot review on PR creation — `address-copi
 
 ## Amendment
 
-The 2-round cap no longer exists: Copilot now reviews at most once per invocation (see **Single review** in `.agent-docs/context.md`), and Step 2b's review-required criteria were tightened so low-risk diffs skip the review (full criteria: Classification rule in `address-copilot-comments/REFERENCE.md`). Review effort is not selected by the skill — GitHub exposes no documented per-request effort parameter (only the Reviewers UI and repo/org/user defaults), so Balanced, the repository default, is always used.
+The 2-round cap no longer exists: Copilot now reviews at most once per invocation (see **Single review** in `.agent-docs/context.md`), and Step 2b's review-required criteria were tightened so low-risk diffs skip the review (full criteria: Classification rule in `address-copilot-comments/REFERENCE.md`). Review effort is now chosen per PR (None, Lite or Balanced) and passed explicitly to `requestCopilotCodeReview`. See ADR 0007, which replaces this Amendment's earlier claim that GitHub had no per-request effort parameter.

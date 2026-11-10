@@ -14,7 +14,6 @@ allowed-tools:
   - Bash(gh repo view *)
   - Bash(gh pr create *)
   - Bash(gh pr diff *)
-  - Bash(gh pr edit *)
   - Bash(gh pr view *)
   - Bash(gh pr comment *)
   - Bash(gh api repos/*)
@@ -86,7 +85,7 @@ gh pr diff {number}
 
 See the Decide Whether Copilot Review Is Required section in [REFERENCE.md](REFERENCE.md) for the classification rule and worked examples.
 
-**Review-required** (any risk criterion hit; when unsure) → trigger it (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)); continue to Step 3. **Single review**: this is the only point where Copilot is requested, once per invocation.
+**Review-required** (any risk criterion hit; when unsure) → request the review at `BALANCED` (see the Trigger Copilot Review section in [REFERENCE.md](REFERENCE.md)). On success or `REQUEST_CONFLICT`, continue to Step 3. On any other failure, report it and go to Step 7. **Single review**: this is the only point where Copilot is requested, once per invocation.
 **Low-risk** → skip straight to Step 7. Do not trigger, do not poll.
 
 ## Step 3 — Poll for Copilot review threads and suppressed comments
@@ -223,5 +222,6 @@ gh pr view --json url --jq '.url'
 ```
 
 Share the PR link with the user, with anything earlier steps said to tell them. The PR is
-ready to merge — unless a poll returned `ERROR`: then say which poll failed, so Copilot's
-review may not have been fully read, and leave out "ready to merge".
+ready to merge, with two exceptions where you leave out "ready to merge". If the Step 2b review
+request failed, say why: the review the PR needed never ran. If a poll returned `ERROR`, say
+which poll failed: Copilot's review may not have been fully read.
