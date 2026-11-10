@@ -38,7 +38,7 @@ This reads the full diff of every changed file in one call. The classification b
 
 ### Read the repo's listed paths
 
-Before classifying, check the target repo's `.agent-docs/agent.md` for a `## Review levels` section. If it has one, note the paths it lists for Balanced rule 7. If the file or the section doesn't exist, use rules 1–6 only.
+Before classifying, check the target repo's `.agent-docs/agent.md` for a `## Review levels` section. If it has one, note the paths it lists for Balanced rule 7. Each entry is a directory prefix or a glob, matched against the file's repo-relative path. If the file or the section doesn't exist, use rules 1–6 only.
 
 ### Classification rule
 
@@ -66,11 +66,11 @@ Any behaviour change that hits no Balanced rule: a feature or bug fix contained 
 
 #### None: every changed file is one of these
 
-- Docs, comments or formatting.
+- Docs, comments or formatting, including page copy and styling that change no logic.
 - A test-only change.
 - A rename or move with no content change.
 - A generated file, other than a lockfile. Lockfiles follow the dependency rules: a lockfile that adds a package is Balanced (rule 5).
-- A patch or minor dependency bump that only changes a lockfile or version pin.
+- A patch or minor dependency bump that only changes a lockfile or a version pin in a dependency manifest.
 - A config value tweak outside production or security config.
 - A tiny edit of 10 lines or fewer that hits no Balanced rule.
 
@@ -110,7 +110,7 @@ Note the level and the rule that decided it (a Balanced rule number, the Lite ca
 
 ### Trigger Copilot Review
 
-This is the only place Copilot is requested: once per invocation, when the Review level is Lite or Balanced. Always pass the effort explicitly. Without `reviewEffort`, the repository default applies, and the level reported at Step 7 would no longer be the level the review ran at. Send only `LITE` or `BALANCED`, never `MAX` or `AUTO`. Every other way of adding Copilot as a reviewer, whether from the CLI or the REST API, takes no effort parameter, so none of them is used.
+This is the only place Copilot is requested: once per invocation, when the Review level is Lite or Balanced. Always pass the effort explicitly. Without `reviewEffort`, the repository default applies, and the level reported at Step 7 would no longer be the level the review ran at. Send only `LITE` or `BALANCED`, never `MAX` or `AUTO`. The CLI's add-reviewer flag and the REST `requested_reviewers` endpoint take no effort parameter (checked 2026-11-10), so neither is used.
 
 Get the PR node ID, then request the review with `{effort}` set to `LITE` or `BALANCED`:
 
@@ -136,7 +136,7 @@ Pass the values as variables, as shown. `$pr` and `$effort` sit inside single qu
 |---|---|
 | `success: true` | Step 3 |
 | `failureReason: REQUEST_CONFLICT`: a Copilot review is already pending | Step 3. That pending review is the one to poll. |
-| Any other `failureReason` (`ACTOR_INELIGIBLE`, `REPOSITORY_INELIGIBLE`, `APP_NOT_INSTALLED`, `NO_QUOTA_REMAINING`, `LICENSED_ORGANIZATION_UNAVAILABLE`), `success: false` with no reason, or a non-zero `gh` exit (GraphQL or network error) | Report the reason or error, then go to Step 7. No review was requested, so Step 7 leaves out "ready to merge". |
+| Any other `failureReason` (`ACTOR_INELIGIBLE`, `REPOSITORY_INELIGIBLE`, `APP_NOT_INSTALLED`, `NO_QUOTA_REMAINING`, `LICENSED_ORGANIZATION_UNAVAILABLE`), `success: false` with no reason, or a non-zero `gh` exit from either call (the node-ID fetch or the mutation) | Report the reason or error, then go to Step 7. No review was requested, so Step 7 leaves out "ready to merge". |
 
 ---
 
