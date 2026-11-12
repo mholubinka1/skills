@@ -1,6 +1,6 @@
 ---
 name: design
-description: Runs a two-axis design interview — business (what and why), then engineering (how) — recording CONTEXT.md terms and ADRs as decisions land. Use when the user wants to design or think through a change before building it, or when /implement reaches its design step.
+description: Runs a two-axis design interview — business (what and why), then engineering (how) — recording glossary terms and ADRs as decisions land. Use when the user wants to design or think through a change before building it, or when /implement reaches its design step.
 allowed-tools:
   - AskUserQuestion
   - Read
@@ -8,8 +8,6 @@ allowed-tools:
   - Glob
   - Edit(.agent-docs/**)
   - Write(.agent-docs/**)
-  - Edit(CONTEXT.md)
-  - Write(CONTEXT.md)
 attribution: Combines grilling and grill-with-docs disciplines (Matt Pocock, mattpocock/skills)
 ---
 
@@ -67,7 +65,7 @@ Phase 2 is complete when every bullet above is answered or marked N/A, and the u
 
 As decisions crystallise, write them down immediately — do not batch.
 
-**CONTEXT.md** — when a domain term is introduced or sharpened, update it right there. Keep it a glossary only — no implementation details. Follow the format in `CONTEXT-FORMAT.md`.
+**Glossary** — the repo's domain glossary is `.agent-docs/context.md`, the file every other skill reads. When a domain term is introduced or sharpened, update it right there. Keep it a glossary only — no implementation details. Follow the format in [`../init-agent-docs/CONTEXT-FORMAT.md`](../init-agent-docs/CONTEXT-FORMAT.md). If the file does not exist yet, create it in that format when the first term is resolved. Never write a `CONTEXT.md` at the repo root: nothing reads it.
 
 **ADRs** — offer one only when all three are true:
 
