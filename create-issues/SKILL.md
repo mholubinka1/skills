@@ -40,7 +40,7 @@ For each slice, draw Given-When-Then scenarios from the spec's user stories as i
 
 ### 5. Write the local issues file
 
-Create `.agent-docs/issues/<branch-name>.md` using the Local Issues File Template in [REFERENCE.md](REFERENCE.md).
+Create `.agent-docs/issues/<branch-name>.md` using the Local Issues File Template in [REFERENCE.md](REFERENCE.md). Each acceptance criterion is one of the Given-When-Then scenarios approved in Step 4, unchanged.
 
 ### 6. Push to GitHub
 
@@ -50,6 +50,7 @@ Publishing is mechanical, so it runs in a Haiku sub-agent with an empty context.
 Read <this skill's base directory>/REFERENCE.md, section "GitHub issue creation command".
 Verify gh is available (gh --version). Publish every slice in .agent-docs/issues/<branch-name>.md
 to GitHub in dependency order (blockers first), then write the real issue numbers back into
-that file. Change no other wording in it.
+that file: each slice's own number in its "GitHub issue" field, blockers' numbers in the
+"Blocked by" fields. Change no other wording in it.
 Return: slice title → issue number, one per line, and one line "Skipped / risk:".
 ```
