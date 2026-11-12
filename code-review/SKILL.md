@@ -39,7 +39,8 @@ Step 3  Pin fixed point + identify spec source
 Step 4  Migrate legacy review.md into the Criteria gist if present; spawn parallel
         Standards + Spec review agents → aggregate findings
 Step 5  Address all findings — blocking first, then advisory
-        Second consecutive clean pass? ──► Step 6
+        Second consecutive clean pass? ──► Step 6, or stop here when the caller
+                                           asked for Steps 1–5 only
         Otherwise ──► Step 4 (new agents, new context windows)
 Step 6  Run /address-copilot-comments for Copilot PR review
 Step 7  Run /pr-cleanup
@@ -51,24 +52,20 @@ Invoke the `branch-hygiene` skill with a quoted one-line summary of the change u
 
 ## Step 2 — Verify changes and pre-commit
 
-```bash
-git diff HEAD --stat
-git diff --cached --stat
-```
-
-If no changes at all, stop and inform the user. Otherwise invoke the `pre-commit-check` skill and act on its `next:` line before proceeding.
-
-## Step 3 — Pin fixed point and spec source
-
-**Fixed point**: default to the merge-base with the default branch:
+A branch's work may be committed, uncommitted, or both, so check each:
 
 ```bash
 BASE=$(git symbolic-ref refs/remotes/origin/HEAD --short | sed 's|origin/||')
-git rev-parse origin/$BASE   # confirm it resolves
-git diff origin/$BASE...HEAD --stat   # confirm diff is non-empty
+git rev-parse origin/$BASE            # confirm it resolves
+git diff origin/$BASE...HEAD --stat   # work committed on this branch
+git status --porcelain                # staged, unstaged and untracked work
 ```
 
-If the user supplied an explicit commit, branch, or tag, use that instead. A bad ref or empty diff should fail here — not inside parallel sub-agents.
+If the user supplied an explicit commit, branch, or tag as the fixed point, use that instead of `origin/$BASE` in both commands that name it. A command that fails is an error to report, not "no changes" — a ref that does not resolve, or a diff with no merge-base in a shallow checkout, prints nothing either. A bad ref should fail here — not inside parallel sub-agents. Stop and inform the user only when every command succeeds and both the diff and the status print nothing. Otherwise invoke the `pre-commit-check` skill and act on its `next:` line before proceeding.
+
+## Step 3 — Pin fixed point and spec source
+
+**Fixed point**: the ref Step 2 checked — the merge-base with the default branch (`origin/$BASE`) by default, or the commit, branch, or tag the user supplied.
 
 **Spec source**: look in this order:
 
@@ -78,59 +75,8 @@ If the user supplied an explicit commit, branch, or tag, use that instead. A bad
 
 ## Step 4 — Migrate legacy criteria, then spawn parallel review agents
 
-**Migrate first, if needed.** Check whether the target repo has `.agent-docs/review.md` — a
-leftover from before criteria moved to the shared [Criteria gist](CRITERIA-GIST.md). If it
-exists:
-
-- **Validate the whole file, not just the entries.** The only accepted content under
-  `## Criteria` is one of: the literal placeholder line `_None yet._` on its own, or zero or
-  more entries each matching `- **Label**: text (PR #<number>)` exactly — including that
-  trailing `(PR #<number>)` suffix; an entry missing it doesn't parse either, since there'd be
-  nothing to retag and it would end up appended with no provenance. Content above the heading
-  is free-form explanatory prose and isn't validated. If the file has no `## Criteria`
-  heading, has **any** content under that heading that isn't the placeholder or a
-  correctly-tagged entry (a stray note after the list is exactly as unaccounted-for as a
-  malformed entry), or **any** single entry fails to parse, **stop here** for the whole file:
-  report that it couldn't be parsed and leave it in place untouched. Never delete a file whose
-  content you couldn't fully account for, and never salvage only the parts that happened to
-  parse.
-- Rewrite each entry to the [Criteria style](CRITERIA-STYLE.md) rules — an entry covering
-  two defects becomes two — and retag its `(PR #<number>)` as `(repo#PR)` on every entry it
-  produces, using the target repo's name and the existing PR number. Get the repo name via `gh repo view --json name -q .name`, run in the
-  target repo. **If that lookup fails** (no network, `gh` not authenticated) — stop here:
-  there is no valid tag to retag with, so don't append untagged entries and don't delete the
-  file. Leave `.agent-docs/review.md` in place, skip migration for this run, and continue
-  straight to **Dispatch the reviewers** below as if the migration check had found nothing to do.
-- Start this skill's own [CRITERIA-GIST.md](CRITERIA-GIST.md)'s "Appending an entry"
-  procedure now, but stop after its fetch step (step 1) — that gist content is what you
-  dedupe the retagged entries against, matching on meaning. **If that fetch fails** — no
-  network, `gh` not authenticated, the gist unreachable — treat it exactly like a failed
-  write below: report the failure, leave `.agent-docs/review.md` in place, do not delete it.
-  There is no confirmed successful outcome (a write, or a verified-empty dedupe) without a
-  successful fetch to base it on. Otherwise, carry that same fetched content forward into the
-  rest of the procedure rather than fetching it again.
-- **If there are any retagged entries left after dedupe**: continue the "Appending an entry"
-  procedure from step 2 with the survivors, and **confirm the write succeeded** (the
-  `gh gist edit` call exits zero) before proceeding.
-  - If the write failed for any reason — no network, `gh` not authenticated, the gist
-    unreachable — report the failure and leave `.agent-docs/review.md` in place; do **not**
-    delete it. A migrated-and-deleted file with a failed write would lose those criteria
-    permanently, since nothing else retains them.
-- **If the file parsed cleanly but had nothing to append** (an empty list, only the
-  `_None yet._` placeholder, or every entry already covered by the gist): there is no write
-  to confirm — treat this as a successful no-op and proceed directly to deletion below.
-- Once the write (or no-op) is confirmed successful: delete `.agent-docs/review.md` from the
-  target repo. If it was tracked by git (`git ls-files --error-unmatch .agent-docs/review.md`
-  exits zero before the delete), stage the deletion (`git add .agent-docs/review.md`) so it
-  isn't lost to an incidental `git checkout`/`git restore`; if it was never tracked (e.g. an
-  old, uncommitted bootstrap that never got added), there's nothing to stage — the file being
-  gone from disk is already the complete outcome, and `git add` on an untracked deletion would
-  just fail with a pathspec error. Either way, leave the deletion uncommitted: the next
-  commit made after this review picks up the staged deletion.
-
-This is idempotent: once `.agent-docs/review.md` is gone, later runs against the same repo
-skip straight past this check. A failed migration simply leaves the file in place for the
-next run to retry.
+**Migrate first, if needed.** If the target repo has `.agent-docs/review.md`, follow
+[MIGRATE-LEGACY-REVIEW.md](MIGRATE-LEGACY-REVIEW.md) before dispatching. Otherwise skip it.
 
 **Dispatch the reviewers.** Each sub-agent starts with an empty context and gathers its own
 inputs, so the main context neither reads the criteria nor pastes the diff. Send a **single
@@ -229,9 +175,14 @@ Then apply the accepted fixes:
 
 Then re-run pre-commit hooks.
 
-Once all findings are decided and fixes applied, update the clean-pass count. Once the
-exit rule above is met, continue to Step 6 without asking the user; otherwise return to
-**Step 4** for the next pass, with brand new agents (fresh context windows).
+Once all findings are decided and fixes applied, update the clean-pass count. Until the
+exit rule above is met, return to **Step 4** for the next pass, with brand new agents (fresh
+context windows). Once it is met:
+
+- **The caller asked for Steps 1–5 only** (as `address-copilot-comments` Step 4b does): stop
+  here. Leave the fixes uncommitted, report the outcome, and return to the caller. Steps 6
+  and 7 belong to the caller's own run, so running them here would re-invoke it.
+- **Otherwise**: continue to Step 6 without asking the user.
 
 ## Step 6 — Copilot PR review
 

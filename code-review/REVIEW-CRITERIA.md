@@ -103,7 +103,7 @@ Each smell: _what it is_ → _how to fix_:
 
 - **Meaningful assertions**: tests should test behaviour, not the shape of the code. Assertions must provide information on failure. Flag tests that catch exceptions and assert nothing about them.
 - **Mock only at system boundaries**: do not mock code that can be controlled — only mock external systems (databases, APIs, queues).
-- **Coverage target**: there is an 80% code coverage requirement enforced at the pipeline level. Flag new code paths lacking test coverage.
+- **Coverage target**: flag new code paths lacking test coverage. Cite a coverage threshold only when the repo's CI or test configuration enforces one (a `--cov-fail-under` flag, a `coverageThreshold` block, a coverage gate in the pipeline), and then cite that repo's figure.
 - **Single test for a branch with several triggers**: flag a catch-all exception or shared branch documented to have more than one cause when only one is exercised by a test. Add one test per distinct triggering path, not one test for the branch as a whole.
 - **Fixture that bypasses the mechanism under test**: flag a test fixture that supplies a value directly from a closure or literal when the fix under test changes how that value is looked up or refreshed — such a fixture can pass identically against the unfixed code.
 - **Indistinguishable conversion test values**: flag a test for a unit conversion whose input and expected values are far enough apart that skipping the conversion entirely would not change the pass/fail outcome. Pick a value where the converted and unconverted results diverge.
