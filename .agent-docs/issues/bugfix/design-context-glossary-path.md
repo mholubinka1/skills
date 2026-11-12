@@ -1,5 +1,7 @@
 # Issues: bugfix/design-context-glossary-path
 
+> Work complete — PR ready to merge.
+
 ## design: audit follow-ups (DES-1)
 
 **GitHub issue**: #154
