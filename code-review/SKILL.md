@@ -61,7 +61,7 @@ git diff origin/$BASE...HEAD --stat   # work committed on this branch
 git status --porcelain                # staged, unstaged and untracked work
 ```
 
-If the user supplied an explicit commit, branch, or tag as the fixed point, use that instead of `origin/$BASE` in both commands that name it. A ref that does not resolve is an error to report, not "no changes": a bad ref should fail here — not inside parallel sub-agents. Stop and inform the user only when the ref resolves and both the diff and the status print nothing. Otherwise invoke the `pre-commit-check` skill and act on its `next:` line before proceeding.
+If the user supplied an explicit commit, branch, or tag as the fixed point, use that instead of `origin/$BASE` in both commands that name it. A command that fails is an error to report, not "no changes" — a ref that does not resolve, or a diff with no merge-base in a shallow checkout, prints nothing either. A bad ref should fail here — not inside parallel sub-agents. Stop and inform the user only when every command succeeds and both the diff and the status print nothing. Otherwise invoke the `pre-commit-check` skill and act on its `next:` line before proceeding.
 
 ## Step 3 — Pin fixed point and spec source
 

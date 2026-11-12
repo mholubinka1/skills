@@ -45,7 +45,8 @@ line with the commands the skill now runs.
 
 - **CR-1 — `code-review` SKILL, Step 2**: resolve the default branch here (the same
   `git symbolic-ref` line Step 3 uses today) and check `git diff origin/$BASE...HEAD --stat`
-  and `git status --porcelain`. Stop only when both are empty. Step 3 reuses `$BASE` rather
+  and `git status --porcelain`. Stop only when the commands succeed and both are empty; a
+  failing command is reported as an error. Step 3 reuses `$BASE` rather
   than resolving it again. A user-supplied fixed point replaces `origin/$BASE` in the
   Step 2 check too.
 - **CR-2 — new `MIGRATE-LEGACY-REVIEW.md`** in the `code-review` skill: the migration
@@ -60,7 +61,8 @@ line with the commands the skill now runs.
   tests in every repo; cite a coverage threshold only when the repo's CI or test
   configuration enforces one, and then cite that repo's figure.
 - **CR-12 — `FIXER`, "Snapshot first" and "Blocked"**: the snapshot saves
-  `git status --porcelain` next to `git diff`. Rollback deletes files that are untracked
+  `git status --porcelain --untracked-files=all` next to `git diff`, so files inside an
+  already-untracked directory are listed individually. Rollback deletes files that are untracked
   now and were absent from the snapshot's status, and is checked by comparing status and
   diff against the snapshot.
 - **`allowed-tools`**: the skill's frontmatter already scopes `git diff *` and
