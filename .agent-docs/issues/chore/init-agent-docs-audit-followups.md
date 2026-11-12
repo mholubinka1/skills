@@ -1,5 +1,7 @@
 # Issues: chore/init-agent-docs-audit-followups
 
+> Work complete — PR ready to merge.
+
 ## init-agent-docs: audit follow-ups (IAD-1, IAD-2, IAD-4)
 
 **GitHub issue**: #150
