@@ -66,12 +66,13 @@ Plain pip has no built-in semver-aware "update within range" command. List outda
 pip list --outdated
 ```
 
-For packages where only the patch/minor version changed, upgrade and re-pin explicitly:
+For each package where only the patch/minor version changed, edit its pin in place: on that package's own line in `requirements.txt`, change `==<old-version>` to `==<new-version>` and nothing else. Leave every other line as it is — comments, markers, options, and lines that are not `==` pins. Then install from the file:
 
 ```bash
-pip install --upgrade "<package>==<new-version>"
-pip freeze > requirements.txt
+pip install -r requirements.txt
 ```
+
+Never run `pip freeze > requirements.txt`: it replaces the file with every package in the environment, including transitive and unrelated ones, and drops the comments and markers.
 
 ## .NET / C\#
 
@@ -106,12 +107,24 @@ npm update
 
 `npm update` bumps within the semver ranges already declared in `package.json` (patch/minor only, given normal `^`/`~` ranges). Rows in `npm outdated` where `Latest` > `Wanted` are majors — report, don't apply.
 
-**yarn** (`yarn.lock`):
+**yarn** (`yarn.lock`): the commands depend on the major version, so run `yarn --version` first.
+
+Yarn 1.x:
 
 ```bash
 yarn outdated
 yarn upgrade
 ```
+
+Yarn 3 and later (`yarn outdated` and `yarn upgrade` do not exist there):
+
+```bash
+yarn up -R '**'
+```
+
+`yarn up -R` resolves every matching range again to the highest version it allows and leaves `package.json` untouched, so with normal `^`/`~` ranges this is patch/minor only. Never run `yarn up` without `-R`: it ignores the declared ranges and moves to the latest release, majors included. Yarn 3 and later has no non-interactive listing of outdated packages (`yarn upgrade-interactive` needs a terminal), so report "majors not checked for yarn" rather than a list.
+
+Yarn 2.x has neither set of commands in a usable form: report it and skip the ecosystem.
 
 **pnpm** (`pnpm-lock.yaml`):
 

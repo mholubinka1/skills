@@ -1,5 +1,7 @@
 # Issues: bugfix/address-copilot-push-resolve-poll
 
+> Work complete — PR merged.
+
 ## address-copilot-comments: Haiku poller can return PENDING before the poll window elapses
 
 **GitHub**: #132
@@ -16,16 +18,16 @@ The poller sub-agent calls it instead of sequencing sleeps, and the main context
 
 ### Acceptance criteria
 
-- [ ] Given no new review for two polls and a clean one on the third, when the poll script
+- [x] Given no new review for two polls and a clean one on the third, when the poll script
       runs, then it prints `DECISION=CLEAN` and `POLLS_RUN=3`.
-- [ ] Given no review within the cap, when the poll script runs, then it prints
+- [x] Given no review within the cap, when the poll script runs, then it prints
       `DECISION=PENDING` and `POLLS_RUN` equal to the cap.
-- [ ] Given a `gh` failure, when the poll script runs, then it stops at once with
+- [x] Given a `gh` failure, when the poll script runs, then it stops at once with
       `DECISION=ERROR`.
-- [ ] Given a poller that returns `PENDING` with fewer than 10 polls, when Step 3 or
+- [x] Given a poller that returns `PENDING` with fewer than 10 polls, when Step 3 or
       Step 5b reads its report, then the result is handled as `ERROR`, not routed to Step 6
       as a finished wait.
-- [ ] `allowed-tools` scopes the poll script and no longer lists `sleep 60`.
+- [x] `allowed-tools` scopes the poll script and no longer lists `sleep 60`.
 
 ---
 
@@ -44,10 +46,10 @@ named in this run's decisions.
 
 ### Acceptance criteria
 
-- [ ] Given a branch that was never pushed, when Step 2 runs, then it pushes before
+- [x] Given a branch that was never pushed, when Step 2 runs, then it pushes before
       `gh pr create`, and is done when `gh pr view` returns the PR (ACC-1).
-- [ ] Given a PR with an unresolved human thread, when Step 5 resolves threads, then only
+- [x] Given a PR with an unresolved human thread, when Step 5 resolves threads, then only
       the `threadId`s in the decisions are resolved (ACC-2).
-- [ ] `allowed-tools` matches the commands the skill runs.
+- [x] `allowed-tools` matches the commands the skill runs.
 
 ---

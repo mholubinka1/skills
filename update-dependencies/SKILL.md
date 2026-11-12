@@ -5,13 +5,19 @@ allowed-tools:
   - Read
   - Glob
   - Grep
+  - Edit
   - Bash(git status *)
+  - Bash(git symbolic-ref refs/remotes/origin/HEAD --short)
+  - Bash(git branch --show-current)
+  - Bash(date +%F*)
   - Bash(git fetch *)
   - Bash(git pull *)
   - Bash(git checkout -b *)
   - Bash(git merge *)
   - Bash(git diff *)
   - Bash(git stash push *)
+  - Bash(git stash list *)
+  - Bash(git stash apply *)
   - Bash(git add *)
   - Bash(git commit *)
   - Bash(uv lock --upgrade)
@@ -25,14 +31,17 @@ allowed-tools:
   - Bash(pipenv update *)
   - Bash(pip-compile --upgrade *)
   - Bash(pip list --outdated)
+  - Bash(pip install -r requirements.txt)
   - Bash(dotnet list package --outdated)
   - Bash(dotnet add * package *)
   - Bash(dotnet tool list --global)
   - Bash(dotnet outdated *)
   - Bash(npm outdated)
   - Bash(npm update)
+  - Bash(yarn --version)
   - Bash(yarn outdated)
   - Bash(yarn upgrade)
+  - Bash(yarn up -R *)
   - Bash(pnpm outdated)
   - Bash(pnpm update)
   - Bash(pre-commit autoupdate *)
@@ -46,18 +55,28 @@ background: false
 
 # Update Dependencies
 
-Syncs with `main`/`master` first (Dependabot may have already merged updates there), then updates dependencies to their latest patch/minor versions across every detected ecosystem, plus pre-commit hook versions. Commits the result locally.
+Syncs with the default branch first (Dependabot may have already merged updates there), then updates dependencies to their latest patch/minor versions across every detected ecosystem, plus pre-commit hook versions. Commits the result locally.
 
 See [REFERENCE.md](REFERENCE.md) for per-ecosystem detection rules and commands.
 
-## Step 1: Sync with main/master
+## Step 1: Sync with the default branch
 
-1. Run `git status`. If the working tree is dirty, stash it: `git stash push -u -m "update-dependencies: pre-sync stash"`.
-2. Run `git fetch origin`.
-3. If the current branch is `main`/`master`: pull latest (`git pull`), then create a fresh branch off it, e.g. `git checkout -b chore/update-dependencies`.
-4. Otherwise (already on a feature/dev branch): merge latest main/master into it, e.g. `git merge origin/main` (or `origin/master`), to absorb anything Dependabot already merged.
-5. On merge conflicts: stop immediately and leave any stash in place. Report the conflicted files (`git diff --name-only --diff-filter=U`) — resolving them is the caller's job.
-6. If a stash was created in step 1 and the sync succeeded cleanly, pop it: `git stash pop`. On a conflict popping the stash, stop and hand off to the user — do not auto-resolve.
+1. Resolve the default branch: `git symbolic-ref refs/remotes/origin/HEAD --short`. It prints a ref such as `origin/main`; the part after `origin/` is the default branch name. If the command fails, stop and report it, telling the user to run `git remote set-head origin --auto`. Never guess `main` or `master`.
+2. Run `git status --porcelain`. If it prints anything, the working tree is dirty. Set it aside and note the stash's SHA:
+
+   ```bash
+   date +%F-%H%M%S
+   git stash push -u -m "update-dependencies <that timestamp>"
+   git stash list --format='%H %gs'
+   ```
+
+   The SHA is the first field of the line that ends with your message. Keep it for Step 6. The stash stack is shared with other worktrees and sessions, so from here on this stash is only ever named by its SHA.
+3. Run `git fetch origin`.
+4. If `git branch --show-current` prints the default branch name: pull latest (`git pull`), then create a dated branch off it: `git checkout -b chore/update-dependencies-<YYYY-MM-DD>`, with the date from `date +%F`. If that branch already exists, add `-2`, then `-3`, and so on.
+5. Otherwise (already on a feature or dev branch): merge the default branch into it, `git merge origin/<default branch>`, to absorb anything Dependabot already merged.
+6. On merge conflicts: stop immediately and leave the stash in place. Report the conflicted files (`git diff --name-only --diff-filter=U`) and the stash SHA — resolving them is the caller's job.
+
+The stash stays set aside until Step 6, so the working tree holds only this run's changes while it updates and commits. Whenever the run stops early, report the stash SHA.
 
 ## Step 2: Detect ecosystems
 
@@ -78,7 +97,9 @@ If a required package manager binary isn't installed for a detected ecosystem (e
 If `.pre-commit-config.yaml` exists at the repo root:
 
 1. Run `pre-commit autoupdate`.
-2. Run `pre-commit run --all-files` and record pass/fail per hook. A newly bumped hook surfacing a failure is expected and useful — report it, don't fix it silently.
+2. Run `git status --porcelain` and note the files it lists.
+3. Run `pre-commit run --all-files` and record pass/fail per hook. A newly bumped hook surfacing a failure is expected and useful — report it, don't fix it silently.
+4. Run `git status --porcelain` again. Every file listed now that step 2 did not list was rewritten or created by a hook: record these as the hook autofixes. Leave them in the working tree, unstaged, for the user to review.
 
 ## Step 5: Best-effort validation
 
@@ -86,7 +107,7 @@ For each ecosystem updated, run its standard build/test command if one is detect
 
 ## Step 6: Commit
 
-Stage only the files this run actually touched — dependency manifests, lockfiles, and `.pre-commit-config.yaml` (e.g. `package.json`, `package-lock.json`, `requirements.txt`, `poetry.lock`, `uv.lock`, `pyproject.toml`, `*.csproj`, `.pre-commit-config.yaml`). Never `git add -A` or `git add .`: a stash popped back in Step 1 may contain unrelated in-progress work that must not be bundled into this commit.
+Stage only the files this run actually touched — dependency manifests, lockfiles, and `.pre-commit-config.yaml` (e.g. `package.json`, `package-lock.json`, `requirements.txt`, `poetry.lock`, `uv.lock`, `pyproject.toml`, `*.csproj`, `.pre-commit-config.yaml`). Never `git add -A` or `git add .`: the hook autofixes recorded in Step 4 are not part of this commit.
 
 Commit with a clear, descriptive message summarizing what was updated per ecosystem, e.g.:
 
@@ -99,13 +120,22 @@ chore: update dependencies (patch/minor)
 
 Do not push. Commit even when Step 4 or Step 5 reported failures; their results are already captured in the report for the user to act on.
 
+**Then restore the stash**, if Step 1 made one — after the commit, or straight away when there was nothing to commit:
+
+```bash
+git stash apply <stash SHA from Step 1>
+```
+
+Never run `git stash pop` or a bare `git stash apply`: the top of the shared stack may be another session's entry. On a conflict applying the stash, stop and hand off to the user with the SHA — do not auto-resolve. A successful apply leaves the entry on the stack; leave it there and report it, so the user can drop it once they have checked their work is back.
+
 ## Step 7: Report
 
 Summarize:
 
 - The branch the updates landed on, and whether it was newly created.
 - Per ecosystem: packages updated (old → new version), and majors available but not applied.
-- Pre-commit: hooks bumped, and the `--all-files` result.
+- Pre-commit: hooks bumped, the `--all-files` result, and every hook autofix from Step 4 by file path, noting they are uncommitted.
 - Validation: build/test result per ecosystem, if run.
+- Stash: if Step 1 stashed work, whether it was restored, and its SHA with a note that the entry is still on the stash stack.
 - The commit created (hash + message summary), and an explicit note that it was not pushed — the next step (review, test, push/PR) is up to the user, or a follow-on skill like `code-review`.
 - `Skipped / risk:` one line naming any ecosystem skipped and any failure the user must act on.
