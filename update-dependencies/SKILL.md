@@ -98,9 +98,9 @@ If `.pre-commit-config.yaml` exists at the repo root:
 
 1. Run `pre-commit autoupdate`.
 2. Stage this run's changes so far, by path: each manifest and lockfile Step 3 changed, and `.pre-commit-config.yaml`. The index now holds them as they were before any hook ran.
-3. Run `git status --porcelain` and note the untracked (`??`) files.
+3. Run `git diff --name-only` and `git status --porcelain`. Note the tracked files the first lists — Step 3 changed them and step 2 did not stage them, such as a regenerated `.pnp.cjs` — and the untracked (`??`) files in the second.
 4. Run `pre-commit run --all-files` and record pass/fail per hook. A newly bumped hook surfacing a failure is expected and useful — report it, don't fix it silently.
-5. Find the hook autofixes. `git diff --name-only` compares the working tree with the index, so it lists every tracked file a hook rewrote, a file staged in step 2 included. Run `git status --porcelain` again: an untracked file that step 3 did not list was created by a hook. Record all of these as the hook autofixes.
+5. Find the hook autofixes. `git diff --name-only` compares the working tree with the index, so a file staged in step 2 appears in it only when a hook rewrote it. Every file it lists now that step 3 did not note was rewritten by a hook. Run `git status --porcelain` again: an untracked file that step 3 did not note was created by a hook. Record all of these as the hook autofixes.
 6. Where a hook rewrote a file staged in step 2, `git add` that file again, so the commit holds the version that passes the hooks, and record the autofix as committed. Leave every other autofix in the working tree, unstaged, for the user to review.
 
 ## Step 5: Best-effort validation

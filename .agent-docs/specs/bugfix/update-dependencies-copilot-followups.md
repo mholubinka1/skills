@@ -41,9 +41,11 @@ hooks, so a diff against the index shows every file a hook rewrote.
   lines, is left unchanged and reported as skipped. Regenerating hashes needs a tool this
   flow does not have.
 - **SKILL Step 4**: after `pre-commit autoupdate`, the run stages its manifests, lockfiles
-  and `.pre-commit-config.yaml` by path. After the hooks, `git diff --name-only` lists every
-  tracked file a hook rewrote, and new untracked entries in `git status --porcelain` are
-  files a hook created.
+  and `.pre-commit-config.yaml` by path, then notes what `git diff --name-only` still lists:
+  tracked files Step 3 changed that are not staged, such as a regenerated `.pnp.cjs`. After
+  the hooks, a file `git diff --name-only` lists that was not noted was rewritten by a hook,
+  and new untracked entries in `git status --porcelain` are files a hook created. A hook
+  rewrite of a file already noted is not detected.
 - **Hook rewrite of a staged file**: the file is staged again and the autofix is reported as
   committed. Committing the pre-hook version instead would make the commit fail the repo's
   own hooks wherever pre-commit is installed as a git hook. Autofixes to any other file stay
