@@ -56,21 +56,16 @@ A branch's work may be committed, uncommitted, or both, so check each:
 
 ```bash
 BASE=$(git symbolic-ref refs/remotes/origin/HEAD --short | sed 's|origin/||')
+git rev-parse origin/$BASE            # confirm it resolves
 git diff origin/$BASE...HEAD --stat   # work committed on this branch
 git status --porcelain                # staged, unstaged and untracked work
 ```
 
-If the user supplied an explicit commit, branch, or tag as the fixed point, diff against that instead of `origin/$BASE`. Stop and inform the user only when both commands print nothing. Otherwise invoke the `pre-commit-check` skill and act on its `next:` line before proceeding.
+If the user supplied an explicit commit, branch, or tag as the fixed point, use that instead of `origin/$BASE` in both commands that name it. A ref that does not resolve is an error to report, not "no changes": a bad ref should fail here — not inside parallel sub-agents. Stop and inform the user only when the ref resolves and both the diff and the status print nothing. Otherwise invoke the `pre-commit-check` skill and act on its `next:` line before proceeding.
 
 ## Step 3 — Pin fixed point and spec source
 
-**Fixed point**: default to the merge-base with the default branch, `origin/$BASE` from Step 2:
-
-```bash
-git rev-parse origin/$BASE   # confirm it resolves
-```
-
-If the user supplied an explicit commit, branch, or tag, use that instead. A bad ref should fail here — not inside parallel sub-agents. Step 2 already established there is something to review.
+**Fixed point**: the ref Step 2 checked — the merge-base with the default branch (`origin/$BASE`) by default, or the commit, branch, or tag the user supplied.
 
 **Spec source**: look in this order:
 
