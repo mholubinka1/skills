@@ -38,7 +38,9 @@ This catches the most obvious problem before planning begins: being on a trunk b
 
 ## Step 1 — Planning
 
-When the issue being worked already holds Given-When-Then acceptance criteria (as `/create-issues` writes them into `.agent-docs/issues/<branch-name>.md`), show them as the scenario list together with the interface changes they need (the issues file does not record those — reconstruct them from the issue and the code), get the user's confirmation or adjustments to both, and go to Step 2.
+When the issue being worked already holds Given-When-Then acceptance criteria (as `/create-issues` writes them into `.agent-docs/issues/<branch-name>.md`), show them as the scenario list together with the interface changes they need (the issues file does not record those — reconstruct them from the issue and the code, by the **interface rule** below), get the user's confirmation or adjustments to both, and go to Step 2.
+
+**Interface rule** (both paths): design interface changes as deep modules, testable through the interface. Run the `codebase-design` skill, which owns that vocabulary. If it is not installed, hold to its core rule — a small interface hiding a lot of behaviour, taking its dependencies as arguments and returning results.
 
 Otherwise, before writing any code, run a **Three Amigos** conversation between:
 
@@ -51,7 +53,7 @@ This produces agreed-upon scenarios that become your test plan. Then:
 - [ ] Capture behaviors as user stories: "As a [role], I want [feature], so that [benefit]"
 - [ ] Write acceptance criteria as Given-When-Then scenarios for each story
 - [ ] Confirm with user what interface changes are needed
-- [ ] Design those interfaces as deep modules, testable through the interface: run the `codebase-design` skill, which owns that vocabulary. If it is not installed, hold to its core rule — a small interface hiding a lot of behaviour, taking its dependencies as arguments and returning results
+- [ ] Design those interfaces by the interface rule above
 - [ ] Get user approval on the scenario list
 
 Ask: "What should success look like for the user? Which scenarios are most important to get right?"

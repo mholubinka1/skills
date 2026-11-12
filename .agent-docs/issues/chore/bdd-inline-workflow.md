@@ -1,5 +1,7 @@
 # Issues: chore/bdd-inline-workflow
 
+> Work complete — PR ready to merge.
+
 ## bdd: audit follow-ups (BDD-1, BDD-6, BDD-9)
 
 **GitHub issue**: #148
@@ -20,6 +22,8 @@
 - [x] Given Step 1 planning, when interfaces are designed, then the step runs the
       `codebase-design` skill, and `deep-modules.md` and `interface-design.md` no longer
       exist (BDD-6).
+- [x] Given an issue that already holds Given-When-Then criteria, when Step 1 reconstructs
+      the interface changes, then it applies the same interface rule.
 - [x] Given `codebase-design` is not installed, when Step 1 reaches that item, then the
       step still states the rule to hold to.
 - [x] Given the user invoked `bdd` directly, when Step 5 finishes, then `bdd` runs

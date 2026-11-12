@@ -39,9 +39,12 @@ restating files. End Step 5 with a hand-back that names no step number and runs
   tracer-bullet diagram and the one-failing-test rule move into Step 4, where the handoff
   happens. `WORKFLOW.md` in the `bdd` skill is deleted.
 - **Step 1 (BDD-6)**: the two checklist items pointing at `deep-modules.md` and
-  `interface-design.md` become one item that runs the `codebase-design` skill. That skill
-  is not part of this repo, so the item carries a one-sentence fallback for when it is not
-  installed. Both files are deleted. `refactoring.md` keeps its "shallow modules" bullet.
+  `interface-design.md` become one **interface rule** that runs the `codebase-design`
+  skill. The rule applies on both planning paths: when an issue already supplies the
+  scenarios (the usual path under `/implement`) and when Three Amigos produces them. That
+  skill is not part of this repo, so the rule carries a one-sentence fallback for when it
+  is not installed. Both files are deleted. `refactoring.md` keeps its "shallow modules"
+  bullet.
 - **Step 5 (BDD-9)**: a caller gets control back and owns `pre-commit-check` and the
   commit; with no caller, `bdd` runs `pre-commit-check` and leaves the commit to the user.
   No other skill's step number is named.
