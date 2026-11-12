@@ -6,6 +6,7 @@ allowed-tools:
   - Glob
   - Bash(git diff *)
   - Bash(git ls-files *)
+  - Bash(git hash-object *)
   - Bash(git symbolic-ref refs/remotes/origin/HEAD --short)
   - Bash(pre-commit *)
   - Bash(.venv/bin/pre-commit *)
@@ -60,8 +61,22 @@ pass 2 never sends you back to pass 1.
 
 ## Handling failures (both passes)
 
-Before each pass, record `git diff --name-only`; after it, diff again. Files that appear only
-afterwards were autofixed by the hooks — that difference is the autofixed set.
+Take a snapshot of the working tree before each pass, and the same snapshot after it:
+
+```bash
+git ls-files --modified --others --exclude-standard   # every file that differs from the index, or is untracked
+git ls-files --deleted                                # of those, the ones deleted from disk
+git hash-object -- <each listed file that is not deleted>
+```
+
+The snapshot is each listed, undeleted file with its hash (`git hash-object` prints one hash
+per file, in the order given). With no such file, skip `git hash-object`: the snapshot is
+empty.
+
+A file was autofixed by the pass when it is in the after-snapshot and either was missing from
+the before-snapshot, or is in both with a different hash. That is the autofixed set. Compare
+hashes, never names alone: a file already modified before the pass is in both snapshots, so
+only its hash shows that a hook rewrote it.
 
 - A hook that autofixes in place (`black`, `isort`, `prettier`, end-of-file, …): keep the
   fix, in any file, and re-run the same pass once to confirm it now passes. A hook still
