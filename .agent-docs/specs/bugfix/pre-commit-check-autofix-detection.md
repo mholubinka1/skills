@@ -25,13 +25,18 @@ it is new to the after-snapshot or its hash changed.
 
 - **`pre-commit-check` SKILL, "Handling failures"**: the snapshot is
   `git ls-files --modified --others --exclude-standard`, minus the paths
-  `git ls-files --deleted` prints, each with its `git hash-object` hash. It is taken before
-  and after each pass, including the confirming re-run.
+  `git ls-files --deleted` prints, each with its `git hash-object --no-filters` hash. It is
+  taken before and after each pass, including the confirming re-run.
+- **After-snapshot also rehashes the before-snapshot's files** that still exist, even when
+  they are no longer listed: a hook that restores a modified file to its indexed content
+  makes it clean, and it would otherwise drop out unnoticed.
+- **`--no-filters`** hashes the bytes on disk, so a line-ending conversion configured in
+  `.gitattributes` cannot hide a hook's CRLF-to-LF rewrite.
 - **Autofixed set**: a file in the after-snapshot that was missing from the
   before-snapshot, or is in both with a different hash.
-- Only files that differ from the index or are untracked are hashed. A clean file a hook
-  rewrites becomes modified, so it is new to the after-snapshot; hashing the whole tree is
-  not needed.
+- Only files that differ from the index or are untracked are hashed before a pass. A clean
+  file a hook rewrites becomes modified, so it is new to the after-snapshot; hashing the
+  whole tree is not needed.
 - Deleted files are left out because `git hash-object` fails on a missing path.
 - **`allowed-tools`** gains `Bash(git hash-object *)`. `git ls-files *` is already scoped.
   `git diff *` stays: it still collects the changed set.

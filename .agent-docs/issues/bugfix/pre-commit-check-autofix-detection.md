@@ -1,5 +1,7 @@
 # Issues: bugfix/pre-commit-check-autofix-detection
 
+> Work complete — PR ready to merge.
+
 ## pre-commit-check: audit follow-ups (PCC-1)
 
 **GitHub issue**: #146

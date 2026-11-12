@@ -61,17 +61,23 @@ pass 2 never sends you back to pass 1.
 
 ## Handling failures (both passes)
 
-Take a snapshot of the working tree before each pass, and the same snapshot after it:
+Take a snapshot of the working tree before each pass, and another after it:
 
 ```bash
 git ls-files --modified --others --exclude-standard   # every file that differs from the index, or is untracked
 git ls-files --deleted                                # of those, the ones deleted from disk
-git hash-object -- <each listed file that is not deleted>
+git hash-object --no-filters -- <files to hash>
 ```
 
-The snapshot is each listed, undeleted file with its hash (`git hash-object` prints one hash
-per file, in the order given). With no such file, skip `git hash-object`: the snapshot is
-empty.
+- **Before-snapshot**: hash each listed file that is not deleted.
+- **After-snapshot**: hash each listed file that is not deleted, plus every file from the
+  before-snapshot that still exists on disk, even when it is no longer listed. A hook can
+  restore a modified file to its indexed content; it then drops off the list, and only
+  hashing it again shows the rewrite.
+
+`git hash-object` prints one hash per file, in the order given. `--no-filters` hashes the
+bytes on disk; without it a line-ending conversion set in `.gitattributes` can hide a hook's
+CRLF-to-LF rewrite. With no file to hash, skip the command: that snapshot is empty.
 
 A file was autofixed by the pass when it is in the after-snapshot and either was missing from
 the before-snapshot, or is in both with a different hash. That is the autofixed set. Compare
