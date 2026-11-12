@@ -1,5 +1,7 @@
 # Issues: bugfix/implement-resume-and-inline-workflow
 
+> Work complete — PR ready to merge.
+
 ## implement: audit follow-ups (IMP-1, IMP-2)
 
 **GitHub issue**: #153
