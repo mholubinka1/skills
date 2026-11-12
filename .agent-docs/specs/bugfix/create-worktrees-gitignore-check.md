@@ -29,10 +29,12 @@ Ask git whether the path is ignored, and append the entry with a leading newline
 ## Implementation Decisions
 
 - **`create-worktrees` SKILL, Step 3, check (CW-2)**:
-  `git check-ignore -v .claude/worktrees`. Exit 0 means ignored and prints the rule's
-  source; exit 1 means not ignored; any other exit is an error to stop on. The probe path
-  is the directory the worktree will be created in, so a directory-only rule (`.claude/`)
-  matches even before `.claude` exists.
+  `git check-ignore -q .claude/ignore-probe`. Exit 0 means ignored; exit 1 means not
+  ignored, or re-included by a `!` rule; any other exit is an error to stop on. The probe
+  is a made-up file directly inside `.claude`: it is ignored only when the whole directory
+  is, so a rule for `.claude/worktrees` alone does not pass, and a directory-only rule
+  (`.claude/`) matches even before `.claude` exists. `-v` is not used, because with it a
+  matching `!` rule also exits 0.
 - **Step 3, write (CW-3)**: `printf '\n.claude\n' >> .gitignore`, then the same check again;
   the step continues only on exit 0. A file that already ends in a newline gains one blank
   line, which is harmless.
@@ -43,8 +45,9 @@ Ask git whether the path is ignored, and append the entry with a leading newline
 
 - Prose change to a skill definition; there is no executable behaviour to test red-green.
 - The frontmatter guard tests cover the `allowed-tools` change.
-- Both commands were run in a throwaway repo: `git check-ignore` exits 0 for `.claude`,
-  `.claude/`, `/.claude`, `/.claude/` and `**/.claude`, and 1 for an unrelated rule or no
+- Both commands were run in a throwaway repo: the check exits 0 for `.claude`, `.claude/`,
+  `/.claude`, `/.claude/`, `**/.claude` and `.claude/*`, and 1 for `.claude/worktrees`
+  alone, for a `!` rule re-including the probe, for an unrelated rule, and for no
   `.gitignore`; the `printf` append onto a file ending `foo` with no newline leaves `foo`
   and `.claude` on separate lines, and the check then exits 0.
 

@@ -10,7 +10,7 @@ allowed-tools:
   - Agent
   - Bash(git rev-parse --git-dir)
   - Bash(git worktree list *)
-  - Bash(git check-ignore -v .claude/worktrees)
+  - Bash(git check-ignore -q .claude/ignore-probe)
   - Bash(printf '\n.claude\n' >> .gitignore)
   - Bash(git branch --show-current)
   - Bash(git add .gitignore)
@@ -69,12 +69,16 @@ Stop here. If none exist, or the answer is *Start new*, continue to Step 3.
 Ask git itself, so every way of ignoring it counts — `.claude`, `.claude/`, `/.claude`, a nested `.gitignore`, `.git/info/exclude`, or the user's global excludes file:
 
 ```bash
-git check-ignore -v .claude/worktrees
+git check-ignore -q .claude/ignore-probe
 ```
 
-- **Exit 0** — it prints the file and line of the rule that ignores it. Nothing to add: continue to Step 4.
-- **Exit 1** with no output — not ignored.
+`.claude/ignore-probe` is a made-up file name directly inside `.claude`. It need not exist. It is ignored only when the whole directory is, so a rule covering just `.claude/worktrees` does not pass. The command prints nothing: read its exit status.
+
+- **Exit 0** — ignored. Nothing to add: continue to Step 4.
+- **Exit 1** — not ignored, or re-included by a `!` rule.
 - **Any other exit** — the check itself failed: stop and report the error.
+
+Never add `-v`: with it, a matching `!` rule also exits 0.
 
 If it is not ignored (including when `.gitignore` doesn't exist yet), the entry must be added and committed before Step 4, so the worktree that Step 4 creates is never at risk of being committed. Check the current branch first:
 
@@ -92,7 +96,7 @@ printf '\n.claude\n' >> .gitignore
 git add .gitignore
 ```
 
-The leading `\n` matters: a `.gitignore` whose last line has no trailing newline would otherwise get `.claude` glued onto that line, breaking both entries. Run `git check-ignore -v .claude/worktrees` again and continue only when it exits 0.
+The leading `\n` matters: a `.gitignore` whose last line has no trailing newline would otherwise get `.claude` glued onto that line, breaking both entries. Run `git check-ignore -q .claude/ignore-probe` again and continue only when it exits 0; otherwise stop and report that the new entry did not take effect.
 
 Run the `pre-commit-check` skill and act on its `next:` line. Commit only when it reads `none — ready to commit.` or lists only pre-existing failures or outside-the-change autofixes; otherwise stop and report. Then commit:
 
