@@ -179,7 +179,7 @@ Validation that the current git branch follows naming conventions (correct type 
 _Avoid_: branch naming check, branch validation
 
 **Dependency update**:
-The process of syncing a target repo with `main`/`master` (to absorb changes Dependabot already merged), then bumping patch/minor package versions per detected ecosystem (Python, .NET, Node/TypeScript) and updating pre-commit hook versions, committed locally without pushing. Run by the `update-dependencies` skill against whatever repo is currently open — not specific to this skills repo.
+The process of syncing a target repo with its default branch (to absorb changes Dependabot already merged), then bumping patch/minor package versions per detected ecosystem (Python, .NET, Node/TypeScript) and updating pre-commit hook versions, committed locally without pushing. Run by the `update-dependencies` skill against whatever repo is currently open — not specific to this skills repo.
 _Avoid_: dependency bump, package update, dependency refresh
 
 **Ecosystem** (dependency update sense):
