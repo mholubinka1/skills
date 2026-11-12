@@ -18,10 +18,6 @@ _Avoid_: skill file, main file, entrypoint file
 A supplementary file co-located with `SKILL.md`, holding detailed commands, queries, and platform-specific syntax extracted to keep `SKILL.md` concise.
 _Avoid_: detail file, command reference, documentation file
 
-**WORKFLOW.md**:
-A file used by a skill (e.g. `bdd`) to define a multi-step workflow executed inline in the current conversation rather than delegated to a sub-agent.
-_Avoid_: process file, workflow definition
-
 ### Skill Authoring
 
 Vocabulary for writing skills, applied by `create-a-skill` (adapted from Matt Pocock's `writing-for-agents`).
