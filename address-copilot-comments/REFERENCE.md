@@ -187,7 +187,7 @@ DECISION=ACTIONABLE|CLEAN|PENDING|ERROR
   time): `CURRENT_REVIEW_ID` is non-empty and differs from the baseline, with nothing
   actionable. Copilot has reviewed and left nothing to address.
 - **`PENDING`** — no new review yet, or this was a no-baseline capture call (see below) with
-  nothing already actionable. Wait 60 seconds and call again.
+  nothing already actionable. The poll script (below) waits and checks again.
 - **`ERROR`** — a `gh api` call itself failed (network, auth, or the PR/repo not found). Do
   not treat this as `PENDING` — stop polling and return the `gh` error.
 
@@ -209,26 +209,32 @@ If this first call already prints `DECISION=ACTIONABLE`, skip the poll loop enti
 empty `CURRENT_REVIEW_ID` means no Copilot review exists yet; any review that appears during
 polling is considered new.
 
-### Poll loop (every 60 seconds, max 10 attempts)
+### Poll loop (every 60 seconds, 10 polls)
 
-The baseline call, 10 polls and the final check are 12 script calls, too long for one Bash
-call (600000 ms limit). Run them in two Bash calls of at most 6 script calls each — baseline
-and 5 polls, then 5 polls and the final check — with `sleep 60` between script calls and at
-the start of the second Bash call, and a Bash timeout of 600000 ms. Stop early on any result
-other than `PENDING`. A Step 5b re-poll uses its given baseline and skips the capture call.
-
-Call the script again on each iteration, passing the baseline captured above:
+The waiting belongs to `scripts/poll-review-status.sh`, beside the status-check script. Never
+run `sleep` between status checks yourself: a skipped wait ends the poll window early and
+the review lands unread.
 
 ```bash
-bash "<skill-base-dir>/scripts/check-review-status.sh" {owner} {repo} {number} {baseline_review_id}
+bash "<skill-base-dir>/scripts/poll-review-status.sh" {owner} {repo} {number} "{baseline_review_id}"
 ```
 
-`DECISION=ACTIONABLE` or `CLEAN` → exit the poll loop. `DECISION=PENDING` → wait 60 seconds
-and repeat. `DECISION=ERROR` → stop polling immediately and return the failure — do not count
-it as a `PENDING` attempt or keep retrying silently.
+The baseline argument is required. Pass `""` when the baseline is empty; never drop it. Each
+call makes up to 5 polls: it waits 60 seconds, runs the status check with the baseline, and
+stops at the first result other than `PENDING`. It prints the last check's four lines, then
+`POLLS_RUN=<n>`.
 
-After 10 `PENDING` attempts, call the script one final time with the same arguments. If that
-final call is still `PENDING`, Copilot has not yet reviewed or has nothing actionable.
+Ten polls are too long for one Bash call (600000 ms limit), so make two calls, each with a
+Bash timeout of 600000 ms:
+
+1. Call the poll script. `DECISION=ACTIONABLE`, `CLEAN` or `ERROR` → stop and return it.
+2. On `PENDING`, call it once more with the same arguments and return that result.
+
+Return `POLLS_RUN` as the two calls' values added together (0 when the capture call was
+already `ACTIONABLE` and the poll script never ran). `PENDING` is a valid result only when
+that total is 10: the main context treats a lower total as a failed poll. `DECISION=ERROR`
+is never retried or counted as a `PENDING` poll. A Step 5b re-poll uses its given baseline
+and skips the capture call.
 
 Suppressed comments have no `databaseId`/thread ID — they are markdown text embedded in the
 review body's collapsible `<details>` block (GitHub's Copilot reviewer folds some findings
@@ -302,22 +308,11 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
 
 ### Resolve the thread — do this immediately after replying, one thread at a time
 
-**Get unresolved thread node IDs:**
+Resolve only the `threadId`s named in the decisions you were handed. Never list the PR's
+unresolved threads to find IDs: that list includes human reviewers' threads, which are not
+this skill's to resolve.
 
-```bash
-gh api graphql -f query='
-query {
-  repository(owner: "{owner}", name: "{repo}") {
-    pullRequest(number: {number}) {
-      reviewThreads(first: 100) {
-        nodes { id isResolved }
-      }
-    }
-  }
-}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | .id'
-```
-
-**Resolve each thread (one call per ID):**
+**Resolve each decided thread (one call per `threadId`):**
 
 ```bash
 gh api graphql -f query='

@@ -28,7 +28,8 @@ allowed-tools:
   - Bash(git push)
   - Bash(bash "*/address-copilot-comments/scripts/check-review-status.sh" *)
   - Bash(bash "*\address-copilot-comments\scripts\check-review-status.sh" *)
-  - Bash(sleep 60)
+  - Bash(bash "*/address-copilot-comments/scripts/poll-review-status.sh" *)
+  - Bash(bash "*\address-copilot-comments\scripts\poll-review-status.sh" *)
 ---
 
 # Address Copilot Comments
@@ -39,10 +40,11 @@ allowed-tools:
 
 ```text
 Step 0  gh available?
-Step 1  PR exists? No ──► Step 2 (create it) ──► Step 2b
+Step 1  PR exists? No ──► Step 2 (push, then create it) ──► Step 2b
 Step 2b Review level? None ──► Step 7 | Lite or Balanced ──► request Copilot at that effort (single review)
           ──► Step 3 (or Step 7 if the diff and file list can't be fetched, or the request fails, except REQUEST_CONFLICT)
-Step 3  Haiku poller: ACTIONABLE ──► Step 4 | CLEAN or PENDING ──► Step 6 | ERROR ──► report, Step 6
+Step 3  Haiku poller: ACTIONABLE ──► Step 4 | CLEAN, or PENDING after all 10 polls ──► Step 6
+          | ERROR, or PENDING after fewer polls ──► report, Step 6
 Step 4  Decide Fix or Push back per item; apply the fixes
 Step 4b Any fix applied? Run code-review Steps 1–5
 Step 5  pre-commit-check, then commit, push, reply, resolve ──► Step 5b
@@ -69,12 +71,17 @@ PR found → note the number, continue to Step 2b. No PR → go to Step 2.
 
 ## Step 2 — Create the PR
 
+Push first: `gh pr create` needs the branch on the remote.
+
 ```bash
+git push
 BASE=$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name')
 gh pr create --base "$BASE" --title "<title>" --body "<summary and test plan>"
+gh pr view --json number,url
 ```
 
-Note the PR number. Continue to Step 2b.
+If the push fails, report its error and stop: do not create the PR. The step is done when
+`gh pr view` returns the PR. Note its number and continue to Step 2b.
 
 ## Step 2b — Choose the review level
 
@@ -98,25 +105,30 @@ and wait for its report. Handover:
 ```text
 Read <this skill's base directory>/REFERENCE.md, sections "Step 3 — Poll for Copilot review
 threads and suppressed comments" and "Step 4 — Address each comment and suppressed entry"
-(only its two fetch subsections). PR #<number> in <owner>/<repo>. The status-check script is
-<this skill's base directory>/scripts/check-review-status.sh.
+(only its two fetch subsections). PR #<number> in <owner>/<repo>. The scripts are in
+<this skill's base directory>/scripts/: check-review-status.sh and poll-review-status.sh.
 <Step 3: Capture the baseline Copilot review ID, then poll as that section says.>
-<Step 5b: Use baseline review ID "<id>" as the script's 4th argument — pass "" when it is
-empty, never drop it — capture no new baseline, and poll as that section says.>
+<Step 5b: Use baseline review ID "<id>" as the poll script's 4th argument — pass "" when it
+is empty, never drop it — capture no new baseline, and poll as that section says.>
+The poll script does the waiting: never run sleep yourself, and never report PENDING before
+both poll calls have returned.
 On ACTIONABLE, fetch every unresolved Copilot thread and every suppressed-comment entry. If
 any of those fetches fails, or returns fewer items than the script's THREAD_COUNT plus
 SUPPRESSED_COUNT, return DECISION=ERROR instead.
 Change nothing.
 Return: BASELINE=<review ID used>, BASELINE_ACTIONABLE=yes|no (Step 3 only: whether the
-capture call itself was already ACTIONABLE), DECISION=ACTIONABLE|CLEAN|PENDING|ERROR (with
-the gh error if ERROR), then one block per item: threadId and comment_id (or "suppressed"),
+capture call itself was already ACTIONABLE), POLLS_RUN=<the poll script's POLLS_RUN values
+added together, 0 if it never ran>, DECISION=ACTIONABLE|CLEAN|PENDING|ERROR (with the gh
+error if ERROR), then one block per item: threadId and comment_id (or "suppressed"),
 path:line, the comment body verbatim; then one line "Skipped / risk:" naming any fetch that
 failed or was incomplete.
 ```
 
 Keep `BASELINE` and `BASELINE_ACTIONABLE` for Step 5b. `ACTIONABLE` → Step 4 with the returned
-items. `CLEAN`, or `PENDING` after the final check → Step 6. `ERROR` → report the failure to
-the user and go to Step 6; it is not a "wait and retry".
+items. `CLEAN` → Step 6. `PENDING` with `POLLS_RUN` of 10 → Step 6: the full window ran and
+Copilot has not reviewed. `PENDING` with a lower `POLLS_RUN` is a poll that stopped short, so
+treat it as `ERROR`: the review may land unread. `ERROR` → report the failure to the user and
+go to Step 6; it is not a "wait and retry".
 
 ## Step 4 — Decide and apply changes
 
@@ -172,7 +184,8 @@ Decisions, one per line:  <threadId> <comment_id> | suppressed <path:line> — F
    hook or the push fails: stop here and report it, posting nothing.
 2. For each thread: reply "Fixed. <reason>" or "Ignored. <reason>", then resolve it at once.
    A resolve-only thread gets no reply, only the resolve. If a thread's reply fails, skip
-   its resolve.
+   its resolve. Resolve only the threadIds listed above: any other open thread on the PR,
+   a human reviewer's included, stays open.
 3. If any suppressed entries: post one PR comment summarising each one's outcome.
 If a reply, resolve or comment fails after step 1 (or when step 1 was skipped), carry on
 with the rest.
@@ -199,8 +212,9 @@ to Step 5b, or to Step 6 if this is already the Step 5b pass.
 Reached from Step 5. If Step 3's `BASELINE_ACTIONABLE` was `yes`, the requested review may not
 have landed yet, so what Step 4 handled could be leftovers from before it. In that case
 dispatch the Step 3 poller once more, with Step 3's `BASELINE` (no new capture). `ACTIONABLE` → Steps 4, 4b and 5 once more for the new items, then Step 6; this
-is the only catch-up — never return here a second time. `CLEAN`, `PENDING`, or
-`BASELINE_ACTIONABLE` = `no` → Step 6. `ERROR` → report it and go to Step 6.
+is the only catch-up — never return here a second time. `CLEAN`, `PENDING` with `POLLS_RUN`
+of 10, or `BASELINE_ACTIONABLE` = `no` → Step 6. `ERROR`, or `PENDING` with a lower
+`POLLS_RUN` → report it and go to Step 6.
 
 ## Step 6 — Distil review criteria into the shared Criteria gist
 
@@ -232,4 +246,4 @@ The PR is ready to merge, `REQUEST_CONFLICT` included, except in two cases where
 
 - Step 2b failed, either because the diff and file list could not be fetched or because the
   review request failed. Say why: the review the PR needed never ran.
-- A poll returned `ERROR`. Say which poll failed: Copilot's review may not have been fully read.
+- A poll returned `ERROR`, or `PENDING` before all 10 polls had run. Say which poll failed: Copilot's review may not have been fully read.
