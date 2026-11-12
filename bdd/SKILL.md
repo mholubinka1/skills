@@ -40,7 +40,7 @@ This catches the most obvious problem before planning begins: being on a trunk b
 
 When the issue being worked already holds Given-When-Then acceptance criteria (as `/create-issues` writes them into `.agent-docs/issues/<branch-name>.md`), show them as the scenario list together with the interface changes they need (the issues file does not record those — reconstruct them from the issue and the code, by the **interface rule** below), get the user's confirmation or adjustments to both, and go to Step 2.
 
-**Interface rule** (both paths): design interface changes as deep modules, testable through the interface. Run the `codebase-design` skill, which owns that vocabulary. If it is not installed, hold to its core rule — a small interface hiding a lot of behaviour, taking its dependencies as arguments and returning results.
+**Interface rule** (both paths): design interface changes as deep modules — a small interface hiding a lot of behaviour — see [deep-modules.md](deep-modules.md). Design them for testability — taking dependencies as arguments and returning results — see [interface-design.md](interface-design.md).
 
 Otherwise, before writing any code, run a **Three Amigos** conversation between:
 
