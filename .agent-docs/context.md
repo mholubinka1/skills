@@ -19,7 +19,7 @@ A supplementary file co-located with `SKILL.md`, holding detailed commands, quer
 _Avoid_: detail file, command reference, documentation file
 
 **WORKFLOW.md**:
-A file used by orchestrating skills (e.g. `implement`) to define a multi-step workflow executed inline in the current conversation rather than delegated to a sub-agent.
+A file used by a skill (e.g. `bdd`) to define a multi-step workflow executed inline in the current conversation rather than delegated to a sub-agent.
 _Avoid_: process file, workflow definition
 
 ### Skill Authoring
