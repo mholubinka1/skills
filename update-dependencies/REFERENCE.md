@@ -66,7 +66,11 @@ Plain pip has no built-in semver-aware "update within range" command. List outda
 pip list --outdated
 ```
 
-For each package where only the patch/minor version changed, edit its pin in place: on that package's own line in `requirements.txt`, change `==<old-version>` to `==<new-version>` and nothing else. Leave every other line as it is — comments, markers, options, and lines that are not `==` pins. Then install from the file:
+For each package where only the patch/minor version changed, edit its pin in place: on that package's own line in `requirements.txt`, change `==<old-version>` to `==<new-version>` and nothing else. Leave every other line as it is — comments, markers, options, and lines that are not `==` pins.
+
+A pin with `--hash` options, on its own line or on the continuation lines after a trailing `\`, is the exception: leave it unchanged and report it as skipped. Its hashes belong to the old release, so the new version would fail pip's hash check, and this flow has no command that regenerates them.
+
+Then install from the file:
 
 ```bash
 pip install -r requirements.txt
