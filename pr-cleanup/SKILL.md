@@ -26,15 +26,17 @@ Commit final housekeeping to the PR branch, close GitHub issues, and share the P
 ### 1. Get the PR number
 
 ```bash
-BRANCH=$(git branch --show-current)
+git branch --show-current
 gh pr view --json number --jq '.number'
 ```
 
-Store the returned number — it is referenced as `<PR-number>` in the steps below. `gh pr view` resolves the PR for the current branch and fails fast if none exists.
+Note both outputs: the branch name is `<branch-name>` and the number is `<PR-number>` in the steps below. Shell variables do not survive from one Bash call to the next, so carry the two values yourself. `gh pr view` resolves the PR for the current branch and fails fast if none exists.
 
 ### 2. Update the local issues file
 
-Read `.agent-docs/issues/$BRANCH.md`. Extract all GitHub issue numbers referenced in the file. Mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top:
+Read `.agent-docs/issues/<branch-name>.md`. Collect the issues this branch implements: the number on each slice's `**GitHub issue**: #<n>` line (older files spell the field `**GitHub**: #<n>`). Take numbers from those lines only. A number on a `**Blocked by**` line, or anywhere else in the file, is another branch's issue and is never closed here.
+
+Mark all acceptance criteria checkboxes as checked (`- [x]`) and add a closing note at the top:
 
 ```md
 > Work complete — PR ready to merge.
@@ -46,15 +48,17 @@ missing file on the `Skipped / risk:` line.
 
 ### 3. Commit and push
 
-Stage the issues file and commit with the message `"Close <actual-branch-name> issues"` (substituting the real branch name from Step 1), then push the branch.
+Stage the issues file and commit with the message `"Close <branch-name> issues"` (substituting the real branch name from Step 1), then push the branch.
 
 ### 4. Close GitHub issues
 
-For each issue number found in the issues file:
+For each issue number collected in Step 2:
 
 ```bash
 gh issue close <number> --comment "Closed: implementation complete, see PR for review."
 ```
+
+If Step 2 found no `**GitHub issue**` line, close nothing and say so on the `Skipped / risk:` line.
 
 ### 5. Share PR link
 

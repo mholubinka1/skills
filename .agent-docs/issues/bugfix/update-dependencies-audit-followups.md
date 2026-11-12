@@ -1,5 +1,7 @@
 # Issues: bugfix/update-dependencies-audit-followups
 
+> Work complete — PR merged.
+
 ## update-dependencies: audit follow-ups (UD-1, UD-2, UD-3, UD-4, UD-5, UD-6)
 
 **GitHub**: #151
@@ -17,18 +19,18 @@ and date the branch name, report hook autofixes, and pick yarn commands by versi
 
 ### Acceptance criteria
 
-- [ ] Given another entry on top of the stash stack, when the skill restores its stash,
+- [x] Given another entry on top of the stash stack, when the skill restores its stash,
       then it applies its own entry by SHA and never runs `git stash pop` (UD-1).
-- [ ] Given a dirty working tree, when the skill commits, then the stash is still set
+- [x] Given a dirty working tree, when the skill commits, then the stash is still set
       aside, and it is restored only after the commit (UD-3).
-- [ ] Given a plain `requirements.txt`, when a package gets a patch or minor bump, then
+- [x] Given a plain `requirements.txt`, when a package gets a patch or minor bump, then
       only that package's pin changes and `pip freeze` is never run (UD-2).
-- [ ] Given a repo whose default branch is not `main`, when Step 1 runs, then the branch
+- [x] Given a repo whose default branch is not `main`, when Step 1 runs, then the branch
       is resolved from `origin/HEAD`, and a new branch gets a dated name (UD-4).
-- [ ] Given a hook that rewrites a file under `--all-files`, when the run reports, then the
+- [x] Given a hook that rewrites a file under `--all-files`, when the run reports, then the
       file is listed as an uncommitted hook autofix (UD-5).
-- [ ] Given Yarn 3 or later, when the Node flow runs, then it uses `yarn up -R` and not
+- [x] Given Yarn 3 or later, when the Node flow runs, then it uses `yarn up -R` and not
       `yarn outdated` / `yarn upgrade` (UD-6).
-- [ ] `allowed-tools` matches the commands the skill runs, and the `unittest` suite passes.
+- [x] `allowed-tools` matches the commands the skill runs, and the `unittest` suite passes.
 
 ---
