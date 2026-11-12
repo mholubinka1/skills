@@ -14,42 +14,77 @@ allowed-tools:
 
 # Behaviour-Driven Development
 
-## Philosophy
+Work outside-in: agree what success looks like for the user as Given-When-Then scenarios, then drive the code from one failing test at a time. Follow Steps 0 to 5 in order. Commits and pushes belong to the caller; this skill makes none.
 
-**Core principle**: Tests should verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't.
+## Principles
 
-Good tests are integration-style specifications that exercise real code paths through public interfaces and survive refactors; bad tests are coupled to implementation. See `tests.md` for both, with examples, and `mocking.md` for mocking guidelines.
+- **Test behaviour through public interfaces, not implementation details.** The code can change entirely; the tests shouldn't. `tests.md` shows good and bad tests, and `mocking.md` covers mocking.
+- **Use the domain's vocabulary.** A test name reads as a scenario title in plain English: "shopper receives confirmation when checking out with valid cart", not "checkout_service_returns_200_with_order_id".
+- **One scenario is one Given-When-Then**: the starting state, the action or event, the observable outcome.
 
-**Ubiquitous language**: Tests should use domain vocabulary shared across the entire team — developers, testers, and business stakeholders. When tests speak the language of the business, they double as living documentation. "shopper receives confirmation when checking out with valid cart" is better than "checkout_service_returns_200_with_order_id".
+  ```gherkin
+  Given a cart with one in-stock product
+  When the shopper checks out with a valid payment method
+  Then the order is confirmed and the shopper receives a confirmation number
+  ```
 
-**Outside-in development**: BDD is an outside-in discipline. Start from the user's perspective — acceptance criteria, user stories — and work inward toward implementation. Define what success looks like for the user before designing internal structure.
+- **Vertical slices, one test at a time.** One test, then the code that passes it, then the next test, each written in response to what the last cycle taught. Never write the whole test list first.
 
-## Scenarios: Given-When-Then
+## Step 0 — Fast branch check (before planning)
 
-Structure every behavior as a scenario using the Given-When-Then format:
+Run the **branch-hygiene** skill with a one-line summary of the request (no `change_type` — it infers one), e.g. `/branch-hygiene "add CSV export to reports"`. Act on its `next:` line.
 
-- **Given**: Initial context — the state of the system before the action
-- **When**: The triggering event or action
-- **Then**: The expected outcome
+This catches the most obvious problem before planning begins: being on a trunk branch (`main`, `master`, `develop`). Step 2 re-checks once planning confirms the change type; a mismatch that is only a `wip/` or `worktree-wip+` placeholder waits for Step 2.
 
-This format enforces that tests describe behavior from the outside, not internal mechanics, and provides a natural structure for acceptance criteria agreed on before implementation.
+## Step 1 — Planning
 
-**User story** (written before any code):
-> As a shopper, I want to checkout my cart, so that I can receive my order.
+When the issue being worked already holds Given-When-Then acceptance criteria (as `/create-issues` writes them into `.agent-docs/issues/<branch-name>.md`), show them as the scenario list together with the interface changes they need (the issues file does not record those — reconstruct them from the issue and the code, by the **interface rule** below), get the user's confirmation or adjustments to both, and go to Step 2.
 
-**Scenario** (executable specification):
+**Interface rule** (both paths): design interface changes as deep modules — a small interface hiding a lot of behaviour — see [deep-modules.md](deep-modules.md). Design them for testability — taking dependencies as arguments and returning results — see [interface-design.md](interface-design.md).
 
-```gherkin
-Given a cart with one in-stock product
-When the shopper checks out with a valid payment method
-Then the order is confirmed and the shopper receives a confirmation number
+Otherwise, before writing any code, run a **Three Amigos** conversation between:
+
+- **Business** (product/stakeholder): defines the problem and acceptance criteria in plain language
+- **Development**: proposes technical approach and constraints
+- **Testing**: questions edge cases and missing scenarios
+
+This produces agreed-upon scenarios that become your test plan. Then:
+
+- [ ] Capture behaviors as user stories: "As a [role], I want [feature], so that [benefit]"
+- [ ] Write acceptance criteria as Given-When-Then scenarios for each story
+- [ ] Confirm with user what interface changes are needed
+- [ ] Design those interfaces by the interface rule above
+- [ ] Get user approval on the scenario list
+
+Ask: "What should success look like for the user? Which scenarios are most important to get right?"
+
+**You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
+
+## Step 2 — Full branch check (after planning)
+
+Now that planning has produced agreed user stories, acceptance criteria, and a confirmed change type, run the **branch-hygiene** skill again, passing `change_type` first, then the summary — e.g. `/branch-hygiene feature "add CSV export to reports"`.
+
+Determine `change_type` from the Three Amigos output — or, when Step 1 reused an issue's criteria, from that issue — as one of `feature`, `bugfix`, `hotfix`, `release`, `chore`, per the Change Type Inference Heuristics in [branch-hygiene's REFERENCE.md](../branch-hygiene/REFERENCE.md).
+
+Act on its `next:` line. A `wip/` or `worktree-wip+` placeholder branch always reports a mismatch, so this is where it gets its proper name.
+
+## Step 3 — Tracer bullet test (authoring phase)
+
+Still in the main context, write ONE test for the **first scenario** — and stop there. **Do not write any production code in this phase.**
+
+```text
+RED: Write the test for the first behaviour → run it → it fails
 ```
 
-Test names should read as scenario titles — plain English, domain vocabulary, no implementation detail. See `tests.md` for how to translate scenarios into code.
+Confirm it fails *for the right reason* — an assertion failure, or a missing function / endpoint / module — not an import error, a syntax error, or a test-collection failure. A test that errors before it runs has proven nothing about the path.
 
-## Tracer Bullets
+Note the exact command that runs the suite (or this test alone); Step 4 passes it to the subagent verbatim.
 
-Work in vertical slices: one test → one implementation → repeat. Each test responds to what you learned from the previous cycle, so it verifies actual behavior through the public interface, and you know exactly what behavior matters because you just wrote the code.
+This is your tracer bullet: it proves the first scenario is expressible as a failing test in this codebase's test setup, which de-risks the handoff that follows.
+
+## Step 4 — Hand off to the implementation subagent (clean context)
+
+The main context is now saturated with planning, the Three Amigos discussion, interface debate, and false starts. Production code written here would be biased toward the shape that discussion imagined rather than what the tests specify. So the implementation loop runs in a **fresh subagent** that treats the agreed scenarios as its specification.
 
 ```text
 authoring context ──▸ write test1 (RED), then stop
@@ -61,10 +96,34 @@ implementation subagent:
   ...
 ```
 
-### The clean-context handoff keeps the slices vertical
+The handoff carries exactly **one** failing test. The subagent writes every remaining test itself, one at a time. What crosses the boundary is the agreed scenarios, not a pile of tests and not the design noise.
 
-Unless the change is only a few lines, the implementation phase runs in a fresh subagent (see [WORKFLOW.md](WORKFLOW.md) Step 4). The first handoff carries exactly **one** failing test — the tracer bullet. The subagent then writes every remaining test one at a time, each responding to what the previous cycle taught, exactly as in the loop above. Tests arrive one at a time, in the test-authoring context and inside the subagent alike. What moves across the boundary is the design noise — the Three Amigos discussion, interface debate, false starts — not a pile of tests.
+**Small change?** When the whole scenario list needs only a few lines of production code (one file, roughly 20 lines or fewer), finish the loop inline instead — the handover would cost more than the work. Follow [IMPLEMENTER.md](IMPLEMENTER.md)'s loop and ladder, then go to Step 5.
 
-## Workflow
+Otherwise dispatch **one** `Agent` call, `subagent_type: general-purpose`, `model: sonnet`, `run_in_background: false`, and wait for its report. The subagent starts with an empty context, and its standing rules live in [IMPLEMENTER.md](IMPLEMENTER.md), so the prompt is a short handover:
 
-See [WORKFLOW.md](WORKFLOW.md) for the full step-by-step cycle: branch check → planning → tracer bullet test → clean-context handoff → implementation subagent (incremental loop + refactor) → verification.
+```text
+Read <this skill's base directory>/IMPLEMENTER.md and follow it. Do not invoke the bdd skill.
+Scenarios: <.agent-docs/issues/<branch-name>.md, issue #<n> — or, when no issues file
+           holds them, the agreed Given-When-Then list from Step 1, in order>
+Interface changes: <the confirmed changes, one line each>
+Failing test: <path from Step 3>   Run: <test command from Step 3>
+```
+
+If the subagent reports a scenario as blocked, the main context decides what to do next — fix it inline, or re-dispatch a fresh subagent with a narrower brief, with the same dispatch as above. There is no automatic retry loop.
+
+## Step 5 — Verify the returned work
+
+Back in the main context, read the actual change, not just the report: `git diff`, then the important changed code. Check it against the agreed scenarios:
+
+- [ ] Every scenario from Step 1 has a corresponding test, and the full suite is green
+- [ ] Each test uses domain vocabulary, maps to one scenario, and goes through the public interface
+- [ ] The code takes the first rung of [IMPLEMENTER.md](IMPLEMENTER.md)'s ladder that works, and adds nothing beyond the agreed scenarios
+- [ ] Every item on the report's **Skipped / risk** line is acceptable or resolved
+
+If anything fails the check, address it in the main context or re-dispatch a subagent as in Step 4.
+
+Then hand back:
+
+- **Another skill invoked this one** (such as `/implement`): return to it. `pre-commit-check` and the commit are that caller's next actions.
+- **No caller — the user invoked `bdd` directly**: run the `pre-commit-check` skill on the changed files and act on its `next:` line. Leave the commit to the user.
