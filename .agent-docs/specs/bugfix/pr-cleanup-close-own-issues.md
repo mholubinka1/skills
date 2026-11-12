@@ -45,8 +45,9 @@ relying on a variable. Make both `create-issues` templates Given-When-Then.
   unchanged; the Step 6 handover names both fields to write numbers into.
 - **`pr-cleanup` SKILL, Step 2 and Step 4 (PRC-1)**: issue numbers come only from
   `**GitHub issue**: #<n>` lines. The older spelling `**GitHub**: #<n>`, used by 22 existing
-  slices in this repo, is accepted too. With no such line, nothing is closed and the report
-  says so.
+  slices in this repo, is accepted too. When no number is collected — neither field is
+  present, or every field still reads `not yet published` — nothing is closed and the
+  report says so.
 - **`pr-cleanup` SKILL, Step 1 (PRC-4)**: `git branch --show-current` runs on its own and
   the agent notes its output as `<branch-name>`; `$BRANCH` is gone.
 - **`allowed-tools`**: neither skill runs a new command, so neither list changes.

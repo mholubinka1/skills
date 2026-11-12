@@ -58,7 +58,7 @@ For each issue number collected in Step 2:
 gh issue close <number> --comment "Closed: implementation complete, see PR for review."
 ```
 
-If Step 2 found no `**GitHub issue**` line, close nothing and say so on the `Skipped / risk:` line.
+If Step 2 collected no numbers — the file has neither field, or every field still reads `not yet published` — close nothing and say so on the `Skipped / risk:` line.
 
 ### 5. Share PR link
 
