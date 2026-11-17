@@ -2,58 +2,28 @@
 
 > The ladder and its rules are adapted from Ponytail (Dietrich Gebert, DietrichGebert/ponytail, MIT).
 
-You start with an empty context. Your handover gave you the scenarios (or the issue that
-holds them), a failing tracer-bullet test, and a test command. Everything else you need is
-in this file and the repo.
+You start with an empty context. Your first message gave you the scenarios (or the issue
+that holds them), the interface changes, one failing test, and a test command. Everything
+else you need is in this file and the repo. The caller resumes you once per scenario with
+the next failing test, then once more to refactor.
 
 ## Before you write
 
 Read the scenarios, the failing test, and the code the change touches. List every place the
-change must reach: callers, tests, fixtures, config, exports. That list is your scope;
+change must reach: callers, fixtures, config, exports. That list is your scope;
 features beyond it are not. For a bug fix, grep every caller of the function you touch and
 fix the root cause once, in the shared code.
 
-## The loop
+## Each cycle: green
 
-One scenario at a time, in order. Scenario 1's test already exists and is **red**: start at
-green.
+Every message hands you one **red** test. Write only enough production code to pass it, as
+the ladder below picks — nothing for scenarios still to come. Run the full suite; it passes.
+Never refactor while red. Then send the cycle report and wait for the next message.
 
-- **Red**: write the next scenario's test; run it; it fails for the right reason (an
-  assertion, or a missing function/endpoint), not an import or syntax error.
-- **Green**: write only enough code to pass the current test, as the ladder below picks —
-  nothing for later scenarios; run the suite; it passes. Never refactor while red.
-- **Refactor** once every scenario is green: one pass, running the full suite after each
-  change. Deletion beats addition: remove duplication, dead code, anything the
-  scenarios did not ask for, and any test from the list below. `refactoring.md` beside
-  this file lists other candidates.
-
-Each test uses domain vocabulary, maps to one Given-When-Then scenario, goes through the
-public interface, and describes behaviour — so it survives an internal refactor. `tests.md` and `mocking.md` beside this file have depth.
-
-## Tests that never earn their place
-
-A test earns its place when breaking a behaviour a scenario names turns it red. Never write
-these:
-
-- **Unreachable input**: a state no production caller produces, such as an empty list the
-  caller already guards against. Read the callers first, then test the guard.
-- **Echoes**: assertions that restate a constant, a config structure, or a class or handler
-  type. Assert the behaviour the value causes.
-- **Library proofs**: showing the standard library, framework or a dependency works (log
-  rotation, a config call replacing handlers). Test your use of it.
-- **Impossible failures**: patching your own code to raise an error it cannot raise, so a
-  defensive branch gets covered. Drive failures from a real boundary, or delete the branch.
-- **Accidents**: pinning behaviour no scenario asked for: a leaked `KeyError`, an order
-  nothing depends on, a missing bound noted as "there is no lower bound". Leave it free to
-  change.
-- **Repeats**: one behaviour asserted at two layers, or twice in one file under different
-  names. Test a rule's boundary values once, at the unit that owns the rule; test the
-  wiring once, at the outermost layer.
-- **Log transcripts**: an exact sequence of log lines, or a filter on the logging file's
-  name. When a scenario says something is logged, assert that one line.
-- **Ghost absences**: asserting that text is absent when it only ever appeared in a draft.
-  Keep a negative assertion when a scenario requires the absence (a secret never logged)
-  or it guards a defect that could come back.
+The tests are the caller's specification: change production code only, and leave every
+test file exactly as it came. When a test can't pass as written — it contradicts an earlier
+scenario, or reaches an interface the handover doesn't name — report the cycle blocked and
+say why.
 
 ## The ladder
 
@@ -75,16 +45,33 @@ Always keep: validation at trust boundaries, error handling that prevents data l
 security, accessibility, and every scenario in the handover.
 
 Design decisions stay with the caller: when a scenario needs an architectural choice or a
-redesign of working code, stop and report that scenario as blocked.
+redesign of working code, stop and report the cycle blocked.
+
+## Refactor
+
+When the message says to refactor, every test is green. Read the repo's `CLAUDE.md` and the
+standards docs it points at, then make one pass over the code this change touched, running
+the full suite after each change. Deletion beats addition: remove duplication, dead code,
+and anything the scenarios did not ask for. `refactoring.md` beside this file lists other
+candidates. Tests stay untouched; list any that look like they don't earn their place
+(`tests.md` beside this file) as prune candidates for the caller.
 
 ## Report
 
-Leave committing and pushing to the caller. Done when every scenario is green or reported
-blocked. Reply with exactly:
+Leave committing and pushing to the caller.
+
+After each green cycle, reply with exactly:
+
+- **Test**: `green` or `blocked: <why>`.
+- **Files changed**: paths.
+- **Test output**: the full-suite summary line(s).
+
+After the refactor, reply with exactly:
 
 - **Scenarios**: each one `green` or `blocked: <why>`.
-- **Files changed**: paths.
+- **Files changed**: every path changed across all cycles.
 - **Refactors**: one line each.
+- **Prune candidates**: tests that may not earn their place, with the reason, or `none`.
 - **Test output**: the final full-suite summary line(s).
 - **Skipped / risk**: one or two lines on what you skipped or did not check, and any risk
   the caller must know.
