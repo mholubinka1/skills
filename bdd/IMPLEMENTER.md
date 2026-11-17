@@ -10,20 +10,22 @@ the next failing test, then once more to refactor.
 ## Before you write
 
 Read the scenarios, the failing test, and the code the change touches. List every place the
-change must reach: callers, fixtures, config, exports. That list is your scope;
+change must reach: callers, config, exports. That list is your scope;
 features beyond it are not. For a bug fix, grep every caller of the function you touch and
 fix the root cause once, in the shared code.
 
 ## Each cycle: green
 
-Every message hands you one **red** test. Write only enough production code to pass it, as
-the ladder below picks — nothing for scenarios still to come. Run the full suite; it passes.
+Every message hands you one **red** test, and may name files the caller changed since your
+last report — read those first. Write only enough production code to pass the test, as the
+ladder below picks — nothing for scenarios still to come. Run the full suite; it passes.
 Never refactor while red. Then send the cycle report and wait for the next message.
 
 The tests are the caller's specification: change production code only, and leave every
-test file exactly as it came. When a test can't pass as written — it contradicts an earlier
-scenario, or reaches an interface the handover doesn't name — report the cycle blocked and
-say why.
+test file — fixtures and helpers included — exactly as it came. When a test can't pass as
+written — it contradicts an earlier scenario, needs a fixture or helper that isn't there, or
+reaches an interface the handover doesn't name — revert your edits for that test, then
+report the cycle blocked and say why.
 
 ## The ladder
 
@@ -49,18 +51,20 @@ redesign of working code, stop and report the cycle blocked.
 
 ## Refactor
 
-When the message says to refactor, every test is green. Read the repo's `CLAUDE.md` and the
+When the message says to refactor — or your first message gives the failing test as `none`
+— skip the cycle: every test is green. Read the repo's `CLAUDE.md` and the
 standards docs it points at, then make one pass over the code this change touched, running
 the full suite after each change. Deletion beats addition: remove duplication, dead code,
 and anything the scenarios did not ask for. `refactoring.md` beside this file lists other
-candidates. Tests stay untouched; list any that look like they don't earn their place
-(`tests.md` beside this file) as prune candidates for the caller.
+candidates. Tests stay untouched, so keep every interface they call; a rename or move the
+tests would need goes on the Skipped / risk line. List any test that looks like it doesn't
+earn its place (`tests.md` beside this file) as a prune candidate for the caller.
 
 ## Report
 
 Leave committing and pushing to the caller.
 
-After each green cycle, reply with exactly:
+After each cycle, green or blocked, reply with exactly:
 
 - **Test**: `green` or `blocked: <why>`.
 - **Files changed**: paths.
@@ -68,8 +72,7 @@ After each green cycle, reply with exactly:
 
 After the refactor, reply with exactly:
 
-- **Scenarios**: each one `green` or `blocked: <why>`.
-- **Files changed**: every path changed across all cycles.
+- **Files changed**: paths the refactor changed.
 - **Refactors**: one line each.
 - **Prune candidates**: tests that may not earn their place, with the reason, or `none`.
 - **Test output**: the final full-suite summary line(s).

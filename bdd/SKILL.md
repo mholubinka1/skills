@@ -82,12 +82,12 @@ RED:   test2 ──────────────────────�
 all green: "refactor" ──────────────▸ REFACTOR, final report   (Step 4)
 ```
 
-**Small change?** When the whole scenario list needs only a few lines of production code (one file, roughly 20 lines or fewer), play both sides inline — the handover would cost more than the work. Write each test as below, make it pass by [IMPLEMENTER.md](IMPLEMENTER.md)'s ladder, refactor by its refactor rules, then go to Step 5.
+**Small change?** When the whole scenario list needs only a few lines of production code (one file, roughly 20 lines or fewer), play both sides inline — the handover would cost more than the work. Write each test as below, make it pass by [IMPLEMENTER.md](IMPLEMENTER.md)'s ladder, refactor by its [refactor rules](IMPLEMENTER.md#refactor), run the full suite green, then go to Step 5.
 
 For each scenario, in order:
 
-1. **Red.** Write ONE test for the scenario, checked against [tests.md](tests.md)'s *Tests that never earn their place*. Run it: it fails *for the right reason* — an assertion failure, or a missing function / endpoint / module — not an import error, a syntax error, or a test-collection failure. A test that errors before it runs has proven nothing. Write no production code.
-2. **Hand over.** For the first scenario, dispatch **one** `Agent` call, `subagent_type: general-purpose`, `model: sonnet`, and wait for its report. Its standing rules live in [IMPLEMENTER.md](IMPLEMENTER.md), so the prompt is short:
+1. **Red.** Write ONE test for the scenario, plus any fixture or helper it needs — test files are yours, never the implementer's. It uses domain vocabulary, maps to this one scenario, goes through the public interface ([tests.md](tests.md), [mocking.md](mocking.md)), and is none of tests.md's [Tests that never earn their place](tests.md#tests-that-never-earn-their-place). Run it: it fails *for the right reason* — an assertion failure, or a missing function / endpoint / module — not an import error, a syntax error, or a test-collection failure. A test that errors before it runs has proven nothing. Write no production code.
+2. **Hand over.** For the first scenario, dispatch **one** `Agent` call, `subagent_type: general-purpose`, `model: sonnet`, `run_in_background: false`, and wait for its report. Its standing rules live in [IMPLEMENTER.md](IMPLEMENTER.md), so the prompt is short:
 
    ```text
    Read <this skill's base directory>/IMPLEMENTER.md and follow it. Do not invoke the bdd skill.
@@ -101,10 +101,11 @@ For each scenario, in order:
 
    ```text
    Failing test: <path and test name>   Run: <command that runs the suite>
+   Changed since your last report: <files you edited inline — omit the line when none>
    ```
 
-   When the implementer can't be resumed, dispatch a fresh one with the first-scenario prompt; it reads the code as it stands.
-3. **Learn.** Read the production code the cycle changed: `git diff` on the files its report names. Write the next test in response to what that code taught — test n+1 starts only after test n is green and read.
+   When the implementer can't be resumed, dispatch a fresh one with the first-scenario prompt, its **Failing test** set to the current one; it reads the code as it stands.
+3. **Learn.** Read the production code the cycle changed: every file its report names, new ones included. Write the next test in response to what that code taught — test n+1 starts only after test n is green and read.
 
 A cycle reported **blocked** comes back to you: rewrite the test if it was wrong, fix the code inline, or narrow the brief in your next message. There is no automatic retry loop.
 
@@ -116,7 +117,10 @@ Resume the implementer once more:
 
 ```text
 All scenarios green. Refactor now.
+Changed since your last report: <files you edited inline — omit the line when none>
 ```
+
+When the implementer can't be resumed, dispatch a fresh one with the first-scenario prompt, its **Failing test** set to `none` and its **Run** command kept.
 
 It refactors to the repo's standards, keeps the full suite green, and sends its final report. Done when that report arrives.
 
@@ -124,8 +128,9 @@ It refactors to the repo's standards, keeps the full suite green, and sends its 
 
 Back in the main context, read the actual change, not just the report: `git diff`, then the important changed code. Check it against the agreed scenarios:
 
-- [ ] Every scenario from Step 1 has a corresponding test, and the final report shows the full suite green
-- [ ] Every test file is as you wrote it — none appears in the implementer's **Files changed**
+- [ ] Every scenario from Step 1 has a corresponding test, and the full suite is green — by the final report's test output, or your own run on the inline path
+- [ ] Each test uses domain vocabulary, maps to one scenario, and goes through the public interface
+- [ ] Every test file, fixture and helper is as you wrote it — no cycle report or final report names one in **Files changed**
 - [ ] The code takes the first rung of [IMPLEMENTER.md](IMPLEMENTER.md)'s ladder that works, and adds nothing beyond the agreed scenarios
 - [ ] Every test still earns its place by [tests.md](tests.md)'s list, judged across the whole set (repeats only show there) and against the report's **Prune candidates**; delete each one that doesn't and re-run the suite green
 - [ ] Every item on the report's **Skipped / risk** line is acceptable or resolved

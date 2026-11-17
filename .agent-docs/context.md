@@ -159,7 +159,7 @@ The red-green-refactor cycle used in the `bdd` skill: write a failing Given-When
 _Avoid_: TDD cycle, test loop, test-first loop
 
 **Implementation subagent** (BDD sense):
-The fresh-context Sonnet agent the `bdd` skill spawns for the first scenario and resumes with `SendMessage` for each later one. Briefed by `bdd/IMPLEMENTER.md`: each cycle it receives one failing test from the main context and writes only enough production code to pass it, leaving every test file untouched; once all scenarios are green it refactors to the repo's standards and reports prune candidates. Told not to re-invoke the `bdd` skill, so the loop does not recurse. On the normal path it writes every line of production code and no tests.
+The fresh-context agent that, on the normal path through the **BDD loop**, writes every line of production code and no tests.
 _Avoid_: impl agent, worker agent, coding subagent
 
 **Fixer subagent**:
