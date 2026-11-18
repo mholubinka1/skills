@@ -4,6 +4,7 @@ description: Drives a code change through a red-green-refactor loop of Given-Whe
 allowed-tools:
   - Skill
   - Agent
+  - SendMessage
   - Read
   - Grep
   - Glob
@@ -68,60 +69,73 @@ Determine `change_type` from the Three Amigos output — or, when Step 1 reused 
 
 Act on its `next:` line. A `wip/` or `worktree-wip+` placeholder branch always reports a mismatch, so this is where it gets its proper name.
 
-## Step 3 — Tracer bullet test (authoring phase)
+## Step 3 — Ping-pong loop
 
-Still in the main context, write ONE test for the **first scenario** — and stop there. **Do not write any production code in this phase.**
-
-```text
-RED: Write the test for the first behaviour → run it → it fails
-```
-
-Confirm it fails *for the right reason* — an assertion failure, or a missing function / endpoint / module — not an import error, a syntax error, or a test-collection failure. A test that errors before it runs has proven nothing about the path.
-
-Note the exact command that runs the suite (or this test alone); Step 4 passes it to the subagent verbatim.
-
-This is your tracer bullet: it proves the first scenario is expressible as a failing test in this codebase's test setup, which de-risks the handoff that follows.
-
-## Step 4 — Hand off to the implementation subagent (clean context)
-
-The main context is now saturated with planning, the Three Amigos discussion, interface debate, and false starts. Production code written here would be biased toward the shape that discussion imagined rather than what the tests specify. So the implementation loop runs in a **fresh subagent** that treats the agreed scenarios as its specification.
+You write every test; a clean-context **implementer** writes every line of production code. The main context is saturated with planning, the Three Amigos discussion, interface debate, and false starts — production code written here would follow the shape that discussion imagined, not what the tests specify. Tests written here carry the agreed scenarios straight into code. So the loop ping-pongs: one failing test crosses the boundary, it comes back green, you write the next.
 
 ```text
-authoring context ──▸ write test1 (RED), then stop
-─────────────── clean-context handoff ───────────────
-implementation subagent:
-  GREEN:     test1 → impl1     (make the tracer bullet pass)
-  RED→GREEN: test2 → impl2
-  RED→GREEN: test3 → impl3
-  ...
+main context                         implementer (one agent, resumed each cycle)
+RED:   test1 ──────────────────────▸ GREEN: impl1
+       read files ◂─────────────────  report
+RED:   test2 ──────────────────────▸ GREEN: impl2
+       ...
+all green: "refactor" ──────────────▸ REFACTOR, final report   (Step 4)
 ```
 
-The handoff carries exactly **one** failing test. The subagent writes every remaining test itself, one at a time. What crosses the boundary is the agreed scenarios, not a pile of tests and not the design noise.
+**Small change?** When the whole scenario list needs only a few lines of production code (one file, roughly 20 lines or fewer), play both sides inline — the handover would cost more than the work. Write each test as below, make it pass by [IMPLEMENTER.md](IMPLEMENTER.md)'s ladder, refactor by its [refactor rules](IMPLEMENTER.md#refactor), run the full suite green, then go to Step 5.
 
-**Small change?** When the whole scenario list needs only a few lines of production code (one file, roughly 20 lines or fewer), finish the loop inline instead — the handover would cost more than the work. Follow [IMPLEMENTER.md](IMPLEMENTER.md)'s loop and ladder, then go to Step 5.
+For each scenario, in order:
 
-Otherwise dispatch **one** `Agent` call, `subagent_type: general-purpose`, `model: sonnet`, `run_in_background: false`, and wait for its report. The subagent starts with an empty context, and its standing rules live in [IMPLEMENTER.md](IMPLEMENTER.md), so the prompt is a short handover:
+1. **Red.** Write ONE test for the scenario, plus any fixture or helper it needs — test files are yours, never the implementer's. It uses domain vocabulary, maps to this one scenario, goes through the public interface ([tests.md](tests.md), [mocking.md](mocking.md)), and is none of tests.md's [Tests that never earn their place](tests.md#tests-that-never-earn-their-place). Run it: it fails *for the right reason* — an assertion failure, or a missing function / endpoint / module — not an import error, a syntax error, or a test-collection failure. A test that errors before it runs has proven nothing. Write no production code.
+2. **Hand over.** For the first scenario, dispatch **one** `Agent` call, `subagent_type: general-purpose`, `model: sonnet`, `run_in_background: false`, and wait for its report. Its standing rules live in [IMPLEMENTER.md](IMPLEMENTER.md), so the prompt is short:
+
+   ```text
+   Read <this skill's base directory>/IMPLEMENTER.md and follow it. Do not invoke the bdd skill.
+   Scenarios: <.agent-docs/issues/<branch-name>.md, issue #<n> — or, when no issues file
+              holds them, the agreed Given-When-Then list from Step 1, in order>
+   Interface changes: <the confirmed changes, one line each>
+   Failing test: <path and test name>   Run: <command that runs the suite>
+   ```
+
+   For every later scenario, resume the same implementer with `SendMessage` — it keeps what it learned of the code — and wait for its report:
+
+   ```text
+   Failing test: <path and test name>   Run: <command that runs the suite>
+   Changed since your last report: <files you edited inline — omit the line when none>
+   ```
+
+   When the implementer can't be resumed, dispatch a fresh one with the first-scenario prompt, its **Failing test** set to the current one; it reads the code as it stands.
+3. **Learn.** Read the production code the cycle changed: every file its report names, new ones included. Write the next test in response to what that code taught — test n+1 starts only after test n is green and read.
+
+A cycle reported **blocked** comes back to you: rewrite the test if it was wrong, fix the code inline, or narrow the brief in your next message. There is no automatic retry loop.
+
+Done when every scenario's test is green.
+
+## Step 4 — Refactor
+
+Resume the implementer once more:
 
 ```text
-Read <this skill's base directory>/IMPLEMENTER.md and follow it. Do not invoke the bdd skill.
-Scenarios: <.agent-docs/issues/<branch-name>.md, issue #<n> — or, when no issues file
-           holds them, the agreed Given-When-Then list from Step 1, in order>
-Interface changes: <the confirmed changes, one line each>
-Failing test: <path from Step 3>   Run: <test command from Step 3>
+All scenarios green. Refactor now.
+Changed since your last report: <files you edited inline — omit the line when none>
 ```
 
-If the subagent reports a scenario as blocked, the main context decides what to do next — fix it inline, or re-dispatch a fresh subagent with a narrower brief, with the same dispatch as above. There is no automatic retry loop.
+When the implementer can't be resumed, dispatch a fresh one with the first-scenario prompt, its **Failing test** set to `none` and its **Run** command kept.
+
+It refactors to the repo's standards, keeps the full suite green, and sends its final report. Done when that report arrives.
 
 ## Step 5 — Verify the returned work
 
 Back in the main context, read the actual change, not just the report: `git diff`, then the important changed code. Check it against the agreed scenarios:
 
-- [ ] Every scenario from Step 1 has a corresponding test, and the full suite is green
+- [ ] Every scenario from Step 1 has a corresponding test, and the full suite is green — by the final report's test output, or your own run on the inline path
 - [ ] Each test uses domain vocabulary, maps to one scenario, and goes through the public interface
+- [ ] Every test file, fixture and helper is as you wrote it — no cycle report or final report names one in **Files changed**
 - [ ] The code takes the first rung of [IMPLEMENTER.md](IMPLEMENTER.md)'s ladder that works, and adds nothing beyond the agreed scenarios
-- [ ] Every item on the report's **Skipped / risk** line is acceptable or resolved
+- [ ] Every test still earns its place by [tests.md](tests.md)'s list, judged across the whole set (repeats only show there) and against the report's **Prune candidates**; delete each one that doesn't and re-run the suite green
+- [ ] Every item on every report's **Skipped / risk** line is acceptable or resolved
 
-If anything fails the check, address it in the main context or re-dispatch a subagent as in Step 4.
+If anything fails the check, address it in the main context or resume the implementer with a narrower brief.
 
 Then hand back:
 
