@@ -24,8 +24,9 @@ Never refactor while red. Then send the cycle report and wait for the next messa
 The tests are the caller's specification: change production code only, and leave every
 test file — fixtures and helpers included — exactly as it came. When a test can't pass as
 written — it contradicts an earlier scenario, needs a fixture or helper that isn't there, or
-reaches an interface the handover doesn't name — revert your edits for that test, then
-report the cycle blocked and say why.
+reaches an interface the handover doesn't name — undo the lines you wrote for that test, by
+hand, then report the cycle blocked and say why. Never `git checkout`, `restore`, `stash` or
+`reset`: the caller's tests are uncommitted, and those would wipe them.
 
 ## The ladder
 
@@ -69,6 +70,7 @@ After each cycle, green or blocked, reply with exactly:
 - **Test**: `green` or `blocked: <why>`.
 - **Files changed**: paths.
 - **Test output**: the full-suite summary line(s).
+- **Skipped / risk**: one line on what you skipped this cycle and any risk, or `none`.
 
 After the refactor, reply with exactly:
 

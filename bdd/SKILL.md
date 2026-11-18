@@ -76,7 +76,7 @@ You write every test; a clean-context **implementer** writes every line of produ
 ```text
 main context                         implementer (one agent, resumed each cycle)
 RED:   test1 ──────────────────────▸ GREEN: impl1
-       read diff ◂──────────────────  report
+       read files ◂─────────────────  report
 RED:   test2 ──────────────────────▸ GREEN: impl2
        ...
 all green: "refactor" ──────────────▸ REFACTOR, final report   (Step 4)
@@ -133,7 +133,7 @@ Back in the main context, read the actual change, not just the report: `git diff
 - [ ] Every test file, fixture and helper is as you wrote it — no cycle report or final report names one in **Files changed**
 - [ ] The code takes the first rung of [IMPLEMENTER.md](IMPLEMENTER.md)'s ladder that works, and adds nothing beyond the agreed scenarios
 - [ ] Every test still earns its place by [tests.md](tests.md)'s list, judged across the whole set (repeats only show there) and against the report's **Prune candidates**; delete each one that doesn't and re-run the suite green
-- [ ] Every item on the report's **Skipped / risk** line is acceptable or resolved
+- [ ] Every item on every report's **Skipped / risk** line is acceptable or resolved
 
 If anything fails the check, address it in the main context or resume the implementer with a narrower brief.
 
